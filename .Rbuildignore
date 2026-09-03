@@ -1,0 +1,11 @@
+^renv$
+^renv\.lock$
+^predicater\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^README\.Rmd$
+^revdep$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^personal$
