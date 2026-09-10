@@ -1,7 +1,7 @@
 
 # Base tests -------------------------------------------------------------------
 
-#' Predicates - Objects
+#' Types - Objects
 #'
 #' @description
 #' Functions to test for 'object'-related properties:
@@ -170,7 +170,7 @@ is_object <- function(x) {
 #' @export
 object_system <- function(x) {
   # Main:
-  if (! attrs_allow(x, warn = "t")) {
+  if (! is_attrs_allowed(x, warn = "t")) {
     return("base")
   }
   attrs <- attributes(x)

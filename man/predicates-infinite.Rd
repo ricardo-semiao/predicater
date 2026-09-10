@@ -8,7 +8,7 @@
 \alias{is_nan}
 \alias{are_inf}
 \alias{is_inf}
-\title{Predicates - Inf and NaN}
+\title{Types - Inf and NaN}
 \usage{
 are_finite(x, na = "na")
 

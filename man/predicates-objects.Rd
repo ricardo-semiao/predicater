@@ -8,7 +8,7 @@
 \alias{is_object_like}
 \alias{is_s4}
 \alias{is_object}
-\title{Predicates - Objects}
+\title{Types - Objects}
 \usage{
 has_class(x)
 

@@ -1,7 +1,7 @@
 
 # Base checks ------------------------------------------------------------------
 
-#' Predicates - Atomic vectors
+#' Types - Atomic vectors
 #'
 #' @description
 #' Check if an object is of a specific atomic type ([typeof()]). The test is
@@ -60,7 +60,7 @@ is_numeric <- function(x, n = NULL) {
 
 # TRUE and FALSE ---------------------------------------------------------------
 
-#' Predicates - TRUE and FALSE values
+#' Types - TRUE and FALSE values
 #'
 #' Check if an object is literally `TRUE` or `FALSE`, controlling for `NA`
 #' values.
@@ -87,7 +87,7 @@ are_true <- function(x, na = "f") {
 
   # Main:
   switch(na,
-    f = identical(x, TRUE),
+    f = !is.na(x) & x,
     na = vec_if_else(is.na(x), NA, x)
   )
 }
@@ -97,7 +97,6 @@ are_true <- function(x, na = "f") {
 #' @export
 is_true2 <- function(x, na = "f") {
   # Checks:
-  # - x must be a logical vector
   # - na must be one of "f", "na"
 
 
@@ -105,7 +104,8 @@ is_true2 <- function(x, na = "f") {
   if (na == "na" && is.na(x)) {
     return(NA)
   }
-  identical(x, TRUE)
+
+  is_logical(x, 1) && !is.na(x) && x
 }
 
 
@@ -119,7 +119,7 @@ are_false <- function(x, na = "f") {
 
   # Main:
   switch(na,
-    f = identical(x, FALSE),
+    f = !(is.na(x) | x),
     na = vec_if_else(is.na(x), NA, x)
   )
 }
@@ -129,7 +129,6 @@ are_false <- function(x, na = "f") {
 #' @export
 is_false2 <- function(x, na = "f") {
   # Checks:
-  # - x must be a logical vector
   # - na must be one of "f", "na"
 
 
@@ -137,14 +136,16 @@ is_false2 <- function(x, na = "f") {
   if (na == "na" && is.na(x)) {
     return(NA)
   }
-  identical(x, FALSE)
+  is_logical(x, 1) && !is.na(x) && !x
 }
+
+# TODO: reexport is_bool
 
 
 
 # NAs --------------------------------------------------------------------------
 
-#' Predicates - NA values
+#' Types - NA values
 #'
 #' @description
 #' Checks if an object is `NA`, `NA_integer_`, `NA_real_`, `NA_complex_`, or

@@ -1,32 +1,26 @@
 
-# TODO: change to assert_*
-# TODO: make all accept multiple objects via ..., and args via args
+# Assert from others -----------------------------------------------------------
 
-#' Abort using a message-generating function
+#' Assert - Rethrow errors with more information
 #'
 #' @description
-#' Packages like `checkmate` provide functions to check objects and return a
-#' message if the check fails. This function allows the user to catch that
-#' message and generate a condition with higher flexibility than the original
-#' package.
+#' Packages like this one, `checkmate`, and `chk` provide functions to check
+#' objects and return a message or abort if the check fails. This function
+#' allows the user to catch that message/error and generate a condition with
+#' higher flexibility than the original package.
 #'
-#' `test_msgs()` allows the user to apply the same test to multiple objects.
-#'
-#' @param fun \[`\(){}`] A function that checks an object and returns `TRUE` if
-#'   the check passes, or a message if it fails.
-#' @param x \[`any`] The object to check.
-#' @param ... For `test_msgs()`, objects to check, for `test_msg()`, additional
-#'   arguments to pass to `fun`.
-#' @param args \[`list()`] For `test_msgs()`, additional arguments to pass to
-#'   `fun`.
+#' @param fun \[`\(){}`] For `assert_from_msg`: a function that checks an object
+#'   and returns `TRUE` if the check passes, or a message (`character(1)`) if it
+#'   fails; For `assert_from_error`: a function that checks an object and raises
+#'   an error if the check fails.
+#' @param ... \[`any` each] Objects to check.
+#' @param args_fun \[`list()`] Additional arguments to pass to `fun`.
+#' @param x_names \[`character()` | `NULL`] The names of `...` to print in
+#'   messages. In `NULL`, the name is inferred from `x`'s expression.
 #' @param env \[`environment()`] The environment to use for the condition. Often
-#'   useful to remove this helper form the trace stack.
-#' @param x_name,x_names \[`character(1)`, `character()` | `NULL`] The name of
-#'   `x` (or a vector of the names of `...` for `test_msgs()`) to print in
-#'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
-#' @param cnd_fun \[`function()`] The function to use to generate the condition.
-#'   Defaults to `cli_abort()`.
-#' @param cnd_args \[`list()`] Additional arguments to pass to `cnd_fun`.
+#'   useful to remove this helper from the trace stack.
+#' @param args_abort \[`list()`] Additional arguments to pass to
+#'   [cli::cli_abort()], which rethrows the error.
 #'
 #' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
@@ -48,67 +42,12 @@
 #' #> ! Argument `y` must have length 1, but has length 2
 #'
 #' @export
-test_msg <- function(
-  fun, x, ...,
-  env = caller_env(), x_name = NULL, cnd_fun = cli_abort, cnd_args = list()
+assert_from_msg <- function(
+  fun, ..., args_fun = list(),
+  x_names = NULL, env = caller_env(), args_abort = list()
 ) {
   # Setup:
-  x_sym <- enexpr(x)
-  args <- list2(...)
-  force(env)
-
-
-  # Checks:
-  # - x must be a symbol or x_name must be supplied
-  # - fun must be a function
-  # - env must be an environment
-  # - x_name must be a string or NULL
-  # - cnd_fun must be a function
-  # - cnd_args must be a list
-  if (is_null(x_name) && ! is_symbol(x_sym)) {
-    cli_abort("{.arg x} must be a symbol or {.arg x_name} must be supplied.")
-  }
-  if (! is_function(fun)) cli_abort("{.arg fun} must be a function.")
-  if (! is_environment(env)) cli_abort("{.arg env} must be an environment.")
-  if (! is_null(x_name) && ! is_string(x_name)) {
-    cli_abort("{.arg x_name} must be a string or NULL.")
-  }
-  if (! is_function(cnd_fun)) cli_abort("{.arg cnd_fun} must be a function.")
-  if (! is_list(cnd_args)) cli_abort("{.arg cnd_args} must be a list.")
-
-
-  # Main:
-  x_name <- x_name %||% as_name(x_sym)
-
-  msg <- do.call(fun, c(x = list(x), args))
-  if (! isTRUE(msg)) {
-    msg <- gsub(
-      "([^{])\\{([^{])", "\\1{{\\2",
-      gsub("([^}])\\}([^}])", "\\1}}\\2", msg)
-    ) # Escape braces for glue
-    substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
-    cnd_args <- c(
-      glue("Argument `{x_name}` {msg}"),
-      class = "rs_msg_error",
-      msg_args = list(x = x, fun = fun, args = args),
-      call = env
-    )
-    do.call(cnd_fun, cnd_args)
-  }
-
-  invisible(TRUE)
-}
-
-
-#' @rdname test_msg
-#' @export
-test_msgs <- function(
-  fun, ..., args = list(),
-  env = caller_env(), x_names = NULL,
-  cnd_fun = abort, cnd_args = list()
-) {
-  # Setup:
-  x_syms <- enexprs(...)
+  x_exprs <- enexprs(...)
   force(env)
 
 
@@ -119,47 +58,108 @@ test_msgs <- function(
   # - env must be an environment
   # - x_names must be a character vector or NULL
   # - cnd_fun must be a function
-  if (is_null(x_names) && ! all(vapply(x_syms, is_symbol, logical(1)))) {
-    cli_abort("{.arg ...} must be symbols or {.arg x_names} must be supplied.")
-  }
-  test_msg(checkmate::check_function, fun)
-  test_msg(checkmate::check_list, args)
-  test_msg(checkmate::check_environment, env)
-  test_msg(checkmate::check_character, x_names, null.ok = TRUE)
-  test_msg(checkmate::check_function, cnd_fun)
-  test_msg(checkmate::check_list, cnd_args)
+  # TODO:
 
 
   # Main:
-  x_names <- x_names %||% vapply(x_syms, as_name, character(1))
+  xs <- list2(...)
+  x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
 
-  Map(list2(...), x_names, f = \(x, name) {
-    test_msg(
-      fun, x, !!!args,
-      env = env, x_name = name,
-      cnd_fun = cnd_fun, cnd_args = cnd_args
-    )
-  })
+  for (i in seq_along(xs)) {
+    msg <- do.call(fun, c(x = list(xs[[i]]), args_fun))
 
-  NULL
+    if (! isTRUE(msg)) {
+      msg <- gsub(
+        "([^{])\\{([^{])", "\\1{{\\2",
+        gsub("([^}])\\}([^}])", "\\1}}\\2", msg)
+      ) # Escape braces for glue
+      substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
+
+      cnd_args <- c(
+        glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
+        class = "rs_assert_from_error",
+        rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
+        call = env,
+        args_abort
+      )
+      do.call(cli_abort, cnd_args)
+    }
+  }
+
+  invisible(xs)
 }
 
 
-#' Test if object is of a given prototype
+#' @rdname assert_from_msg
+#' @export
+assert_from_error <- function(
+  fun, ..., args_fun = list(),
+  x_names = NULL, nv = caller_env(), args_abort = list()
+) {
+  # Setup:
+  x_exprs <- enexprs(...)
+  force(env)
+
+
+  # Checks:
+  # - ... must be symbols or x_names must be supplied
+  # - fun must be a function
+  # - args and cnd_args must be lists
+  # - env must be an environment
+  # - x_names must be a character vector or NULL
+  # - cnd_fun must be a function
+  # TODO:
+
+
+  # Main:
+  xs <- list2(...)
+  x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
+
+  for (i in seq_along(xs)) {
+    res <- tryCatch(
+      do.call(fun, c(x = list(xs[[i]]), args_fun)),
+      error = \(cnd) {
+        msg <- gsub(
+          "([^{])\\{([^{])", "\\1{{\\2",
+          gsub("([^}])\\}([^}])", "\\1}}\\2", res$message)
+        ) # Escape braces for glue
+        substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
+
+        cnd_args <- c(
+          glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
+          class = "rs_assert_from_error",
+          rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
+          call = env,
+          args_abort
+        )
+        do.call(cli_abort, cnd_args)
+      }
+    )
+  }
+
+  invisible(xs)
+}
+# TODO: allow user to customize msg (probably via function)
+
+
+
+# Assert custom ----------------------------------------------------------------
+
+#' Assert - Error if object is not of prototype
 #'
 #' This function wraps [is_ptype()] and aborts with a custom message if the
 #' check fails. It is useful for testing function arguments.
 #'
-#' @param x \[`any`] The object to check.
 #' @param ptype \[`any`] The prototype to check against. See [is_ptype()] for
 #'   details on what is a prototype.
-#' @param ... Additional arguments to pass to [is_ptype()].
+#' @param ... \[`any` each] Objects to check.
+#' @param args_ptype \[`list()`] Additional arguments to pass to [is_ptype()].
 #' @param msg \[`character(1)` | `NULL`] The message to use if the check fails.
 #'   If `NULL`, a default message is generated.
-#' @param env \[`environment()`] The environment to use for the condition. Often
-#'   useful to remove this helper form the trace stack.
 #' @param x_name \[`character(1)` | `NULL`] The name of `x` to print in
 #'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
+#' @param env \[`environment()`] The environment to use for the condition. Often
+#'   useful to remove this helper form the trace stack.
 #' @param cnd_fun \[`function()`] The function to use to generate the condition.
 #'   Defaults to `cli_abort()`.
 #' @param cnd_args \[`list()`] Additional arguments to pass to `cnd_fun`.
@@ -176,15 +176,15 @@ test_msgs <- function(
 #'
 #' @export
 test_ptype <- function(
-  x, ptype, ...,
-  msg = NULL, env = caller_env(), x_name = NULL,
-  cnd_fun = cli_abort, cnd_args = list()
+  ptype, ..., args_ptype = list(),
+  msg = NULL, x_names = NULL,
+  env = caller_env(), args_abort = list()
 ) {
   # Setup:
-  x_sym <- enexpr(x)
+  x_exprs <- enexprs(...)
   ptype_quo <- enquo(ptype)
-  args <- list2(...)
   force(env)
+
 
   # Checks:
   # - x must be a symbol or x_name must be supplied
@@ -192,29 +192,30 @@ test_ptype <- function(
   # - env must be an environment
   # - cnd_fun must be a function
   # - cnd_args must be a list
-  if (is_null(x_name) && ! is_symbol(x_sym)) {
-    cli_abort("{.arg x} must be a symbol or {.arg x_name} must be supplied.")
-  }
-  test_msgs(checkmate::check_string, msg, x_name, args = list(null.ok = TRUE))
-  test_msg(checkmate::check_environment, env)
-  test_msg(checkmate::check_function, cnd_fun)
-  test_msg(checkmate::check_list, cnd_args)
+  # TODO:
+
 
   # Main:
-  x_name <- x_name %||% as_name(x_sym)
+  x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
+  xs <- list2(...)
 
-  if (! do.call(is_ptype, c(list(.x = x, .ptype = ptype), args))) {
-    cnd_args <- c(
-      msg %||% "Argument {.arg {x_name}} is not of prototype \\
-      {.code {deparse(quo_get_expr(ptype_quo))}}.",
-      class = "rs_ptype_error",
-      ptype_args = list(x = x, ptype = ptype, ptype_quo = ptype_quo, args = args),
-      call = env
-    )
-    do.call(cnd_fun, cnd_args)
+  for (i in seq_along(xs)) {
+    if (! do.call(is_ptype, c(list(.x = xs[[i]], .ptype = ptype), args_ptype))) {
+      cnd_args <- c(
+        msg %||% "Argument {.arg {x_name[i]}} is not of prototype \\
+        {.code {deparse(quo_get_expr(ptype_quo))}}.",
+        class = "rs_assert_ptype_error",
+        rs_assert_ptype_error = list(
+          x = xs[[i]], ptype = ptype, ptype_quo = ptype_quo, ptype_args = args_ptype
+        ),
+        call = env,
+        args_abort
+      )
+      do.call(cli_abort, cnd_args)
+    }
   }
 
-  invisible(TRUE)
+  invisible(xs)
 }
 
 
@@ -248,14 +249,15 @@ test_ptype <- function(
 #' #> ! Argument `x` fails `all(.x > 0)`.
 #'
 #' @export
-test_when <- function(
-  x, expr, msg = NULL, env = caller_env(), x_name = NULL,
-  cnd_fun = cli_abort, cnd_args = list()
+assert_predicate <- function(
+  fun, ..., args_fun,
+  msg = NULL, x_names = NULL,
+  env = caller_env(), abort_args = list()
 ) {
   # Setup:
-  x_sym <- enexpr(x)
-  expr_quo <- enquo(expr)
+  x_exprs <- enexprs(...)
   force(env)
+
 
   # Checks:
   # - x must be a symbol or x_name must be supplied
@@ -263,32 +265,52 @@ test_when <- function(
   # - env must be an environment
   # - cnd_fun must be a function
   # - cnd_args must be a list
-  if (is_null(x_name) && ! is_symbol(x_sym)) {
-    cli_abort("{.arg x} must be a symbol or {.arg x_name} must be supplied.")
-  }
-  test_msg(checkmate::check_string, msg, x_name, null.ok = TRUE)
-  test_msg(checkmate::check_environment, env)
-  test_msg(checkmate::check_function, cnd_fun)
-  test_msg(checkmate::check_list, cnd_args)
+  # TODO:
+
 
   # Main:
-  expr_text <- deparse(quo_get_expr(expr_quo))
-  x_name <- x_name %||% as_name(x_sym)
+  x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
 
-  if (! eval_tidy(expr_quo, list(.x = x))) {
-    cnd_fun(
-      msg %||% "Argument {.arg {x_name}} fails {.code {expr_text}}.",
-      class = "rs_when_error",
-      when_args = list(x = x, expr = expr_text, expr_quo = expr_quo),
-      call = env
+  for (i in seq_along(xs)) {
+    pred <- tryCatch(
+      {
+        res <- do.call(fun, c(list(.x = xs[[i]]), args_fun))
+        if (! is_bool(res)) {
+          cli_abort(
+            c(
+              "{.code custom(x)} must return {.val {TRUE}} or {.val {FALSE}}.",
+              "i" = "Instead, it returned {.val {res}}."
+            ),
+            class = "rs_user_fun_error",
+            call = env,
+            rs_user_fun_error = list(bad_result = res)
+          )
+        }
+        res
+      },
+      rs_user_fun_error = cnd_signal,
+      error = \(cnd) {
+        cli_abort(
+          "{.arg fun} run with error at argument {.arg {x_name[i]}}.",
+          .parent = cnd, call = env
+        )
+      }
     )
+    if (! pred) {
+      cnd_args <- c(
+        msg %||% "Argument {.arg {x_name[i]}} fails {.arg fun}.",
+        class = "rs_assert_predicate_error",
+        rs_assert_predicate_error = list(
+          x = xs[[i]], fun = fun, fun_args = args_fun
+        ),
+        call = env,
+        abort_args
+      )
+      do.call(cli_abort, cnd_args)
+    }
   }
 
-  invisible(TRUE)
+
+  invisible(xs)
 }
 # TODO: add try to catch user bad expr
-# TODO: reconsider invisible(TRUE), if all these functions should live in the
-# same rdname, if the difference in ... in test_msg and test_msgs is too
-# confusing or at least create roxy helpers
-# TODO: maybe use function \(x) {} instead of a captured expression. Its cleaner
-# and works with combine_fns 

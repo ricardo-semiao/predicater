@@ -2,10 +2,24 @@
 % Please edit documentation in R/metadata.R
 \name{is_empty2}
 \alias{is_empty2}
-\title{Predicates - Metadata}
+\title{Metadata - Check if a collection is empty}
 \usage{
-is_empty2(x, non_collection, ...)
+is_empty2(x, null = FALSE)
+}
+\arguments{
+\item{x}{[\code{any}] An object to test.}
+
+\item{null}{[\code{TRUE} | \code{FALSE}] Should \code{NULL} be considered a collection? If
+false will error for \code{NULL}, else, will return \code{TRUE}.}
+}
+\value{
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
-Predicates - Metadata
+Is a collection object (see \code{\link[=is_collection]{is_collection()}}) empty, i.e. has zero length?
+Similar to \code{\link[rlang:is_empty]{rlang::is_empty()}}, but yields an error for non-collections,
+including \code{NULL} by default.
+
+Note that objects of type 'S4' and 'object' are not considered collections,
+even if they are 'filled' with slots/attributes.
 }

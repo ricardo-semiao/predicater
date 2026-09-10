@@ -4,12 +4,9 @@
 #' Similar to [identical()] but with more flexibility on how to handle data and
 #' attributes.
 #' - `identical2()` test two objects for exact equality.
-#' - `identical_reduce()` test multiple objects for exact equality.
-#' - `identical_vec()` is a vectorized `identical2()`, comparing each element of
-#'   `x` and `y`.
-#' - `identical_flag()` is a rercursive `identical2()`, returning the comparison
-#'   results in a list with same structure as `x`. Useful to flag where
-#'   `x` and `y` differ.
+#' - `identical_flag()` runs [identical()] or `identical2()` rercursively,
+#'   returning the comparison results in a list with same structure as `x`.
+#'   Useful to flag where `x` and `y` differ.
 #'
 #' @param x,y \[`any`] Any R object.
 #' @param single_NA \[`logical(1)`] Whether to treat `NA` values as a identical
@@ -24,8 +21,11 @@
 #'   - `"abs"`: absolute tolerance.
 #'   - `"rel"`: relative tolerance.
 #' @param tol \[`numeric(1)`] Tolerance value.
-#' @param ignore_data,ignore_attrs \[`character()` each] Names of data and
-#'   attributes to ignore when comparing `x` and `y`.
+#' @param ignore_data \[`character()` | `integer()`] indexes or names of
+#'   elements to ignore when comparing `x` and `y`. Names are compared against
+#'   [rlang::names2()].
+#' @param ignore_attrs \[`list()`] Arguments to pass to [attrs_rmv()] to remove
+#'   attributes from `x` and `y`
 #' @param ... For variants, arguments passed to `identical2()`.
 #' @param fun \[`character(1)`] For variants, function to use for comparison.
 #'   One of `"identical"` or `"identical2"`.
@@ -83,7 +83,7 @@ identical2 <- function(
   single_NA = TRUE, single_zero = TRUE,
   ord_data = TRUE, ord_attrs = FALSE,
   tol_type = "none", tol = sqrt(.Machine$double.eps),
-  ignore_data = character(), ignore_attrs = character()
+  ignore_data = character(), ignore_attrs = list()
 ) {
   # Checks:
   # - single_NA, single_zero, ord_data, ord_attrs must be flags
@@ -103,23 +103,25 @@ identical2 <- function(
 
 
   # Main:
-  attrs_x <- attributes(x)
-  attrs_y <- attributes(y)
+  if (length(ignore_data) > 0) {
+    if (is_character(ignore_data)) {
+      x <- x[! names2(x) %in% ignore_data]
+      y <- y[! names2(y) %in% ignore_data]
+    } else {
+      x <- x[- ignore_data]
+      y <- y[- ignore_data]
+    }
+  }
 
   if (! ord_data) {
     res <- ord_recurse(x, y)
-    x <- res$x
-    y <- res$y
-  }
-
-  if (length(ignore_data) > 0) {
-    x <- x[! names(x) %in% ignore_data]
-    y <- y[! names(y) %in% ignore_data]
+    x[] <- res$x
+    y[] <- res$y
   }
 
   if (length(ignore_attrs) > 0) {
-    attributes(x) <- attrs_x[! names(attrs_x) %in% ignore_attrs]
-    attributes(y) <- attrs_y[! names(attrs_y) %in% ignore_attrs]
+    x <- do.call(attrs_rmv, c(list(x), ignore_attrs))
+    y <- do.call(attrs_rmv, c(list(y), ignore_attrs))
   }
 
   if (tol_type != "none") {
@@ -134,13 +136,12 @@ identical2 <- function(
     attrib.as.set = !ord_attrs
   )
 }
-# TODO: single_nan, single_inf
-# TODO: use attrs_rmv?
+# TODO: single_nan, single_inf, make single.NA work as we would want
 # TODO: order data by names, values, or both (currently only by values)
 # TODO: allow ignore_data to accept vector of names or vector of indices. later
 # could even accept mixed, regex, etc.
-# NOTE: Not important but possible: make encoding matter, make altrep matter, ...
 # TODO: cite using reduce_predicate and Map(identical) usages
+# NOTE: Less important but possible: make C header metadata matter
 
 
 #' @rdname identical2
@@ -195,7 +196,7 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
 
 ord_recurse <- function(x, y) {
   if (length(x) != length(y) || typeof(x) != typeof(y)) {
-    "do nothing" # * Could early exit with FALSE
+    "do nothing" # NOTE: Could early exit with FALSE or something
   } else if (is_list(x)) {
     for (i in seq_along(x)) {
       res <- ord_recurse(x[[i]], y[[i]])

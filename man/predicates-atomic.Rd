@@ -10,7 +10,7 @@
 \alias{is_raw}
 \alias{is_atomic}
 \alias{is_numeric}
-\title{Predicates - Atomic vectors}
+\title{Types - Atomic vectors}
 \usage{
 is_logical(x, n = NULL)
 

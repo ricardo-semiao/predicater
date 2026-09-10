@@ -7,7 +7,7 @@
 \alias{is_pairlist2}
 \alias{is_environment2}
 \alias{is_collection}
-\title{Predicates - Collection types}
+\title{Types - Collection types}
 \usage{
 is_list(x, n = NULL)
 
@@ -46,16 +46,43 @@ Tested by \code{is_environment2()}.
 \code{\link[=is_expression2]{is_expression2()}}.
 }
 
+See the 'Details' section for what behaviour you can expect from these types.
+
 Additionally:
 \itemize{
+\item \code{\link[rlang:type-predicates]{rlang::is_atomic()}} tests for any atomic vector type.
 \item \code{\link[rlang:type-predicates]{rlang::is_vector()}} tests for atomic or generic (list) vectors.
 \item \code{is_collection()} tests for any of the above collection types, with options
 to exclude any of them.
 }
 }
 \details{
-See \code{\link[rlang:is_namespace]{rlang::is_namespace()}} for another environment-related test.
+All collection types:
+\itemize{
+\item Have varying \code{\link[=length]{length()}}.
+\item Can have \code{\link[=names]{names()}}.
+\item Can have their elements accessed by names (if present) via \code{[}, \code{[[}, and \code{$}.
+\item All but environment can have their elements accessed by integer indexes
+too, and their names set via \code{\link{names(x) <- value}}.
+}
 
-Objects of type \code{"s4"} or \code{"object"} are not considered collections, as their
-data is stored in the attributes, and their \code{\link[=length]{length()}} is always \code{0}.
+Note that the result of acessing out-of-bounds indexes depends on the type and
+operator, and is very quirky and inconsistent across R. See \href{https://adv-r.hadley.nz/subsetting.html}{Advanced R, 2nd edition, chapter  4} for more
+details.
+
+Objects that are not considered collections:
+\itemize{
+\item Objects of type \code{"s4"} or \code{"object"} are a 'collection of slots', but their
+data is stored in their attributes, which any R object can do, and their
+length is always 1.
+\item The \code{"dots"} object is a collection of promises, have varying length,
+names, etc. But it is low-level, and removed from this definition for
+simplicity.
+\item 'NULL' (and 'any') have length 0, and are often thought as empty collections,
+but in face of \code{integer(0)} and \code{list()}, such thought is not the best.
+\item 'language' and 'promise' can have names, but don't have varying length.
+\item All the other types have lenght 1, and cannot have names.
+}
+
+See \code{\link[rlang:is_namespace]{rlang::is_namespace()}} for another environment-related test.
 }

@@ -1,7 +1,7 @@
 
 # Infinite-related -------------------------------------------------------------
 
-#' Predicates - Inf and NaN
+#' Types - Inf and NaN
 #'
 #' @description
 #' Check if an object is `Inf`, `-Inf`, `NaN`, or none of them, flexibly dealing
@@ -146,7 +146,7 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 
 # Integer-like -----------------------------------------------------------------
 
-#' Predicates - Integer-like values
+#' Types - Integer-like values
 #'
 #' @description
 #' Check if an object can be considerd integer in 4 different interpretations

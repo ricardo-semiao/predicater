@@ -11,7 +11,7 @@
 \alias{is_externalptr}
 \alias{is_char}
 \alias{is_any}
-\title{Predicates - Other types}
+\title{Types - Other types}
 \usage{
 is_type(x, type, n = NULL)
 

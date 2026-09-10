@@ -4,7 +4,7 @@
 \alias{predicates-na}
 \alias{are_na2}
 \alias{is_na2}
-\title{Predicates - NA values}
+\title{Types - NA values}
 \usage{
 are_na2(x, nan = "f", type = NULL)
 

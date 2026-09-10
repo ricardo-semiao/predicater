@@ -6,7 +6,7 @@
 \alias{is_true2}
 \alias{are_false}
 \alias{is_false2}
-\title{Predicates - TRUE and FALSE values}
+\title{Types - TRUE and FALSE values}
 \usage{
 are_true(x, na = "f")
 

@@ -2,26 +2,25 @@
 % Please edit documentation in R/assert.R
 \name{test_ptype}
 \alias{test_ptype}
-\title{Test if object is of a given prototype}
+\title{Assert - Error if object is not of prototype}
 \usage{
 test_ptype(
-  x,
   ptype,
   ...,
+  args_ptype = list(),
   msg = NULL,
+  x_names = NULL,
   env = caller_env(),
-  x_name = NULL,
-  cnd_fun = cli_abort,
-  cnd_args = list()
+  args_abort = list()
 )
 }
 \arguments{
-\item{x}{[\code{any}] The object to check.}
-
 \item{ptype}{[\code{any}] The prototype to check against. See \code{\link[=is_ptype]{is_ptype()}} for
 details on what is a prototype.}
 
-\item{...}{Additional arguments to pass to \code{\link[=is_ptype]{is_ptype()}}.}
+\item{...}{[\code{any} each] Objects to check.}
+
+\item{args_ptype}{[\code{list()}] Additional arguments to pass to \code{\link[=is_ptype]{is_ptype()}}.}
 
 \item{msg}{[\code{character(1)} | \code{NULL}] The message to use if the check fails.
 If \code{NULL}, a default message is generated.}

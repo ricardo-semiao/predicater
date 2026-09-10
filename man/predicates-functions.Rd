@@ -7,7 +7,7 @@
 \alias{is_primitive}
 \alias{is_primitive_eager}
 \alias{is_primitive_lazy}
-\title{Predicates - Functions}
+\title{Types - Functions}
 \usage{
 is_function(x)
 is_closure(x)

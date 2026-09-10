@@ -1,7 +1,7 @@
 
 # Base type tests --------------------------------------------------------------
 
-#' Predicates - Language objects
+#' Types - Language objects
 #'
 #' @description
 #' In R, there are three building blocks that compose the language itself:
@@ -35,6 +35,8 @@
 #' is_language_valid(x)
 #'
 #' is_expression2(x, n = NULL)
+#'
+#' is_code(x)
 #'
 #'
 #' @param x \[`any`] An object to test.
@@ -87,6 +89,13 @@ is_expression2 <- function(x, n = NULL) {
 }
 
 
+is_code <- function(x, sym = TRUE, call = TRUE, literal = TRUE) {
+  (sym && is_symbol(x)) ||
+    (call && is_language(x)) ||
+    (literal && is_syntactic_literal(x))
+}
+
+
 
 # Helpers ----------------------------------------------------------------------
 
@@ -97,6 +106,6 @@ is_parseable <- function(x) {
       parse(text = deparse(x))
       TRUE
     },
-    error = function(e) FALSE
+    error = \(cnd) FALSE
   )
 }

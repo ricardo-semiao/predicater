@@ -15,7 +15,7 @@ identical2(
   tol_type = "none",
   tol = sqrt(.Machine$double.eps),
   ignore_data = character(),
-  ignore_attrs = character()
+  ignore_attrs = list()
 )
 
 identical_flag(x, y, ..., fun = "identical2")
@@ -42,8 +42,12 @@ numeric values. One of:
 
 \item{tol}{[\code{numeric(1)}] Tolerance value.}
 
-\item{ignore_data, ignore_attrs}{[\code{character()} each] Names of data and
-attributes to ignore when comparing \code{x} and \code{y}.}
+\item{ignore_data}{[\code{character()} | \code{integer()}] indexes or names of
+elements to ignore when comparing \code{x} and \code{y}. Names are compared against
+\code{\link[rlang:names2]{rlang::names2()}}.}
+
+\item{ignore_attrs}{[\code{list()}] Arguments to pass to \code{\link[=attrs_rmv]{attrs_rmv()}} to remove
+attributes from \code{x} and \code{y}}
 
 \item{...}{For variants, arguments passed to \code{identical2()}.}
 
@@ -68,12 +72,9 @@ Similar to \code{\link[=identical]{identical()}} but with more flexibility on ho
 attributes.
 \itemize{
 \item \code{identical2()} test two objects for exact equality.
-\item \code{identical_reduce()} test multiple objects for exact equality.
-\item \code{identical_vec()} is a vectorized \code{identical2()}, comparing each element of
-\code{x} and \code{y}.
-\item \code{identical_flag()} is a rercursive \code{identical2()}, returning the comparison
-results in a list with same structure as \code{x}. Useful to flag where
-\code{x} and \code{y} differ.
+\item \code{identical_flag()} runs \code{\link[=identical]{identical()}} or \code{identical2()} rercursively,
+returning the comparison results in a list with same structure as \code{x}.
+Useful to flag where \code{x} and \code{y} differ.
 }
 }
 \examples{

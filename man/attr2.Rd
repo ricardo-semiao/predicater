@@ -2,7 +2,7 @@
 % Please edit documentation in R/attributes.R
 \name{attr2}
 \alias{attr2}
-\title{Get attribute of object}
+\title{Attribute - Get attribute of object}
 \usage{
 attr2(x, which, exact = TRUE)
 }

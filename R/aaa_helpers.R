@@ -9,6 +9,11 @@ MSGS <- list()
 
 # General helpers --------------------------------------------------------------
 
+vapply_lgl <- function(.x, .f = as.logical, ..., .n = 1L) {
+  vapply(X = .x, FUN = .f, FUN.VALUE = logical(.n), ...)
+}
+
+
 `%@@%` <- function(x, attrs) {
   if (!is_null(x)) {
     attributes(x) <- c(attributes(x), as.list(attrs))
@@ -30,6 +35,12 @@ atomic_from_list_scalars <- function(x, type) {
 }
 # same
 
+
+
+# Test helpers -----------------------------------------------------------------
+
+# TODO: move to test helpers
+
 fn_core_to_test <- function(core, env = caller_env()) {
   core_sym <- ensym(core)
 
@@ -45,22 +56,22 @@ fn_core_to_test <- function(core, env = caller_env()) {
   new_function(args, body, env)
 }
 
-fn_core_to_assert <- function(core, env = caller_env()) {
+fn_core_to_assert <- function(core, msgs_fns, env = caller_env()) {
   core_sym <- ensym(core)
-  msgs_expr <- parse_expr(paste0("MSGS$", as_string(core_sym)))
   assert_name <- gsub("^core_", "assert_", as_string(core_sym))
 
   args <- fn_fmls(core)
   args_syms <- syms(names(args))
 
-  body <- expr({
-    assert_name <- !!assert_name
+  args <- append(args, c(action = "abort"), after = 1)
+  args["x_name"] <- list(NULL)
+  args$report_untested <- TRUE
+  args$`...` <- expr() # CHECK: consider args_cnd = list()
 
-    x_expr <- enexpr(x)
-    if (is_null(x_name) && !is_symbol(x_expr)) {
-      cli_abort("Either supply {.arg x_name} or pass a symbol to {.arg x}.", call = env)
-    }
-    x_name <- x_name %||% as_string(x_expr)
+  body <- expr({
+    # TODO: checks
+    assert_name <- !!assert_name
+    x_name <- x_name %||% expr_name(enexpr(x))
 
     tests <- (!!core_sym)(!!!args_syms)
 
@@ -68,18 +79,12 @@ fn_core_to_assert <- function(core, env = caller_env()) {
       return(invisible(x))
     }
 
-    tests_n <- length(tests)
-    tests_msgs <- character(tests_n)
-    tests_names <- names(tests)
-    for (i in seq_len(tests_n)) {
-      ti <- tests[[i]]
-      if (ti) {
-        tests_msgs[i] <- paste0(tests_names[i], ": ", "Ok.")
-        names(tests_msgs)[i] <- "v"
-      } else {
-        tests_msgs[i] <- (!!msgs_expr)[[tests_names[i]]](attributes(ti))
-        names(tests_msgs)[i] <- "x"
-      }
+    tests_msgs <- create_tests_msgs(tests, msgs_fns, report_untested)
+    for (i in seq_along(tests)) {
+      attributes(tests[[i]]) <- list(
+        test_info = attributes(tests[[i]]),
+        test_msg = tests_msgs[i]
+      )
     }
 
     msgs <- c(
@@ -88,57 +93,69 @@ fn_core_to_assert <- function(core, env = caller_env()) {
       "i" = "See this condition's {.code rs_assert_error} attribute for details."
     )
 
-    if (raise) {
+    if (action == "abort") {
       cli_abort(
-        msgs, call = env,
+        msgs, call = env, ...,
         rs_assert_error = list(args = list(!!!args_syms), tests = tests)
       )
-    } else {
-      msgs
+    } else if (action %in% c("warn", "inform")) {
+      cnd_fun <- switch(action, warn = cli_warn, inform = cli_inform)
+      cnd_fun(
+        msgs, call = env, ...,
+        rs_assert_error = list(args = list(!!!args_syms), tests = tests)
+      )
     }
+
+    invisible(x)
   })
 
-  args["x_name"] <- list(NULL)
-  args$raise <- TRUE
-
-  new_function(args, body, env)
+  new_function(args, body, new_environment(list(msgs_fns = msgs_fns), env))
 }
-# TODO: create helper functions? Turn into a factory that creates a new env instead of !!?
+# TODO: add functionality to recieve modifiers for each test's message and the
+# top message
+# TODO: prune msgs_funs based on core args
 
 
-#' Resolve based on a 'categorical' argument
-#'
-#' For the common case where some categorical argument dictates the return value
-#' of a function, with options:
-#' - `"tw"` for `TRUE` with a warning, `"t"` without.
-#' - `"fw"` for `FALSE` with a warning, `"f"` without.
-#' - `"naw"` or `"na"` for `NA` with the appropriate type.
-#' - `"abort"` to abort with a message. Avoid, it is usually an anti-pattern
-#'
-#' @noRd
-resolve_category <- function(
-  x, msg,
-  ..., env = caller_env(), warn = FALSE, x_name = NULL,
-  na_type = typeof(x)
-) {
-  force(env)
-  x_name <- x_name %||% ensym(x)
+create_tests_msgs <- function(tests, msgs_fns, report_untested) {
+  tests_n <- length(tests)
+  tests_msgs <- msgs_names <- character(tests_n)
+  tests_names <- names(tests)
 
-  if (grepl("w", x)) {
-    cli_warn(msg, ..., call = env)
-    x <- sub("w", "", x)
+  for (i in seq_len(tests_n)) {
+    ti <- tests[[i]]
+    ni <- tests_names[i]
+
+    if (is.na(ti) && report_untested) {
+      tests_msgs[i] <- paste0(ni, ": ", "not tested due to previous failure.")
+      msgs_names[i] <- "*"
+    } else if (ti) {
+      tests_msgs[i] <- paste0(ni, ": ", "ok.")
+      msgs_names[i] <- "v"
+    } else {
+      tests_msgs[i] <- paste0(ni, ": ", msgs_fns[[ni]](attributes(ti)))
+      msgs_names[i] <- "x"
+    }
   }
 
-  switch(x,
-    t = TRUE,
-    f = FALSE,
-    na = NAS[[na_type]],
-    abort = cli_abort(msg, ..., call = env),
-    cli_abort(
-      "Invalid value for argument {.arg {x_name}}: {.val {x}}.",
-      .internal = TRUE, call = env
-    )
-  )
+  names(tests_msgs) <- msgs_names
+  tests_msgs
+}
+
+
+initialize_tests <- function(pre, ..., post = character()) {
+  syms <- ensyms(...)
+  env <- caller_env()
+
+  names <- vapply(syms, \(x) as_string(x), character(1))
+  are_null <- vapply(syms, \(x) is_null(eval(x, env)), logical(1))
+  test_names <- c(pre, names[!are_null], post)
+
+  out <- vector("list", length(test_names))
+  names(out) <- test_names
+  for (nm in test_names) {
+    out[[nm]] <- NA
+  }
+  out
 }
 
 

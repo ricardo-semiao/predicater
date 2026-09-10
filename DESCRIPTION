@@ -23,3 +23,23 @@ RoxygenNote: 7.3.2
 Depends: 
     R (>= 4.3)
 Config/roxygen2/version: 8.1.0
+Collate: 
+    'aaa_helpers.R'
+    'assert.R'
+    'attributes.R'
+    'identical.R'
+    'metadata.R'
+    'others.R'
+    'predicater-package.R'
+    'ptype.R'
+    'roxy-tests.R'
+    'tests-attributes.R'
+    'tests-collections.R'
+    'tests-helpers.R'
+    'tests-numeric.R'
+    'tests-other_atomic.R'
+    'types-atomic_na.R'
+    'types-language.R'
+    'types-numeric.R'
+    'types-objects.R'
+    'types-others.R'

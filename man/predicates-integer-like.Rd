@@ -4,7 +4,7 @@
 \alias{predicates-integer-like}
 \alias{are_integer_like}
 \alias{is_integer_like}
-\title{Predicates - Integer-like values}
+\title{Types - Integer-like values}
 \usage{
 are_integer_like(x, mode = "range", tol = sqrt(.Machine$double.eps), na = "t")
 

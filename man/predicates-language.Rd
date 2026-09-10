@@ -8,7 +8,7 @@
 \alias{is_language}
 \alias{is_language_valid}
 \alias{is_expression2}
-\title{Predicates - Language objects}
+\title{Types - Language objects}
 \usage{
 is_syntactic_literal(x)
 

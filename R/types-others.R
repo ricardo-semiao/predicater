@@ -1,7 +1,7 @@
 
 # Other types ------------------------------------------------------------------
 
-#' Predicates - Other types
+#' Types - Other types
 #'
 #' @description
 #' Test if object is of a specific type ([typeof()]). The test is invariant to
@@ -28,10 +28,11 @@
 #' is_externalptr(x)
 #'
 #' is_char(x)
+#'
 #' is_any(x)
 #'
 #' @param x \[`any`] An object to test.
-#' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test. 
+#' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
 #' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
@@ -88,7 +89,7 @@ is_promise <- function(x) {
 #' @usage NULL
 #' @export
 is_dots <- function(x, n = NULL) {
-  typeof(x) == "dots" && (is.null(n) || length(x) == n)
+  typeof(x) == "..." && (is.null(n) || length(x) == n)
 }
 
 
@@ -127,7 +128,7 @@ is_any <- function(x) {
 
 # Functions --------------------------------------------------------------------
 
-#' Predicates - Functions
+#' Types - Functions
 #'
 #' @description
 #' There are three types ([typeof()]) of functions in R: `"closure"` (standard
@@ -142,7 +143,7 @@ is_any <- function(x) {
 #'
 #' @usage
 #' is_function(x)
-
+#'
 #' is_closure(x)
 #'
 #' is_primitive(x)
@@ -165,7 +166,7 @@ NULL
 
 # Collections ------------------------------------------------------------------
 
-#' Predicates - Collection types
+#' Types - Collection types
 #'
 #' @description
 #' In R, there are several types ([typeof()]) that can "store elements":
@@ -182,6 +183,7 @@ NULL
 #' See the 'Details' section for what behaviour you can expect from these types.
 #'
 #' Additionally:
+#' - [rlang::is_atomic()] tests for any atomic vector type.
 #' - [rlang::is_vector()] tests for atomic or generic (list) vectors.
 #' - `is_collection()` tests for any of the above collection types, with options
 #'   to exclude any of them.
@@ -238,6 +240,7 @@ NULL
 #'
 #' @name predicates-collections
 NULL
+# TODO: move atomic here?
 
 
 #' @rdname predicates-collections
@@ -259,20 +262,22 @@ is_environment2 <- function(x, n = NULL) {
 #' @rdname predicates-collections
 #' @usage NULL
 #' @export
-is_collection <- function(x, n = NULL, expr = TRUE, pairlist = TRUE, env = TRUE) {
+is_collection <- function(
+  x, n = NULL, expr = TRUE, pairlist = TRUE, env = TRUE, null = FALSE, dots = FALSE
+) {
   # Checks:
   # - n must pass is_integer_like(n, 1) or be NULL
   # - expr, pairlist, and env must be flags
   # TODO:
 
   # Main:
-  (is_null(n) || lengh(x) == n) && (
+  (is_null(n) || length(x) == n) && (
     is_vector(x) ||
+      (null && is.null(x)) ||
       (expr && is.expression(x)) ||
       (pairlist && is.pairlist(x)) ||
-      (env && is.environment(x))
+      (env && is.environment(x)) ||
+      (dots && is_dots(x))
   )
 }
-# Check if include_* is TRUE or FALSE (??)
-# Test for list, pairlist, expression, or environment, and primitive function (??)
-# TODO: add dots (... is a collection of promises, can have names)
+# TODO: rethink null and dots (... is a collection of promises, can have names)

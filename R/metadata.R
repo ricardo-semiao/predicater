@@ -1,18 +1,29 @@
 
 # Length -----------------------------------------------------------------------
 
-#' Predicates - Metadata
-is_empty2 <- function(x, non_collection, ...) {
-  if (! is_collection(x, ...) && ! is_null(x)) {
-    switch(non_collection,
-      f = return(FALSE),
-      stop = cli_abort("{.arg x} is not a collection."),
-    )
+#' Metadata - Check if a collection is empty
+#'
+#' @description
+#' Is a collection object (see [is_collection()]) empty, i.e. has zero length?
+#' Similar to [rlang::is_empty()], but yields an error for non-collections,
+#' including `NULL` by default.
+#'
+#' Note that objects of type 'S4' and 'object' are not considered collections,
+#' even if they are 'filled' with slots/attributes.
+#'
+#' @param x \[`any`] An object to test.
+#' @param null \[`TRUE` | `FALSE`] Should `NULL` be considered a collection? If
+#' false will error for `NULL`, else, will return `TRUE`.
+#'
+#' @returns \[`TRUE` | `FALSE`] The scalar result of the test.
+#'
+#' @export
+is_empty2 <- function(x, null = FALSE) {
+  if (! is_collection(x, null = null)) {
+    cli_abort("{.arg x} is not a collection.")
   }
-
   length(x) == 0L
 }
-# TODO: Cite that it ignores types s4/object
 # NOTE: for S4/object, it we at most could create a generic function
 
 
