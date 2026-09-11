@@ -32,7 +32,7 @@
 #'   `is_object_like()`: `"warn"` to issue a warning, `"stop"` to throw an
 #'   error, or `"f"` to return `FALSE`.
 #'
-#' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
 #' @name predicates-objects
 NULL
@@ -78,14 +78,15 @@ is_object_like <- function(x, bad = "warn") {
 
 
   # Main:
-  has_class <- has_class(x) # bad = ?
+  has_class <- has_class(x)
   has_object_bit <- has_object_bit(x)
   has_s4_bit <- has_s4_bit(x)
-  is_object_type <- typeof(x) %in% c("object", "S4")
 
   is_bad <- has_class != has_object_bit ||
-    has_class != has_s4_bit ||
-    has_class != is_object_type
+    (has_s4_bit && !has_object_bit) ||
+    (typeof(x) %in% c("object", "S4") && !has_object_bit) ||
+    (typeof(x) == "S4" && !has_s4_bit)
+  # TODO: adhere to full list of relations below
 
   if (is_bad) {
     switch(bad,
@@ -94,10 +95,15 @@ is_object_like <- function(x, bad = "warn") {
     )
   }
 
-  has_bit
+  has_object_bit
 }
 # CHECK: consider allowing user chosing the final test (has_bit or other)
-
+# List of relations betwee: class, object bit, s4 bit, s4 typeof, object typeof
+# - class -> object bit
+# - object bit -> class
+# - s4 bit -> class & -> object bit
+# - s4 typeof -> class & -> object bit, -> s4 bit
+# - object typeof -> class & -> object bit
 
 #' @rdname predicates-objects
 #' @usage NULL
@@ -137,7 +143,7 @@ is_object <- function(x) {
 #'
 #' @returns
 #' - \[`character(1)`] For `object_system()`: the object-oriented system of `x`.
-#' - \[`logical(1)`] For `is_system()`: `TRUE` if `x` belongs to `system`,
+#' - \[`TRUE` | `FALSE`] For `is_system()`: `TRUE` if `x` belongs to `system`,
 #'   `FALSE` otherwise.
 #'
 #' @details
@@ -183,8 +189,8 @@ object_system <- function(x) {
 
   if (! is_object_like(x)) {
     "base"
-  } else if (isS4(x)) { 
-    if (methods::is(x, "refClass")) {
+  } else if (isS4(x)) {
+    if (methods::is(x, "refClass")) { # CHECK: try to remove this dep on methods
       "RC"
     } else {
       "S4"

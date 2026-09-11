@@ -24,7 +24,8 @@
 #'   `"t" for `TRUE`, `"tw"` to return true but re-throw the warning; and ``"e"`
 #'   to throw the warning as an error.
 #'
-#' @returns \[`logical(1)`] Whether attributes can be set on `x`, or re-throws
+#' @returns \[`TRUE` | `FALSE`] Whether attributes can be set on `x`, or
+#' re-throws
 #'   the catched condition.
 #'
 #' @examples
@@ -74,8 +75,8 @@ is_attrs_allowed <- function(x, cnd_match = NULL, warn = "tw") {
 #'
 #' @param x \[`any`] Object to get attribute from.
 #' @param which \[`character(1)`] Name of attribute to get.
-#' @param exact \[`logical(1)`] Whether to match attribute name exactly, or allow
-#'   partial matching.
+#' @param exact \[`TRUE` | `FALSE`] Whether to match attribute name exactly, or
+#'   allow partial matching.
 #'
 #' @returns \[`any`] The value of the attribute matched, or NULL if no match
 #'   was found.
@@ -288,7 +289,7 @@ attrs_filter <- function(
 #'   zero-length inputs: `"f"` to return `FALSE`, or `"t"` return `TRUE`. A `"w"`
 #'   suffix can be added (e.g. `"tw"`) to also issue a warning.
 #'
-#' @returns \[`logical(1)`] Whether `x` has names according to the specified
+#' @returns \[`TRUE` | `FALSE`] Whether `x` has names according to the specified
 #'   checks.
 #'
 #' @details
@@ -310,10 +311,10 @@ attrs_filter <- function(
 #' @examples
 #' has_names(mtcars) #> TRUE
 #'
-#' has_names(setNames(1:3, c("a", "", "b")), empty = "t") #> TRUE
-#' has_names(setNames(1:3, c("a", "b", NA)), na = "t") #> TRUE
-#' has_names(setNames(1:3, c("a", "a", "a"))) #> FALSE
-#' has_names(setNames(1:3, c("_bad", "b", "c")), invalid = "f") #> FALSE
+#' has_names(set_names(1:3, c("a", "", "b")), empty = "t") #> TRUE
+#' has_names(set_names(1:3, c("a", "b", NA)), na = "t") #> TRUE
+#' has_names(set_names(1:3, c("a", "a", "a"))) #> FALSE
+#' has_names(set_names(1:3, c("_bad", "b", "c")), invalid = "f") #> FALSE
 #'
 #' @export
 has_names_valid <- function(
@@ -389,10 +390,10 @@ are_names_valid <- function(
 #'   object has dimensions, dimension names, and rownames, respectively.
 #'
 #' @param x \[`any`] Object to check.
-#' @param count_empty \[`logical(1)`] Whether to count empty dimensions and
+#' @param count_empty \[`TRUE` | `FALSE`] Whether to count empty dimensions and
 #'   dimension names.
-#' @param count_invalid \[`logical(1)`] Whether to dimension names that have only
-#'   non-NA or non-empty values.
+#' @param count_invalid \[`TRUE` | `FALSE`] Whether to dimension names that have
+#'   only non-NA or non-empty values.
 #' @param how \[`character(1)`] How to extract the attribute:
 #' - For dimensions: `"dim"` for [dim()] and `"attr"` for [attr()].
 #' - For dimension names: `"dimnames"` for [dimnames()] and `"attr"` for
@@ -402,7 +403,7 @@ are_names_valid <- function(
 #'
 #' @returns
 #' - \[integer(1)] For `n_dims()` and `n_dimnames()`.
-#' - \[`logical(1)`] For `has_dim()`, `has_dimnames()`, and `has_rownames()`.
+#' - \[`TRUE` | `FALSE`] For `has_dim()`, `has_dimnames()`, and `has_rownames()`.
 #'
 #' @name attributes-dimensions
 NULL
@@ -592,7 +593,7 @@ dimnames2 <- function(x, repair = "unique", how = "dimnames") {
 
 #' @rdname attributes-getters-setters
 #' @export
-`dimnames2<-` <- function(x, value, repair = repair, how = "dimnames") {
+`dimnames2<-` <- function(x, value, repair = "unique", how = "dimnames") {
   # Checks:
   # - x is a collection with dimensions
   # - value has lenght equal to length(dim(x)); each value[[i]] has length equal

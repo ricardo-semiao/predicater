@@ -30,7 +30,7 @@ is_object_like(x, bad = "warn")
 error, or \code{"f"} to return \code{FALSE}.}
 }
 \value{
-[\code{logical(1)}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
 }
 \description{
 Functions to test for 'object'-related properties:

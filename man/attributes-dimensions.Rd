@@ -22,7 +22,7 @@ has_dim(x, how = "dim")
 \arguments{
 \item{x}{[\code{any}] Object to check.}
 
-\item{count_empty}{[\code{logical(1)}] Whether to count empty dimensions and
+\item{count_empty}{[\code{TRUE} | \code{FALSE}] Whether to count empty dimensions and
 dimension names.}
 
 \item{how}{[\code{character(1)}] How to extract the attribute:
@@ -34,13 +34,13 @@ dimension names.}
 element of \code{\link[=dimnames]{dimnames()}}, and \code{"attr"} for \code{\link[=attr]{attr()}}.
 }}
 
-\item{count_invalid}{[\code{logical(1)}] Whether to dimension names that have only
-non-NA or non-empty values.}
+\item{count_invalid}{[\code{TRUE} | \code{FALSE}] Whether to dimension names that have
+only non-NA or non-empty values.}
 }
 \value{
 \itemize{
 \item [integer(1)] For \code{n_dims()} and \code{n_dimnames()}.
-\item [\code{logical(1)}] For \code{has_dim()}, \code{has_dimnames()}, and \code{has_rownames()}.
+\item [\code{TRUE} | \code{FALSE}] For \code{has_dim()}, \code{has_dimnames()}, and \code{has_rownames()}.
 }
 }
 \description{

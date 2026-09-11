@@ -1,10 +1,75 @@
 
-# TODO: empty RHS returns the value of last non-empty RHS
-# TODO: _ptype and _id versions with a fixed tab
+# if_else and case_when --------------------------------------------------------
+
+# From https://github.com/Yunuuuu/standalone/blob/main/R/standalone-tibble.R
+# at 11/09/2026
+
+#' @title Match - Vectorized if-else
+#' @inherit funs::if_else
+if_else2 <- function(condition, true, false, na = NULL) {
+  # output size from `condition`
+  size <- vctrs::vec_size(condition)
+
+  # output type from `true`/`false`/`na`
+  ptype <- vctrs::vec_ptype_common(true = true, false = false, na = na)
+
+  args <- vctrs::vec_recycle_common(
+    true = true, false = false, na = na, .size = size
+  )
+  args <- vctrs::vec_cast_common(!!!args, .to = ptype)
+
+  out <- vctrs::vec_init(ptype, size)
+
+  loc_true <- condition
+  loc_false <- !condition
+
+  out <- vctrs::vec_assign(out, loc_true, vctrs::vec_slice(args$true, loc_true))
+  out <- vctrs::vec_assign(out, loc_false, vctrs::vec_slice(args$false, loc_false))
+
+  if (!is.null(na)) {
+    loc_na <- vctrs::vec_detect_missing(condition)
+    out <- vctrs::vec_assign(out, loc_na, vctrs::vec_slice(args$na, loc_na))
+  }
+
+  out
+}
+
+#' @title Match - Vectorized nested if-else
+#' @inherit dplyr::case_when
+case_when2 <- function(.default, ..., .ptype = NULL) {
+  if (is.null(.ptype)) {
+    .ptype <- vctrs::vec_ptype(.default)
+  } else {
+    .default <- vctrs::vec_cast(.default, .ptype)
+  }
+  env <- rlang::caller_env()
+  dots <- rlang::list2(...)
+  unused <- vctrs::vec_rep(TRUE, times = vctrs::vec_size(.default))
+  for (i in seq_along(dots)) {
+    if (!any(unused)) {
+      break
+    }
+    dot <- .subset2(dots, i)
+    loc <- unused & rlang::eval_tidy(rlang::f_lhs(dot), env = env)
+    value <- rlang::eval_tidy(rlang::f_rhs(dot), env = env)
+    value <- vctrs::vec_cast(value, .ptype, x_arg = sprintf("`...` (%d)", i))
+    if (length(value) > 1L) value <- vctrs::vec_slice(value, loc)
+    .default <- vctrs::vec_assign(
+      .default, loc, value, value_arg = sprintf("`...` (%d)", i)
+    )
+    unused[loc] <- FALSE
+  }
+  .default
+}
+
+
 
 # Match ------------------------------------------------------------------------
 
-#' Match case of object
+# TODO: empty RHS returns the value of last non-empty RHS
+# TODO: _ptype and _id versions with a fixed tab
+
+#' Match - Pattern matching
 #'
 #' Pattern matching functions to return a value based on a case of `x`. Similar
 #' to [switch()] but allows for any type for object as the case. Cases are two

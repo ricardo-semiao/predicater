@@ -9,3 +9,4 @@
 ^docs$
 ^pkgdown$
 ^personal$
+^predicater\.code-workspace$

@@ -1,4 +1,6 @@
 
+# TODO: rethink if we should export identical_vec, etc.
+
 #' Test objects for exact equality with more flexibility
 #'
 #' Similar to [identical()] but with more flexibility on how to handle data and
@@ -9,12 +11,12 @@
 #'   Useful to flag where `x` and `y` differ.
 #'
 #' @param x,y \[`any`] Any R object.
-#' @param single_NA \[`logical(1)`] Whether to treat `NA` values as a identical
-#'   to each other.
-#' @param single_zero \[`logical(1)`] Whether to treat `+0` and `-0` as
+#' @param single_NA \[`TRUE` | `FALSE`] Whether to treat `NA` values as a
 #'   identical to each other.
-#' @param ord_data,ord_attrs \[`logical(1)` each] Whether to keep (`TRUE`) or
-#'   ignore (`FALSE`) the order of the data and attributes in `x` and `y`.
+#' @param single_zero \[`TRUE` | `FALSE`] Whether to treat `+0` and `-0` as
+#'   identical to each other.
+#' @param ord_data,ord_attrs \[`TRUE` | `FALSE` each] Whether to keep the order
+#'   of the data and attributes in `x` and `y`.
 #' @param tol_type \[`character(1)`] Type of tolerance to use when comparing
 #'   numeric values. One of:
 #'   - `"none"`: no tolerance (default).
@@ -30,11 +32,11 @@
 #' @param fun \[`character(1)`] For variants, function to use for comparison.
 #'   One of `"identical"` or `"identical2"`.
 #' @param l \[`list()`] For `identical_reduce()`, a list of objects to compare.
-#' @param accumulate \[`logical(1)`] For `identical_reduce()`, whether to return
-#'   the accumulated tests' results or just the final result.
+#' @param accumulate \[`TRUE` | `FALSE`] For `identical_reduce()`, whether to
+#'   return the accumulated tests' results or just the final result.
 #'
 #' @returns
-#' - \[`logical(1)`] for `identical2()` and `identical_reduce()`.
+#' - \[`TRUE` | `FALSE`] for `identical2()` and `identical_reduce()`.
 #' - \[`logical(length(x))`] for `identical_vec()`.
 #' - `identical_flag()` returns a object with the same structure as `x` and
 #'   logical elements.
@@ -91,15 +93,6 @@ identical2 <- function(
   # - tol must be numeric(1) in ]0, Inf[
   # - ignore_data, ignore_attrs must be non-NA character vectors
   # TODO:
-  #test_msgs(checkmate::check_flag, single_NA, single_zero, ord_data, ord_attrs)
-  #test_msg(checkmate::check_choice, tol_type, choices = c("none", "abs", "rel"))
-  #if (! is_finite(tol) || tol <= 0) {
-  #  cli_abort("{.arg tol} must be a finite number greater than 0.")
-  #}
-  #test_msgs(
-  #  checkmate::check_character, ignore_data, ignore_attrs,
-  #  args = list(any.missing = FALSE)
-  #)
 
 
   # Main:
@@ -151,8 +144,6 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
   # - x and y must be lists
   # - fun must be one of "identical2" or "identical"
   # TODO:
-  #test_msgs(checkmate::check_list, x, y)
-  #test_msg(checkmate::check_choice, fun, choices = c("identical2", "identical"))
 
 
   # Main:
@@ -164,7 +155,7 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
     "do nothing" # * Could early exit with FALSE
     res$.data <- FALSE
   } else if (is_list(x)) {
-    if (is_named3(x)) {
+    if (has_names_valid(x)) {
       names_x <- names(x)
       res$.data <- set_names(vector("list", length(x)), names_x)
     } else {

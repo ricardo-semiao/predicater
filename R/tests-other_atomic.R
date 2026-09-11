@@ -1,136 +1,104 @@
 
-#' @include tests-helpers.R
+#' @include tests-helpers.R tests-menu.R
 NULL
 
 
 
-# Raw ----------------------------------------------------------
+# Raw and logical ----------------------------------------------------------
 
-#' Tests - Raw
+#' Tests - Logical and Raw vectors
 #'
 #' @description
-#' Test if an object is a raw vector.
+#' Test if an object is a logical or raw vector.
 #'
-#' `test_raw()` is the predicate test, while `assert_raw()` validates
-#' its input, aborting if it fails the test.
+#' They all are predicate tests, while the `assert_*()` functions validate their
+#' input, aborting if it fails the test.
 #'
 #' @param x \[`any`] An object to test.
-#' @param len `r ROXY$x_n("len")`
+#' @param len,na_n,true_n `r ROXY$x_n("len,na_n,true_n")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
-#' @returns `r ROXY$test_returns("raw")`
+#' @returns `r ROXY$test_returns()`
 #'
-#' @name tests-raw
+#' @name test-logical_raw
 NULL
+
+
+# Core functions:
+
+core_logical <- function(
+  x,
+  len = NULL, na_n = NULL, true_n = NULL,
+  sentinels = NULL, custom = NULL, custom_map = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, len, na_n, true_n, custom, custom_map,
+    tests_pars = list(l = length(x)), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_logical(x) %@@% c(type = typeof(x)),
+      true_n = \(x, arg, pars) {
+        n_true <- sum(x, na.rm = TRUE)
+        test_in_range(n_true, arg, pars$l) %@@% c(n = n_true)
+      }
+    )
+  )
+}
 
 
 core_raw <- function(
-  x, len = NULL, sentinels = NULL, custom = NULL, env = caller_env()
+  x,
+  len = NULL,
+  sentinels = NULL, custom = NULL, custom_map = NULL,
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-  # Main:
-  tests <- initialize_tests("type", sentinels, len, custom)
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_raw(x) %@@% c(type = typeof(x))
-  if (!tests$type) {
-    return(tests)
-  }
-
-  l <- length(x)
-
-  tests$len <- test_in_range(l, len, l) %@@% c(n = l)
-  tests$custom <- test_custom(x, custom, env)
-
-  tests
+  run_tests(
+    x, sentinels, len, custom, custom_map,
+    tests_pars = list(l = length(x)), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_raw(x) %@@% c(type = typeof(x))
+    )
+  )
 }
 
-#' @rdname tests-raw
+
+# Test functions:
+
+#' @rdname test-logical_raw
 #' @export
-test_double <- fn_core_to_test(core_double)
+test_logical <- fn_core_to_test(core_logical)
 
-#' @rdname tests-raw
+#' @rdname test-logical_raw
 #' @export
-assert_double <- fn_core_to_assert(core_double, c(
-  MSGS$sub_tests,
-  type = \(attrs) glue("had type {{.val {attrs$type}}}, not {.val raw}.")
-))
+test_raw <- fn_core_to_test(core_raw)
 
 
+# Assert functions:
 
-# Logical ----------------------------------------------------------------------
-
-#' Tests - Logical
-#'
-#' @description
-#' Test if an object is a logical vector.
-#'
-#' `test_logical()` is the predicate test, while `assert_logical()` validates
-#' its input, aborting if it fails the test.
-#'
-#' @param x \[`any`] An object to test.
-#' @param len,na_n `r ROXY$x_n("len,na_n")`
-#' @param sentinels `r ROXY$sentinels()`
-#' @param custom `r ROXY$custom()`
-#'
-#' @returns `r ROXY$test_returns("logical")`
-#'
-#' @name tests-logical
-NULL
-
-core_logical <- function(
-  x, len = NULL, na_n = NULL, sentinels = NULL, custom = NULL, env = caller_env()
-) {
-  # Checks:
-  # TODO:
-
-  # Main:
-  tests <- initialize_tests("type", sentinels, len, na_n, custom)
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_logical(x) %@@% c(type = typeof(x))
-  if (!tests$type) {
-    return(tests)
-  }
-
-  l <- length(x)
-
-  tests$len <- test_in_range(l, len, l) %@@%
-    c(n = l)
-  tests$na_n <- test_in_range(n_na <- sum(are_na2(x, nan = "f")), na_n, l) %@@%
-    c(n = n_na)
-  tests$custom <- test_custom(x, custom, env)
-
-  tests
-}
-# TODO: add true_n
-
-
-#' @rdname tests-logical
+#' @rdname test-logical_raw
 #' @export
-test_double <- fn_core_to_test(core_double)
+assert_logical <- fn_core_to_assert(
+  core_logical,
+  msgs_add = list(
+    type = \(attrs) glue("had type `{attrs$type}`, not `logical`."),
+    true_n = \(attrs) "count of TRUE elements does not fall within the expected range."
+  )
+)
 
-#' @rdname tests-logical
+#' @rdname test-logical_raw
 #' @export
-assert_double <- fn_core_to_assert(core_double, c(
-  MSGS$sub_tests,
-  type = \(attrs) glue("had type {{.val {attrs$type}}}, not {.val logical}.")
-))
+assert_raw <- fn_core_to_assert(
+  core_raw,
+  msgs_add = list(
+    type = \(attrs) glue("had type `{attrs$type}`, not `raw`.")
+  )
+)
 
 
 
@@ -145,7 +113,7 @@ assert_double <- fn_core_to_assert(core_double, c(
 #' its input, aborting if it fails the test.
 #'
 #' @param x \[`any`] An object to test.
-#' @param len,na_n,dup_n `r ROXY$x_n("len,na_n,dup_n")`
+#' @param len,na_n,dup_n,char_n `r ROXY$x_n("len,na_n,dup_n,char_n")`
 #' @param set `r ROXY$set("character")`
 #' @param match \[`character()` | `list(yes = , no = )` | `NULL`] Test if all
 #'   elements of `x` match regular expression patterns. Pass a character vector of
@@ -153,70 +121,56 @@ assert_double <- fn_core_to_assert(core_double, c(
 #'   character vectors of patterns. Set to `NULL` to not test.
 #' @param perl \[`TRUE` | `FALSE`] Should Perl-compatible regexps be used in
 #'   `match`?
+#' @param sorted `r ROXY$sorted()`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
 #' @returns `r ROXY$test_returns("character")`
 #'
-#' @name tests-character
+#' @name test_character
 NULL
-
 
 core_character <- function(
   x,
-  len = NULL, na_n = NULL, dup_n = NULL,
-  set = NULL, match = NULL,
+  len = NULL, na_n = NULL, dup_n = NULL, char_n = NULL,
+  set = NULL, match = NULL, sorted = NULL,
   sentinels = NULL, custom = NULL, perl = FALSE,
-  env = caller_env()
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-  # Main:
-  tests <- initialize_tests(
-    "type", sentinels, len, na_n, dup_n, set, match, custom
+  run_tests(
+    x, sentinels, len, na_n, dup_n, char_n, set, match, sorted, custom,
+    tests_pars = list(l = length(x), perl = perl), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_character(x) %@@% c(type = typeof(x)),
+      char_n = \(x, arg, pars) {
+        n_char <- nchar(x)
+        test_in_range(n_char, arg, pars$l) %@@% c(n = n_char)
+      },
+      match = \(x, arg, pars) test_in_pattern(x, arg, perl = pars$perl)
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_character(x) %@@% c(type = typeof(x))
-  if (!tests$type) {
-    return(tests)
-  }
-
-  l <- length(x)
-
-  tests$len <- test_in_range(l, len, l) %@@%
-    c(n = l)
-  tests$na_n <- test_in_range(n_na <- sum(are_na2(x, nan = "f")), na_n, l) %@@%
-    c(n = n_na)
-  tests$dup_n <- test_in_range(n_dups <- sum(duplicated(unclass(x))), dup_n, l) %@@%
-    c(n = n_dups)
-  tests$set <- test_in_set(x, set, type_test = "character")
-  tests$match <- test_in_pattern(x, match, perl = perl)
-  tests$custom <- test_custom(x, custom, env)
-
-  tests
 }
-# TODO: add sorted
 
 
-#' @rdname tests-character
+#' @rdname test_character
 #' @export
-test_double <- fn_core_to_test(core_double)
+test_character <- fn_core_to_test(core_character)
 
-#' @rdname tests-character
+#' @rdname test_character
 #' @export
-assert_double <- fn_core_to_assert(core_double, c(
-  MSGS$sub_tests,
-  type = \(attrs) glue("had type {{.val {attrs$type}}}, not {.val character}."),
-  match = \(attrs) glue("had matches outside of the allowed patterns.")
-))
+assert_character <- fn_core_to_assert(
+  core_character,
+  msgs_add = list(
+    type = \(attrs) glue("had type `{attrs$type}`, not `character`."),
+    char_n = \(attrs) "character counts do not fall within the expected range.",
+    match = \(attrs) "had matches outside of the allowed patterns."
+  )
+)
 
 
 

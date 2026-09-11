@@ -11,8 +11,8 @@ attr2(x, which, exact = TRUE)
 
 \item{which}{[\code{character(1)}] Name of attribute to get.}
 
-\item{exact}{[\code{logical(1)}] Whether to match attribute name exactly, or allow
-partial matching.}
+\item{exact}{[\code{TRUE} | \code{FALSE}] Whether to match attribute name exactly, or
+allow partial matching.}
 }
 \value{
 [\code{any}] The value of the attribute matched, or NULL if no match

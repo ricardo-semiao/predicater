@@ -44,7 +44,7 @@
 #' @param name \[`character(1)` | `NULL`] An optional name or vector of names
 #'   that the symbol should match. Set to `NULL` to not test.
 #'
-#' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
 #' @aliases is_syntactic_literal is_symbol
 #' @rawNamespace export(is_syntactic_literal, is_symbol)
@@ -109,3 +109,5 @@ is_parseable <- function(x) {
     error = \(cnd) FALSE
   )
 }
+# CHECK: consider exporting. Would do nice alongside is_code. Maybe just is_code
+# with a 'valid' arg

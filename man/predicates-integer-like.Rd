@@ -33,8 +33,10 @@ values.}
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{
-[\code{logical(length(x))}, \code{logical(1)}] The vectorized or scalar
-result of the test, respectively.
+\itemize{
+\item [\code{logical(length(x))}] For \verb{are_*}: the vectorized or result of the test.
+\item [\code{TRUE} | \code{FALSE}] For \verb{is_*}: the scalar result of the test.
+}
 }
 \description{
 Check if an object can be considerd integer in 4 different interpretations

@@ -24,8 +24,10 @@ an object to test.}
 \code{FALSE}, or \code{"na"} to return \code{NA}.}
 }
 \value{
-[\code{logical(length(x))}, \code{logical(1)}] For \verb{are_*()}, the vectorized
-result of the test; for \verb{is_*()}, the scalar result of the test.
+\itemize{
+\item [\code{logical(length(x))}] For \verb{are_*}: the vectorized or result of the test.
+\item [\code{TRUE} | \code{FALSE}] For \verb{is_*}: the scalar result of the test.
+}
 }
 \description{
 Check if an object is literally \code{TRUE} or \code{FALSE}, controlling for \code{NA}

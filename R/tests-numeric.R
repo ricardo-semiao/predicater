@@ -1,24 +1,27 @@
 
-#' @include tests-helpers.R
+#' @include tests-helpers.R tests-menu.R
 NULL
 
 
-# Docs -------------------------------------------------------------------------
+
+# Core functions ---------------------------------------------------------------
 
 #' Tests - Numeric vectors
 #'
 #' @description
-#' Test if an object is an numeric vector:
+#' Test if an object is a numeric vector:
 #' - `test_integer(x, mode = "strict")` tests for integer vectors.
-#' - `test_integer_like(x, mode = *)`, tests for integer-like vectors via
+#' - `test_integer_like(x, mode = *)` tests for integer-like vectors via
 #'   [is_integer_like()], with its multiple modes.
-#' - `test_double(x)` tests for double vectors.
-#' - `test_complex(x)` tests for complex vectors.
+#' - `test_double(x, mode = "double")` tests for double vectors.
+#' - `test_double(x, mode = "numeric")` tests for double or integer vectors.
+#' - `test_complex()` tests for complex vectors, delegating tests on its real,
+#'   imaginary, modulus, and argument parts, to `test_double()`.
 #'
 #' They all are predicate tests, while the `assert_*()` functions validate their
 #' input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An  object to test.
+#' @param x \[`any`] An object to test.
 #' @param mode,mode_tol \[`"strict"` | `"range"` | `"range_tol"` | `"trunc"` |
 #'   `"trunc_tol"`, `double(1)`] For `*_integer()`: the `mode` and `tol`
 #'   arguments to pass to [is_integer_like()].
@@ -30,102 +33,51 @@ NULL
 #' @param sentinels `r ROXY$sentinels()`
 #' @param sorted `r ROXY$sorted()`
 #' @param custom `r ROXY$custom()`
+#' @param custom_map `r ROXY$custom_map()`
 #' @param re_tests,im_tests,mod_tests,arg_tests \[`list()` | `NULL`] For
 #'   `*_complex()`: a list with the same named arguments as `test_double()`, to
 #'   test the real, imaginary, modulus and argument values of `x`.
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
 #' @returns `r ROXY$test_returns()`
 #'
-#' @name tests-numeric
+#' @name test-numeric
 NULL
-
-
-
-# Core functions ---------------------------------------------------------------
-
-core_numeric <- function(
-  x,
-  len = NULL, na_n = NULL, dup_n = NULL, nan_n = NULL, inf_n = NULL,
-  range = NULL, set = NULL, sorted = NULL, custom = NULL,
-  env = caller_env(), tests = NULL
-) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- tests %||% initialize_tests(
-    len, na_n, dup_n, nan_n, inf_n, range, set, sorted, custom
-  )
-  l <- length(x)
-
-  tests$len <- test_in_range(l, len, l) %@@%
-    c(n = l)
-  tests$range <- test_in_range(x, range, l) %@@%
-    c(range = range)
-  tests$na_n <- test_in_range(n_na <- sum(are_na2(x, nan = "f")), na_n, l) %@@%
-    c(n = n_na)
-  tests$dup_n <- test_in_range(n_dups <- sum(duplicated(unclass(x))), dup_n, l) %@@%
-    c(n = n_dups) # TODO: incomparables = NA_integer_?
-  tests$nan_n <- test_in_range(n_nan <- sum(are_nan(x, na = "f")), nan_n, l) %@@%
-    c(n = n_nan)
-  tests$inf_n <- test_in_range(n_inf <- sum(are_inf(x, na = "f")), inf_n, l) %@@%
-    c(n = n_inf)
-  tests$sorted <- test_sorted(x, sorted) %@@%
-    c(sorted = sorted)
-  tests$set <- test_in_set(x, set)
-  tests$custom <- test_custom(x, custom, env)
-
-  tests
-}
 
 
 core_integer <- function(
   x, mode = "strict",
   len = NULL, na_n = NULL, dup_n = NULL, nan_n = NULL, inf_n = NULL,
   range = NULL, set = NULL, sorted = NULL,
-  custom = NULL, sentinels = NULL,
+  custom = NULL, custom_map = NULL, sentinels = NULL,
   mode_tol = NULL,
-  env = caller_env()
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- initialize_tests(
-    "type", sentinels, len, na_n, dup_n, nan_n, inf_n, range, set, sorted,
-    custom
+  run_tests(
+    x, sentinels, mode, len, na_n, dup_n, nan_n, inf_n, range, set, sorted,
+    custom, custom_map,
+    tests_pars = list(l = length(x), mode = mode, mode_tol = mode_tol), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) {
+        mode <- pars$mode
+        tol <- pars$mode_tol
+        if (mode == "strict") {
+          is_integer(x)
+        } else {
+          if (is_null(tol)) { # To respect the default tol
+            is_integer_like(x, mode = mode)
+          } else {
+            is_integer_like(x, mode = mode, tol = tol)
+          }
+        } %@@%
+          c(mode = mode, type = typeof(x), tol = tol)
+      }
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE # Sentinels is not a 'failable' test
-
-  tests$type <- if (mode == "strict") {
-    is_integer(x)
-  } else {
-    if (is_null(mode_tol)) {
-      is_integer_like(x, mode = mode)
-    } else {
-      is_integer_like(x, mode = mode, tol = mode_tol)
-    }
-  }
-  tests$type <- tests$type %@@% c(mode = mode, type = typeof(x), tol = mode_tol)
-  if (! tests$type) {
-    return(tests)
-  }
-
-  tests_numeric <- core_numeric(
-    x, len = len, na_n = na_n, dup_n = dup_n, nan_n = nan_n, inf_n = inf_n,
-    range = range, set = set, sorted = sorted, custom = custom,
-    env = env, tests = tests
-  )
-
-  c(tests, tests_numeric)
 }
 
 
@@ -133,208 +85,124 @@ core_double <- function(
   x, mode = "double",
   len = NULL, na_n = NULL, dup_n = NULL, nan_n = NULL, inf_n = NULL,
   range = NULL, set = NULL, sorted = NULL,
-  sentinels = NULL, custom = NULL,
-  env = caller_env()
+  sentinels = NULL, custom = NULL, custom_map = NULL,
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- initialize_tests(
-    c("sentinels", "type"), len, na_n, dup_n, nan_n, inf_n, range, set, sorted,
-    custom
+  run_tests(
+    x, sentinels, mode, len, na_n, dup_n, nan_n, inf_n, range, set, sorted,
+    custom, custom_map,
+    tests_pars = list(l = length(x), mode = mode), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) {
+        mode <- pars$mode
+        if (mode == "double") {
+          is_double(x)
+        } else {
+          is_numeric(x)
+        } %@@%
+          c(mode = mode, type = typeof(x))
+      }
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- if (mode == "double") {
-    is_double(x)
-  } else {
-    is_numeric(x)
-  }
-  tests$type <- tests$type %@@% c(mode = mode, type = typeof(x))
-  if (! tests$type) {
-    return(tests)
-  }
-
-  tests_numeric <- core_numeric(
-    x, len = len, na_n = na_n, dup_n = dup_n, nan_n = nan_n, inf_n = inf_n,
-    range = range, set = set, sorted = sorted, custom = custom,
-    env = env, tests = tests
-  )
-
-  c(tests, tests_numeric)
 }
 
 
 core_complex <- function(
   x,
   re_tests = NULL, im_tests = NULL, mod_tests = NULL, arg_tests = NULL,
-  sentinels = NULL, custom = NULL,
-  env = caller_env()
+  sentinels = NULL, custom = NULL, custom_map = NULL,
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- initialize_tests(
-    c("sentinels", "type"), re_tests, im_tests, mod_tests, arg_tests, custom
+  run_tests(
+    x, sentinels, re_tests, im_tests, mod_tests, arg_tests, custom, custom_map,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_complex(x) %@@% c(type = typeof(x)),
+      re_tests = \(x, arg, pars) {
+        exec(test_double, x = Re(x), !!!arg) %@@%
+          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+      },
+      im_tests = \(x, arg, pars) {
+        exec(test_double, x = Im(x), !!!arg) %@@%
+          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+      },
+      mod_tests = \(x, arg, pars) {
+        exec(test_double, x = Mod(x), !!!arg) %@@%
+          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+      },
+      arg_tests = \(x, arg, pars) {
+        exec(test_double, x = Arg(x), !!!arg) %@@%
+          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+      }
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_complex(x)
-  tests$type <- tests$type %@@% c(type = typeof(x))
-  if (! tests$type) {
-    return(tests)
-  }
-
-  tests$custom <- test_custom(x, custom, env = env)
-
-  tests$re_tests <- re_tests %&&% exec(test_double, x = Re(x), !!!re_tests) %@@%
-    c(tests = names(re_tests)[vapply_lgl(re_tests, \(x) !is_null(x))])
-  tests$im_tests <- im_tests %&&% exec(test_double, x = Im(x), !!!im_tests) %@@%
-    c(tests = names(im_tests)[vapply_lgl(im_tests, \(x) !is_null(x))])
-  tests$mod_tests <- mod_tests %&&% exec(test_double, x = Mod(x), !!!mod_tests) %@@%
-    c(tests = names(mod_tests)[vapply_lgl(mod_tests, \(x) !is_null(x))])
-  tests$arg_tests <- arg_tests %&&% exec(test_double, x = Arg(x), !!!arg_tests) %@@%
-    c(tests = names(arg_tests)[vapply_lgl(arg_tests, \(x) !is_null(x))])
-
-  tests
 }
 
 
 
-# Test and assert functions ----------------------------------------------------
+# Functions --------------------------------------------------------------------
 
-#' @rdname tests-numeric
+# Test functions:
+
+#' @rdname test-numeric
 #' @export
 test_integer <- fn_core_to_test(core_integer)
 
-#' @rdname tests-numeric
-#' @export
-assert_integer <- fn_core_to_assert(core_integer, c(
-  MSGS$sub_tests,
-  type = \(attrs) {
-    fn <- switch(attrs$mode, strict = "is_integer", "is_integer_like")
-    glue("had type {{.val {attrs$type}}} and did not pass {{.fn {fn}}}.")
-  }
-))
-
-
-#' @rdname tests-numeric
+#' @rdname test-numeric
 #' @export
 test_double <- fn_core_to_test(core_double)
 
-#' @rdname tests-numeric
-#' @export
-assert_double <- fn_core_to_assert(core_double, c(
-  MSGS$sub_tests,
-  type = \(attrs) {
-    fn <- switch(attrs$mode, double = "is_integer", numeric = "is_numeric")
-    glue("had type {{.val {attrs$type}}} and did not pass {{.fn {fn}}}.")
-  }
-))
-
-
-#' @rdname tests-numeric
+#' @rdname test-numeric
 #' @export
 test_complex <- fn_core_to_test(core_complex)
 
-#' @rdname tests-numeric
+
+# Assert functions:
+
+#' @rdname test-numeric
 #' @export
-assert_complex <- fn_core_to_assert(core_complex, c(
-  type = \(attrs) {
-    glue("had type {{.val {attrs$type}}} and did not pass {{.fn is_complex}}.")
-  },
-  re_tests = \(attrs) {
-    glue("its {{.fn Re}} value didn't passed {{.fn test_double}} with tests {{.val {attrs$tests}}}.")
-  },
-  im_tests = \(attrs) {
-    glue("its {{.fn Im}} value didn't passed {{.fn test_double}} with tests {{.val {attrs$tests}}}.")
-  },
-  mod_tests = \(attrs) {
-    glue("its {{.fn Mod}} value didn't passed {{.fn test_double}} with tests {{.val {attrs$tests}}}.")
-  },
-  arg_tests = \(attrs) {
-    glue("its {{.fn Arg}} value didn't passed {{.fn test_double}} with tests {{.val {attrs$tests}}}.")
-  },
-  custom = MSGS$sub_tests$custom
-))
-# TODO: pluralize 'tests'
-
-
-
-# Helpers ----------------------------------------------------------------------
-
-# TODO: consider turning into is_* functions
-
-test_sorted <- function(x, sorted) {
-  if (is_null(sorted)) {
-    return(NULL)
-  }
-
-  if (sorted == "asc") {
-    !is.unsorted(x)
-  } else if (sorted == "desc") {
-    !is.unsorted(rev(x))
-  }
-}
-# TODO: what to do with na.rm = TRUE?
-
-
-test_in_set <- function(x, set, type_test = "integer") {
-  type_tester <- switch(type_test,
-    integer = is_integer,
-    numeric = is_numeric
+assert_integer <- fn_core_to_assert(
+  core_integer,
+  msgs_add = list(
+    type = \(attrs) {
+      fn <- if (attrs$mode == "strict") "is_integer" else "is_integer_like"
+      glue("had type `{attrs$type}` and did not pass `{fn}`.")
+    }
   )
+)
 
-  if (is_null(set)) {
-    return(NULL)
-  }
-
-  if (type_tester(set)) {
-    all(x %in% set)
-  } else if (is_list(set)) {
-    all(x %in% set$yes && ! x %in% set$no)
-  }
-}
-# TODO: range and etc can be double, for to say len <= 1.1 (len < 1)
-# TODO: this testing should be outside the function
-
-
-test_in_range <- function(n, range, l, type_test = "integer") {
-  type_tester <- switch(type_test,
-    integer = \(x, n) is_integer_like(x, n, mode = "trunc"),
-    numeric = is_numeric,
-    # TODO: internal error
+#' @rdname test-numeric
+#' @export
+assert_double <- fn_core_to_assert(
+  core_double,
+  msgs_add = list(
+    type = \(attrs) {
+      fn <- if (attrs$mode == "double") "is_double" else "is_numeric"
+      glue("had type `{attrs$type}` and did not pass `{fn}`.")
+    }
   )
+)
 
-  if (is_null(range)) {
-    return(NULL)
-  }
-
-  if (type_tester(range, 1)) {
-    all(n == range)
-  } else if (type_tester(range, 2)) {
-    all(n >= range[1] & n <= range[2])
-  } else if (type_tester(range) && length(range) > 2) {
-    all(n %in% range)
-  } else if (is_function(range)) {
-    range(n, l) # TODO: try catch also if not T/F
-  } else {
-    # TODO: err
-  }
-}
+#' @rdname test-numeric
+#' @export
+assert_complex <- fn_core_to_assert(
+  core_complex,
+  msgs_add = list(
+    type = \(attrs) {
+      glue("had type `{attrs$type}` and did not pass `is_complex`.")
+    },
+    re_tests = \(attrs) {
+      glue("real component (`Re`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
+    },
+    im_tests = \(attrs) {
+      glue("imaginary component (`Im`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
+    },
+    mod_tests = \(attrs) {
+      glue("modulus component (`Mod`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
+    },
+    arg_tests = \(attrs) {
+      glue("argument component (`Arg`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
+    }
+  )
+)
+# TODO: pluralize 'tests' (?)

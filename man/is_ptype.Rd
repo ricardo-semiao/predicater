@@ -38,8 +38,9 @@ and returns a boolean; or a string that specifies a predefined function (see
 argument is an attribute name -- of \code{.x} against \code{.ptype}. With a function
 or string (same as above).}
 
-\item{.named}{[\code{logical(1)}] For \code{is_ptype_list()}, whether to use the names
-of \code{.x} and \code{.ptype} for matching them (\code{TRUE}), or the order (\code{FALSE}).}
+\item{.named}{[\code{TRUE} | \code{FALSE}] For \code{is_ptype_list()}, whether to use the
+names of \code{.x} and \code{.ptype} for matching them (\code{TRUE}), or the order
+(\code{FALSE}).}
 
 \item{.depth}{[\code{integer(1)}] For \code{is_ptype_list()}, how many levels of
 recursion to check. \code{1} means check the first level elements only.}

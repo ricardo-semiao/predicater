@@ -17,7 +17,7 @@ is_system(x, system)
 \value{
 \itemize{
 \item [\code{character(1)}] For \code{object_system()}: the object-oriented system of \code{x}.
-\item [\code{logical(1)}] For \code{is_system()}: \code{TRUE} if \code{x} belongs to \code{system},
+\item [\code{TRUE} | \code{FALSE}] For \code{is_system()}: \code{TRUE} if \code{x} belongs to \code{system},
 \code{FALSE} otherwise.
 }
 }

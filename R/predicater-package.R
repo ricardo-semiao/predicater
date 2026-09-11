@@ -8,7 +8,5 @@
 #' @importFrom cli cli_warn
 #' @importFrom glue glue
 #' @importFrom lifecycle deprecated
-#' @importFrom vctrs vec_c
-#' @importFrom vctrs vec_if_else
 ## usethis namespace: end
 NULL

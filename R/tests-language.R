@@ -1,4 +1,7 @@
 
+#' @include tests-helpers.R tests-menu.R
+NULL
+
 # TODO: is_code with: is_code args, valid, sentinels, custom
 # is_code <- function(x, sym = TRUE, call = TRUE, literal = TRUE) {
 #   (sym && is_symbol(x)) ||
@@ -6,6 +9,9 @@
 #     (literal && is_syntactic_literal(x))
 # }
 
+
+
+# Expression -------------------------------------------------------------------
 
 #' Tests - Expression
 #'
@@ -21,57 +27,59 @@
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_map `r ROXY$custom_map()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
 #' @returns `r ROXY$test_returns("expression")`
 #'
-#' @name tests-expression
+#' @name test_expression
 NULL
 
 core_expression <- function(
   x,
   len = NULL, null_n = NULL, call_n = NULL, sym_n = NULL, literal_n = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
-  env = caller_env()
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- initialize_tests(
-    "type", sentinels, len, null_n, call_n, sym_n, literal_n, custom, custom_map
+  run_tests(
+    x, sentinels, len, null_n, call_n, sym_n, literal_n, custom, custom_map,
+    tests_pars = list(l = length(x), x_list = as.list(x)), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_expression2(x) %@@% c(type = typeof(x)),
+      call_n = \(x, arg, pars) {
+        n_call <- sum(vapply_lgl(pars$x_list, is_call))
+        test_in_range(n_call, arg, pars$l) %@@% c(n = n_call)
+      },
+      sym_n = \(x, arg, pars) {
+        n_sym <- sum(vapply_lgl(pars$x_list, is_symbol))
+        test_in_range(n_sym, arg, pars$l) %@@% c(n = n_sym)
+      },
+      literal_n = \(x, arg, pars) {
+        n_lit <- sum(vapply_lgl(pars$x_list, is_syntactic_literal))
+        test_in_range(n_lit, arg, pars$l) %@@% c(n = n_lit)
+      }
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_expression2(x) %@@% c(type = typeof(x))
-  if (!tests$type) {
-    return(tests)
-  }
-
-  l <- length(x)
-  x_list <- as.list(x)
-
-  tests$len <- test_in_range(l, len, l) %@@%
-    c(n = l)
-  tests$null_n <- test_in_range(n_null <- sum(vapply_lgl(x_list, is_null)), null_n, l) %@@%
-    c(n = n_null)
-  tests$call_n <- test_in_range(n_call <- sum(vapply_lgl(x_list, is_call)), call_n, l) %@@%
-    c(n = n_call)
-  tests$sym_n <- test_in_range(n_sym <- sum(vapply_lgl(x_list, is_symbol)), sym_n, l) %@@%
-    c(n = n_sym)
-  tests$literal_n <- test_in_range(n_lit <- sum(vapply_lgl(x_list, is_syntactic_literal)), literal_n, l) %@@%
-    c(n = n_lit)
-  tests$custom <- test_custom(x, custom, env)
-  tests$custom_map <- test_custom_map(x_list, custom_map, env)
-
-  tests
 }
+
+#' @rdname test_expression
+#' @export
+test_expression <- fn_core_to_test(core_expression)
+
+#' @rdname test_expression
+#' @export
+assert_expression <- fn_core_to_assert(
+  core_expression,
+  msgs_add = list(
+    type = \(attrs) "must be an expression.",
+    call_n = \(attrs) "count of call elements does not fall within the expected range.",
+    sym_n = \(attrs) "count of symbol elements does not fall within the expected range.",
+    literal_n = \(attrs) "count of literal elements does not fall within the expected range."
+  )
+)
 
 
 
@@ -87,73 +95,80 @@ core_expression <- function(
 #'
 #' @param x \[`any`] An object to test.
 #' @param char_n `r ROXY$x_n("char_n")`
-#' @param valid \[`logical(1)` | `NULL`] Test if the symbol name is a valid
+#' @param valid \[`TRUE` | `FALSE` | `NULL`] Test if the symbol name is a valid
 #'   syntactic R name (i.e. unchanged when processed by [make.names()]).
 #'   Set to `NULL` to not test.
-#' @param is_in,seen_in \[`environment` | `NULL`] Environment in which the
+#' @param env_has,env_seen \[`environment` | `NULL`] Environment in which the
 #'   symbol exists directly, or inherited from one of its parents, respectively
 #'   (see [rlang::env_has()]). Set to `NULL` to not test.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
 #' @returns `r ROXY$test_returns("symbol")`
 #'
-#' @name tests-symbol
+#' @name test_symbol
 NULL
-
 
 core_symbol <- function(
   x,
-  char_n = NULL, valid = NULL, is_in = NULL, seen_in = NULL,
+  char_n = NULL, valid = NULL, env_has = NULL, env_seen = NULL,
   sentinels = NULL, custom = NULL,
-  env = caller_env()
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
+  sym_str <- if (is_symbol(x)) as_string(x) else NULL
 
-
-  # Main:
-  tests <- initialize_tests(
-    "type", sentinels, char_n, valid, is_in, seen_in, custom
+  run_tests(
+    x, sentinels, char_n, valid, env_has, env_seen, custom,
+    tests_pars = list(sym_str = sym_str), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_symbol(x) %@@% c(type = typeof(x)),
+      char_n = \(x, arg, pars) {
+        n_char <- nchar(pars$sym_str)
+        test_in_range(n_char, arg, n_char) %@@% c(n = n_char)
+      },
+      valid = \(x, arg, pars) {
+        (make.names(pars$sym_str) == pars$sym_str) == arg
+      },
+      env_has = \(x, arg, pars) {
+        TESTS_MENU$test_env_has(arg, pars$sym_str, inherit = FALSE)
+      },
+      env_seen = \(x, arg, pars) {
+        TESTS_MENU$test_env_has(arg, pars$sym_str, inherit = TRUE)
+      }
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_symbol(x) %@@% c(type = typeof(x))
-  if (!tests$type) {
-    return(tests)
-  }
-
-  sym_str <- as_string(x)
-  n_char <- nchar(sym_str)
-
-  tests$char_n <- test_in_range(n_char, char_n, n_char) %@@%
-    c(n = n_char)
-  tests$valid <- if (! is_null(valid)) {
-    (make.names(sym_str) == sym_str) == valid
-  }
-  tests$is_in <- test_env_has(is_in, sym_str, inherit = FALSE)
-  tests$seen_in <- test_env_has(seen_in, sym_str, inherit = TRUE)
-  tests$custom <- test_custom(x, custom, env)
-
-  tests
 }
+
+#' @rdname test_symbol
+#' @export
+test_symbol <- fn_core_to_test(core_symbol)
+
+#' @rdname test_symbol
+#' @export
+assert_symbol <- fn_core_to_assert(
+  core_symbol,
+  msgs_add = list(
+    type = \(attrs) "must be a symbol.",
+    char_n = \(attrs) "character count does not fall within the expected range.",
+    valid = \(attrs) "is not a valid syntactic R name."
+  )
+)
 
 
 
 # Call -------------------------------------------------------------------------
 
-#' Tests - Call
+#' Tests - Language
 #'
 #' @description
 #' Test if an object is a call (language object).
 #'
-#' `test_call()` is the predicate test, while `assert_call()` validates
+#' `test_language()` is the predicate test, while `assert_language()` validates
 #' its input, aborting if it fails the test.
 #'
 #' @param x \[`any`] An object to test.
@@ -164,66 +179,63 @@ core_symbol <- function(
 #' @param arg_names \[`character()` | `NULL`] Expected exact names of the call
 #'   arguments. Set to `NULL` to not test.
 #' @param simple \[`TRUE` | `FALSE` | `NULL`] Test if the call is simple via
-#'   [is_call_simple()]. Set to `NULL` to not test.
+#'   [rlang::is_call_simple()]. Set to `NULL` to not test.
+#' @param valid \[`TRUE` | `FALSE` | `NULL`] Test if the call is parseable. Set
+#'   to `NULL` to not test.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
-#' @returns `r ROXY$test_returns("call")`
+#' @returns `r ROXY$test_returns("language")`
 #'
-#' @name tests-call
+#' @name test_language
 NULL
 
-
-core_call <- function(
+core_language <- function(
   x,
-  name = NULL, ns = NULL, args_n = NULL, arg_names = NULL,
-  simple = NULL, sentinels = NULL, custom = NULL,
-  env = caller_env()
+  name = NULL, ns = NULL, args_n = NULL, arg_names = NULL, simple = NULL, valid = NULL,
+  sentinels = NULL, custom = NULL,
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- initialize_tests(
-    "type", sentinels, name, ns, args_n, arg_names,
-    simple, custom
+  run_tests(
+    x, sentinels, name, ns, args_n, arg_names, simple, valid, custom,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) is_language(x) %@@% c(type = typeof(x)),
+      name = \(x, arg, pars) identical(call_name(x), arg),
+      ns = \(x, arg, pars) identical(call_ns(x), arg),
+      args_n = \(x, arg, pars) {
+        n_args <- length(x) - 1L
+        test_in_range(n_args, arg, n_args) %@@% c(n = n_args)
+      },
+      arg_names = \(x, arg, pars) {
+        identical(names(call_args(x)), arg)
+      },
+      simple = \(x, arg, pars) is_call_simple(x) == arg,
+      valid = \(x, arg, pars) is_parseable(x) == arg
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_call(x) %@@% c(type = typeof(x))
-  if (!tests$type) {
-    return(tests)
-  }
-
-  n_args <- length(x) - 1L
-
-  tests$name <- if (! is_null(name)) identical(call_name(x), name)
-  tests$ns <- if (! is_null(ns)) identical(call_ns(x), ns)
-  tests$args_n <- test_in_range(n_args, args_n, n_args) %@@% c(n = n_args)
-  tests$arg_names <- test_arg_names(x, arg_names)
-  tests$simple <- if (!is_null(simple)) is_call_simple(x) == simple
-  tests$custom <- test_custom(x, custom, env)
-
-  tests
 }
-# TODO: valid via is_parseable
 
+#' @rdname test_language
+#' @export
+test_language <- fn_core_to_test(core_language)
 
-
-# Helpers ----------------------------------------------------------------------
-
-test_arg_names <- function(x, arg_names) {
-  if (is_null(arg_names)) {
-    return(NULL)
-  }
-
-  actual_names <- names(call_args(x)) %||% character(length(x) - 1L)
-  identical(actual_names, arg_names)
-}
+#' @rdname test_language
+#' @export
+assert_language <- fn_core_to_assert(
+  core_language,
+  msgs_add = list(
+    type = \(attrs) "must be a language object (call).",
+    name = \(attrs) "function name does not match expected value.",
+    ns = \(attrs) "namespace does not match expected value.",
+    args_n = \(attrs) "argument count does not fall within the expected range.",
+    arg_names = \(attrs) "argument names do not match expected values.",
+    simple = \(attrs) "simple call check failed.",
+    valid = \(attrs) "call parseability check failed."
+  )
+)

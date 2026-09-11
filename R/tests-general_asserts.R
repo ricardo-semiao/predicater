@@ -1,7 +1,12 @@
 
+#' @include tests-helpers.R tests-menu.R
+NULL
+
+
+
 # Assert from others -----------------------------------------------------------
 
-#' Assert - Rethrow errors with more information
+#' Tests - Rethrow errors with more information
 #'
 #' @description
 #' Packages like this one, `checkmate`, and `chk` provide functions to check
@@ -26,23 +31,23 @@
 #'
 #' @examples
 #' # Using checkmate::check_* functions:
-#' try({
-#'   f <- \(x) test_msg(checkmate::check_numeric, x, any.missing = FALSE)
-#'   f(c(1, NA))
-#' })
+#' # try({
+#' #   f <- \(x) test_msg(checkmate::check_numeric, x, any.missing = FALSE)
+#' #   f(c(1, NA))
+#' # })
 #' #> Error in `f()`:
 #' #> ! Argument `x` contains missing values (element 2)
 #'
 #' # Multiple arguments with the same test:
-#' try({
-#'   g <- \(x, y) test_msgs(checkmate::check_logical, x, y, args = list(len = 1))
-#'   g(TRUE, c(FALSE, TRUE))
-#' })
+#' # try({
+#' #   g <- \(x, y) test_msgs(checkmate::check_logical, x, y, args = list(len = 1))
+#' #   g(TRUE, c(FALSE, TRUE))
+#' # })
 #' #> Error in `g()`:
 #' #> ! Argument `y` must have length 1, but has length 2
 #'
 #' @export
-assert_from_msg <- function(
+assert_from_msgs <- function(
   fun, ..., args_fun = list(),
   x_names = NULL, env = caller_env(), args_abort = list()
 ) {
@@ -90,11 +95,11 @@ assert_from_msg <- function(
 }
 
 
-#' @rdname assert_from_msg
+#' @rdname assert_from_msgs
 #' @export
 assert_from_error <- function(
   fun, ..., args_fun = list(),
-  x_names = NULL, nv = caller_env(), args_abort = list()
+  x_names = NULL, env = caller_env(), args_abort = list()
 ) {
   # Setup:
   x_exprs <- enexprs(...)
@@ -143,9 +148,9 @@ assert_from_error <- function(
 
 
 
-# Assert custom ----------------------------------------------------------------
+# Assert from custom, ptype --------------------------------------------------
 
-#' Assert - Error if object is not of prototype
+#' Tests - Prototype
 #'
 #' This function wraps [is_ptype()] and aborts with a custom message if the
 #' check fails. It is useful for testing function arguments.
@@ -156,13 +161,11 @@ assert_from_error <- function(
 #' @param args_ptype \[`list()`] Additional arguments to pass to [is_ptype()].
 #' @param msg \[`character(1)` | `NULL`] The message to use if the check fails.
 #'   If `NULL`, a default message is generated.
-#' @param x_name \[`character(1)` | `NULL`] The name of `x` to print in
+#' @param x_names \[`character(1)` | `NULL`] The name of `x` to print in
 #'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
 #' @param env \[`environment()`] The environment to use for the condition. Often
 #'   useful to remove this helper form the trace stack.
-#' @param cnd_fun \[`function()`] The function to use to generate the condition.
-#'   Defaults to `cli_abort()`.
-#' @param cnd_args \[`list()`] Additional arguments to pass to `cnd_fun`.
+#' @param args_cnd \[`list()`] Additional arguments to pass to `cnd_fun`.
 #'
 #' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
@@ -178,7 +181,7 @@ assert_from_error <- function(
 test_ptype <- function(
   ptype, ..., args_ptype = list(),
   msg = NULL, x_names = NULL,
-  env = caller_env(), args_abort = list()
+  env = caller_env(), args_cnd = list()
 ) {
   # Setup:
   x_exprs <- enexprs(...)
@@ -209,7 +212,7 @@ test_ptype <- function(
           x = xs[[i]], ptype = ptype, ptype_quo = ptype_quo, ptype_args = args_ptype
         ),
         call = env,
-        args_abort
+        args_cnd
       )
       do.call(cli_abort, cnd_args)
     }
@@ -219,24 +222,25 @@ test_ptype <- function(
 }
 
 
-#' Test if object passes custom expression
+#' Tests - if object passes custom expression
 #'
 #' This function evaluates a custom expression on an object and aborts with a
 #' custom message if the check fails. It is useful for testing function
 #' arguments.
 #'
-#' @param x \[`any`] The object to check.
-#' @param expr \[`any`] R code (unquoted) to evaluate on `x` as `.x`. The
-#'   expression should return `TRUE` if the check passes, or `FALSE` if it fails.
+#' @param fun \[`\(){}`] The predicate function to run. Must recieve the object
+#'   to test as its first argument.
+#' @param ... \[`any` each] Objects to check.
+#' @param args_fun \[`list()`] Additional arguments to pass to `fun`.
 #' @param msg \[`character(1)` | `NULL`] The message to use if the check fails.
 #'   If `NULL`, a default message is generated.
+#' @param x_names \[`character(1)` | `NULL`] The name of `x` to print in
+#'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
 #' @param env \[`environment()`] The environment to use for the condition. Often
 #'   useful to remove this helper form the trace stack.
-#' @param x_name \[`character(1)` | `NULL`] The name of `x` to print in
-#'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
-#' @param cnd_fun \[`function()`] The function to use to generate the condition.
-#'   Defaults to `cli_abort()`.
 #' @param cnd_args \[`list()`] Additional arguments to pass to `cnd_fun`.
+#'
+#' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
 #' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
@@ -252,10 +256,11 @@ test_ptype <- function(
 assert_predicate <- function(
   fun, ..., args_fun,
   msg = NULL, x_names = NULL,
-  env = caller_env(), abort_args = list()
+  env = caller_env(), args_cnd = list()
 ) {
   # Setup:
   x_exprs <- enexprs(...)
+  xs <- list2(...)
   force(env)
 
 
@@ -274,12 +279,12 @@ assert_predicate <- function(
   for (i in seq_along(xs)) {
     pred <- tryCatch(
       {
-        res <- do.call(fun, c(list(.x = xs[[i]]), args_fun))
+        res <- do.call(fun, c(xs[i], args_fun))
         if (! is_bool(res)) {
           cli_abort(
             c(
-              "{.code custom(x)} must return {.val {TRUE}} or {.val {FALSE}}.",
-              "i" = "Instead, it returned {.val {res}}."
+              "{.code fun(.)} must return {.val {TRUE}} or {.val {FALSE}}.",
+              "i" = "Instead, with {.arg {x_name[i]}}, it returned {.val {res}}."
             ),
             class = "rs_user_fun_error",
             call = env,
@@ -304,13 +309,93 @@ assert_predicate <- function(
           x = xs[[i]], fun = fun, fun_args = args_fun
         ),
         call = env,
-        abort_args
+        args_cnd
       )
       do.call(cli_abort, cnd_args)
     }
   }
 
-
   invisible(xs)
 }
-# TODO: add try to catch user bad expr
+
+
+
+# Assert from multiple types ---------------------------------------------------
+
+#' Tests - Test for one of multiple types
+#'
+#' @description
+#' This function checks if `x` passes at least one of a set of tests. `x` is
+#' allowed to be any type [typeof()] in `types`, and needs to pass the
+#' corresponding test for its type.
+#'
+#' For example, if `x` is of type `"integer"`, then it is tested with
+#' [test_integer()]. Pass a list of arguments to the test function via `...`,
+#' with the same argument name as the type. E.g. `integer = list(len = 2)`.
+#'
+#' @param x \[`any`] An object to check.
+#' @param types \[`character()`] A character vector of types to check against.
+#' @param ... \[`list()` each] Lists of arguments to pass to the test function
+#'   for each type. The list names
+#'
+#' @returns `r ROXY$test_returns("multi")`
+#'
+#' @name test_multiple
+NULL
+
+core_multi <- function(x, types, ...) {
+  type <- typeof(x)
+  cores_args <- list2(...)
+
+  if (! type %in% update_types(types)) {
+    return(c(multi = FALSE) %@@% c(types = types))
+  }
+
+  exec(TABLE_TEST_TYPE[[type]], x, !!!cores_args[[type]])
+  # TABLE lives in zzz.R
+}
+
+#' @rdname test_multiple
+#' @export
+test_multiple <- fn_core_to_test(core_multi)
+
+#' @rdname test_multiple
+#' @export
+assert_multiple <- fn_core_to_assert(core_multi, list(
+  multi = \(attrs) {
+    types <- paste(attrs$types, collapse = ", ")
+    glue("not of any of the expected types: {{.val {types}}}.")
+  }
+))
+
+
+
+# Helpers ----------------------------------------------------------------------
+
+update_types <- function(types) {
+  if ("collection" %in% types) {
+    types <- c(
+      setdiff(types, "collection"),
+      c("vector", "pairlist", "expression", "environment")
+    )
+  }
+  if ("vector" %in% types) {
+    types <- c(
+      setdiff(types, "vector"),
+      c("atomic", "list")
+    )
+  }
+  if ("atomic" %in% types) {
+    types <- c(
+      setdiff(types, "atomic"),
+      c("logical", "integer", "double", "complex", "character")
+    )
+  }
+  if ("code" %in% types) {
+    types <- c(
+      setdiff(types, "code"),
+      c("language", "symbol")
+    )
+  }
+  types
+}

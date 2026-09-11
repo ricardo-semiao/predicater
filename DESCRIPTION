@@ -3,43 +3,49 @@ Title: Simplified predicate and testing functions for R
 Version: 0.0.0.9000
 Authors@R: 
     person("Ricardo", "Semião", , "ricardo.semiao@outlook.com", role = c("aut", "cre"))
-Description: Various utility funcitions, condition catching, decorators,
-    ordered factors, amongst many others.
+Description: Simplified predicate and testing functions for R.
 License: MIT + file LICENSE
+Depends: 
+    R (>= 4.3)
 Imports: 
     cli,
     glue,
     lifecycle,
+    methods,
     rlang,
     vctrs
 Suggests: 
+    sloop,
     spelling,
     testthat (>= 3.0.0)
+Config/roxygen2/version: 8.1.0
 Config/testthat/edition: 3
 Encoding: UTF-8
 Language: en-US
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
-Depends: 
-    R (>= 4.3)
-Config/roxygen2/version: 8.1.0
 Collate: 
     'aaa_helpers.R'
-    'assert.R'
     'attributes.R'
     'identical.R'
+    'match.R'
     'metadata.R'
     'others.R'
     'predicater-package.R'
     'ptype.R'
     'roxy-tests.R'
+    'tests-menu.R'
+    'tests-helpers.R'
     'tests-attributes.R'
     'tests-collections.R'
-    'tests-helpers.R'
+    'tests-general_asserts.R'
+    'tests-language.R'
     'tests-numeric.R'
     'tests-other_atomic.R'
+    'tests-other_types.R'
     'types-atomic_na.R'
     'types-language.R'
     'types-numeric.R'
     'types-objects.R'
     'types-others.R'
+    'zzz.R'

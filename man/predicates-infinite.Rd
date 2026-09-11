@@ -35,8 +35,10 @@ of infinity to allow: \code{"+"} for positive infinity, \code{"-"} for negative
 infinity, or \code{"+-"} for both.}
 }
 \value{
-[\code{logical(length(x))}, \code{logical(1)}] The vectorized or scalar
-result of the test, respectively.
+\itemize{
+\item [\code{logical(length(x))}] For \verb{are_*}: the vectorized or result of the test.
+\item [\code{TRUE} | \code{FALSE}] For \verb{is_*}: the scalar result of the test.
+}
 }
 \description{
 Check if an object is \code{Inf}, \code{-Inf}, \code{NaN}, or none of them, flexibly dealing

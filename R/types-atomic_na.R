@@ -34,13 +34,13 @@
 #'
 #' @param x \[`any`] An object to test.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
-#' @param finite \[`logical(1)` | `NULL`] Whether all values of the vector are
+#' @param finite \[`TRUE` | `FALSE` | `NULL`] Whether all values of the vector are
 #'   not `NA`, `NaN`, `Inf`, or `-Inf`. Set to `NULL` to not test. [is_finite()]
 #'   is designed to allow more flexibility to this test.
 #'
-#' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
-#' @aliases is_logical, is_integer is_double is_complex is_character is_raw is_atomic
+#' @aliases is_logical is_integer is_double is_complex is_character is_raw is_atomic
 #' @rawNamespace export(is_logical, is_integer, is_double, is_complex, is_character, is_raw, is_atomic)
 #'
 #' @name predicates-atomic
@@ -70,8 +70,9 @@ is_numeric <- function(x, n = NULL) {
 #' @param na \[`character(1)`] How to treat `NA` values: `"f"` to return
 #'  `FALSE`, or `"na"` to return `NA`.
 #'
-#' @returns \[`logical(length(x))`, `logical(1)`] For `are_*()`, the vectorized
-#'   result of the test; for `is_*()`, the scalar result of the test.
+#' @returns
+#' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
+#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
 #'
 #' @name predicates-true-false
 NULL
@@ -88,7 +89,7 @@ are_true <- function(x, na = "f") {
   # Main:
   switch(na,
     f = !is.na(x) & x,
-    na = vec_if_else(is.na(x), NA, x)
+    na = if_else2(is.na(x), NA, x)
   )
 }
 
@@ -120,7 +121,7 @@ are_false <- function(x, na = "f") {
   # Main:
   switch(na,
     f = !(is.na(x) | x),
-    na = vec_if_else(is.na(x), NA, x)
+    na = if_else2(is.na(x), NA, x)
   )
 }
 
@@ -163,8 +164,9 @@ is_false2 <- function(x, na = "f") {
 #'   `FALSE`, `"t"` to return `TRUE`, or `"na"` to return `NA`.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
-#' @returns \[`logical(length(x))`, `logical(1)`] The vectorized or scalar
-#'   result of the test, respectively.
+#' @returns
+#' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
+#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
 #'
 #' @examples
 #' x <- c(1, Inf, -Inf, NaN, NA)
@@ -207,7 +209,7 @@ are_na2 <- function(x, nan = "f", type = NULL) {
   switch(sub("w", "", nan),
     f = is.na(x) & !is.nan(x),
     t = is.na(x),
-    na = vec_if_else(is.nan(x), NA, is.na(x))
+    na = if_else2(is.nan(x), NA, is.na(x))
   )
 }
 

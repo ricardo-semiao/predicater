@@ -2,7 +2,7 @@
 % Please edit documentation in R/types-others.R
 \name{predicates-functions}
 \alias{predicates-functions}
-\alias{is_function,}
+\alias{is_function}
 \alias{is_closure}
 \alias{is_primitive}
 \alias{is_primitive_eager}
@@ -10,6 +10,7 @@
 \title{Types - Functions}
 \usage{
 is_function(x)
+
 is_closure(x)
 
 is_primitive(x)
@@ -22,7 +23,7 @@ is_primitive_lazy(x)
 \item{x}{[\code{any}] An object to test.}
 }
 \value{
-[\code{logical(1)}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
 }
 \description{
 There are three types (\code{\link[=typeof]{typeof()}}) of functions in R: \code{"closure"} (standard

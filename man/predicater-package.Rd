@@ -6,7 +6,7 @@
 \alias{predicater-package}
 \title{predicater: Simplified predicate and testing functions for R}
 \description{
-Various utility funcitions, condition catching, decorators, ordered factors, amongst many others.
+Simplified predicate and testing functions for R.
 }
 \author{
 \strong{Maintainer}: Ricardo Semião \email{ricardo.semiao@outlook.com}

@@ -20,8 +20,9 @@
 #'   of infinity to allow: `"+"` for positive infinity, `"-"` for negative
 #'   infinity, or `"+-"` for both.
 #'
-#' @returns \[`logical(length(x))`, `logical(1)`] The vectorized or scalar
-#'   result of the test, respectively.
+#' @returns
+#' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
+#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
 #'
 #' @details
 #' Currently, `NaN` values can never arise from operations with `NA` (`NA + NaN
@@ -77,7 +78,7 @@ are_finite <- function(x, na = "na") {
   switch(na,
     f = is.finite(x),
     t = is.finite(x) | are_na2(x),
-    na = vec_if_else(are_na2(x), NA, is.finite(x))
+    na = if_else2(are_na2(x), NA, is.finite(x))
   )
 }
 # NOTE: could be defined as 'not all other options'
@@ -103,7 +104,7 @@ are_nan <- function(x, na = "na") {
   switch(na,
     f = is.nan(x),
     t = is.nan(x) | are_na2(x),
-    na = vec_if_else(are_na2(x), NA, is.nan(x))
+    na = if_else2(are_na2(x), NA, is.nan(x))
   )
 }
 
@@ -131,7 +132,7 @@ are_inf <- function(x, na = "na", signs = "+-") {
   switch(na,
     f = is.infinite(x) & sign(x) %in% signs_allowed,
     t = is.infinite(x) | are_na2(x) & sign(x) %in% signs_allowed,
-    na = vec_if_else(are_na2(x), NA, is.infinite(x) & sign(x) %in% signs_allowed)
+    na = if_else2(are_na2(x), NA, is.infinite(x) & sign(x) %in% signs_allowed)
   )
 }
 
@@ -179,8 +180,9 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 #'   values.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
-#' @returns \[`logical(length(x))`, `logical(1)`] The vectorized or scalar
-#'   result of the test, respectively.
+#' @returns
+#' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
+#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
 #'
 #' @details
 #' R stores integers with 32 bits, allowing to represent values between about
@@ -275,28 +277,28 @@ are_integer_like <- function(
   na_value <- switch(na, t = TRUE, na = NA)
 
   if (mode == "trunc") {
-    dplyr::case_when(
+    case_when2(
       are_na2(x) ~ na_value,
       is_nan(x, na = "f") ~ TRUE,
       is_inf(x, na = "f") ~ TRUE,
       TRUE ~ x == round(x)
     )
   } else if (mode == "trunc_tol") {
-    dplyr::case_when(
+    case_when2(
       are_na2(x) ~ na_value,
       is_nan(x, na = "f") ~ TRUE,
       is_inf(x, na = "f") ~ TRUE,
       TRUE ~ abs(x - round(x)) < tol
     )
   } else if (mode == "range") {
-    dplyr::case_when(
+    case_when2(
       are_na2(x) ~ na_value,
       is_nan(x, na = "f") ~ FALSE,
       is_inf(x, na = "f") ~ FALSE,
       TRUE ~ abs(x) <= .Machine$integer.max & x == round(x)
     )
   } else if (mode == "range_tol") {
-    dplyr::case_when(
+    case_when2(
       are_na2(x) ~ na_value,
       is_nan(x, na = "f") ~ FALSE,
       is_inf(x, na = "f") ~ FALSE,

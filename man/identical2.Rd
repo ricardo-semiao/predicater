@@ -23,14 +23,14 @@ identical_flag(x, y, ..., fun = "identical2")
 \arguments{
 \item{x, y}{[\code{any}] Any R object.}
 
-\item{single_NA}{[\code{logical(1)}] Whether to treat \code{NA} values as a identical
-to each other.}
-
-\item{single_zero}{[\code{logical(1)}] Whether to treat \code{+0} and \code{-0} as
+\item{single_NA}{[\code{TRUE} | \code{FALSE}] Whether to treat \code{NA} values as a
 identical to each other.}
 
-\item{ord_data, ord_attrs}{[\code{logical(1)} each] Whether to keep (\code{TRUE}) or
-ignore (\code{FALSE}) the order of the data and attributes in \code{x} and \code{y}.}
+\item{single_zero}{[\code{TRUE} | \code{FALSE}] Whether to treat \code{+0} and \code{-0} as
+identical to each other.}
+
+\item{ord_data, ord_attrs}{[\code{TRUE} | \code{FALSE} each] Whether to keep the order
+of the data and attributes in \code{x} and \code{y}.}
 
 \item{tol_type}{[\code{character(1)}] Type of tolerance to use when comparing
 numeric values. One of:
@@ -56,12 +56,12 @@ One of \code{"identical"} or \code{"identical2"}.}
 
 \item{l}{[\code{list()}] For \code{identical_reduce()}, a list of objects to compare.}
 
-\item{accumulate}{[\code{logical(1)}] For \code{identical_reduce()}, whether to return
-the accumulated tests' results or just the final result.}
+\item{accumulate}{[\code{TRUE} | \code{FALSE}] For \code{identical_reduce()}, whether to
+return the accumulated tests' results or just the final result.}
 }
 \value{
 \itemize{
-\item [\code{logical(1)}] for \code{identical2()} and \code{identical_reduce()}.
+\item [\code{TRUE} | \code{FALSE}] for \code{identical2()} and \code{identical_reduce()}.
 \item [\code{logical(length(x))}] for \code{identical_vec()}.
 \item \code{identical_flag()} returns a object with the same structure as \code{x} and
 logical elements.

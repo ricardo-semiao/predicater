@@ -2,7 +2,7 @@
 # Package objects --------------------------------------------------------------
 
 CNDS <- list()
-MSGS <- list()
+ROXY <- list()
 # TODO: document
 
 
@@ -34,129 +34,6 @@ atomic_from_list_scalars <- function(x, type) {
   res
 }
 # same
-
-
-
-# Test helpers -----------------------------------------------------------------
-
-# TODO: move to test helpers
-
-fn_core_to_test <- function(core, env = caller_env()) {
-  core_sym <- ensym(core)
-
-  args <- fn_fmls(core)
-  args$env <- NULL
-  args_syms <- syms(names(fn_fmls(core)))
-
-  body <- expr({
-    tests <- (!!core_sym)(!!!args_syms)
-    all(atomic_from_list_scalars(tests, "logical"))
-  })
-
-  new_function(args, body, env)
-}
-
-fn_core_to_assert <- function(core, msgs_fns, env = caller_env()) {
-  core_sym <- ensym(core)
-  assert_name <- gsub("^core_", "assert_", as_string(core_sym))
-
-  args <- fn_fmls(core)
-  args_syms <- syms(names(args))
-
-  args <- append(args, c(action = "abort"), after = 1)
-  args["x_name"] <- list(NULL)
-  args$report_untested <- TRUE
-  args$`...` <- expr() # CHECK: consider args_cnd = list()
-
-  body <- expr({
-    # TODO: checks
-    assert_name <- !!assert_name
-    x_name <- x_name %||% expr_name(enexpr(x))
-
-    tests <- (!!core_sym)(!!!args_syms)
-
-    if (all(atomic_from_list_scalars(tests, "logical"))) {
-      return(invisible(x))
-    }
-
-    tests_msgs <- create_tests_msgs(tests, msgs_fns, report_untested)
-    for (i in seq_along(tests)) {
-      attributes(tests[[i]]) <- list(
-        test_info = attributes(tests[[i]]),
-        test_msg = tests_msgs[i]
-      )
-    }
-
-    msgs <- c(
-      glue("{{.arg {x_name}}} failed {{.fn {assert_name}}}:"),
-      tests_msgs, "",
-      "i" = "See this condition's {.code rs_assert_error} attribute for details."
-    )
-
-    if (action == "abort") {
-      cli_abort(
-        msgs, call = env, ...,
-        rs_assert_error = list(args = list(!!!args_syms), tests = tests)
-      )
-    } else if (action %in% c("warn", "inform")) {
-      cnd_fun <- switch(action, warn = cli_warn, inform = cli_inform)
-      cnd_fun(
-        msgs, call = env, ...,
-        rs_assert_error = list(args = list(!!!args_syms), tests = tests)
-      )
-    }
-
-    invisible(x)
-  })
-
-  new_function(args, body, new_environment(list(msgs_fns = msgs_fns), env))
-}
-# TODO: add functionality to recieve modifiers for each test's message and the
-# top message
-# TODO: prune msgs_funs based on core args
-
-
-create_tests_msgs <- function(tests, msgs_fns, report_untested) {
-  tests_n <- length(tests)
-  tests_msgs <- msgs_names <- character(tests_n)
-  tests_names <- names(tests)
-
-  for (i in seq_len(tests_n)) {
-    ti <- tests[[i]]
-    ni <- tests_names[i]
-
-    if (is.na(ti) && report_untested) {
-      tests_msgs[i] <- paste0(ni, ": ", "not tested due to previous failure.")
-      msgs_names[i] <- "*"
-    } else if (ti) {
-      tests_msgs[i] <- paste0(ni, ": ", "ok.")
-      msgs_names[i] <- "v"
-    } else {
-      tests_msgs[i] <- paste0(ni, ": ", msgs_fns[[ni]](attributes(ti)))
-      msgs_names[i] <- "x"
-    }
-  }
-
-  names(tests_msgs) <- msgs_names
-  tests_msgs
-}
-
-
-initialize_tests <- function(pre, ..., post = character()) {
-  syms <- ensyms(...)
-  env <- caller_env()
-
-  names <- vapply(syms, \(x) as_string(x), character(1))
-  are_null <- vapply(syms, \(x) is_null(eval(x, env)), logical(1))
-  test_names <- c(pre, names[!are_null], post)
-
-  out <- vector("list", length(test_names))
-  names(out) <- test_names
-  for (nm in test_names) {
-    out[[nm]] <- NA
-  }
-  out
-}
 
 
 

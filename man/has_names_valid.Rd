@@ -30,7 +30,7 @@ zero-length inputs: \code{"f"} to return \code{FALSE}, or \code{"t"} return \cod
 suffix can be added (e.g. \code{"tw"}) to also issue a warning.}
 }
 \value{
-[\code{logical(1)}] Whether \code{x} has names according to the specified
+[\code{TRUE} | \code{FALSE}] Whether \code{x} has names according to the specified
 checks.
 }
 \description{
@@ -56,9 +56,9 @@ is set to \code{"f"}, in which the true value of the NA name is relevant.
 \examples{
 has_names(mtcars) #> TRUE
 
-has_names(setNames(1:3, c("a", "", "b")), empty = "t") #> TRUE
-has_names(setNames(1:3, c("a", "b", NA)), na = "t") #> TRUE
-has_names(setNames(1:3, c("a", "a", "a"))) #> FALSE
-has_names(setNames(1:3, c("_bad", "b", "c")), invalid = "f") #> FALSE
+has_names(set_names(1:3, c("a", "", "b")), empty = "t") #> TRUE
+has_names(set_names(1:3, c("a", "b", NA)), na = "t") #> TRUE
+has_names(set_names(1:3, c("a", "a", "a"))) #> FALSE
+has_names(set_names(1:3, c("_bad", "b", "c")), invalid = "f") #> FALSE
 
 }

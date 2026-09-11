@@ -34,7 +34,7 @@
 #' @param x \[`any`] An object to test.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
-#' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
 #' @details
 #' The full list of R object types ([typeof()]) can be seen in ["R Internals"
@@ -154,9 +154,9 @@ is_any <- function(x) {
 #'
 #' @param x \[`any`] An object to test.
 #'
-#' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
-#' @aliases is_function, is_closure is_primitive is_primitive_eager is_primitive_lazy
+#' @aliases is_function is_closure is_primitive is_primitive_eager is_primitive_lazy
 #' @rawNamespace export(is_function, is_closure, is_primitive, is_primitive_eager, is_primitive_lazy)
 #'
 #' @name predicates-functions
@@ -206,7 +206,7 @@ NULL
 #' @param expr,pairlist,env \[`flag`] Whether to include expression, pairlist,
 #'   or environment as collections.
 #'
-#' @returns \[`logical(1)`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
 #' @details
 #' All collection types:
@@ -214,7 +214,7 @@ NULL
 #' - Can have [names()].
 #' - Can have their elements accessed by names (if present) via `[`, `[[`, and `$`.
 #' - All but environment can have their elements accessed by integer indexes
-#'   too, and their names set via [`names(x) <- value`].
+#'   too, and their names set via `names(x) <- value`.
 #'
 #' Note that the result of acessing out-of-bounds indexes depends on the type and
 #' operator, and is very quirky and inconsistent across R. See [Advanced R, 2nd

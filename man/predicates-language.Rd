@@ -21,6 +21,8 @@ is_language(x)
 is_language_valid(x)
 
 is_expression2(x, n = NULL)
+
+is_code(x)
 }
 \arguments{
 \item{x}{[\code{any}] An object to test.}
@@ -31,7 +33,7 @@ is_expression2(x, n = NULL)
 that the symbol should match. Set to \code{NULL} to not test.}
 }
 \value{
-[\code{logical(1)}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
 }
 \description{
 In R, there are three building blocks that compose the language itself:

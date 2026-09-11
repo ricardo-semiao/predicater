@@ -2,36 +2,7 @@
 % Please edit documentation in R/tests-attributes.R
 \name{tests-names}
 \alias{tests-names}
-\alias{test_names}
-\alias{assert_names}
 \title{Tests - Names}
-\usage{
-test_names(
-  x,
-  zero_len = TRUE,
-  non_collection = FALSE,
-  na = FALSE,
-  empty = FALSE,
-  dups = FALSE,
-  invalid = TRUE,
-  how = "names"
-)
-
-assert_names(
-  x,
-  action = "abort",
-  zero_len = TRUE,
-  non_collection = FALSE,
-  na = FALSE,
-  empty = FALSE,
-  dups = FALSE,
-  invalid = TRUE,
-  how = "names",
-  x_name = NULL,
-  report_untested = TRUE,
-  ...
-)
-}
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 

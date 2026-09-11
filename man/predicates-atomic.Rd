@@ -2,7 +2,7 @@
 % Please edit documentation in R/types-atomic_na.R
 \name{predicates-atomic}
 \alias{predicates-atomic}
-\alias{is_logical,}
+\alias{is_logical}
 \alias{is_integer}
 \alias{is_double}
 \alias{is_complex}
@@ -33,12 +33,12 @@ is_numeric(x, n = NULL)
 
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 
-\item{finite}{[\code{logical(1)} | \code{NULL}] Whether all values of the vector are
+\item{finite}{[\code{TRUE} | \code{FALSE} | \code{NULL}] Whether all values of the vector are
 not \code{NA}, \code{NaN}, \code{Inf}, or \code{-Inf}. Set to \code{NULL} to not test. \code{\link[=is_finite]{is_finite()}}
 is designed to allow more flexibility to this test.}
 }
 \value{
-[\code{logical(1)}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
 }
 \description{
 Check if an object is of a specific atomic type (\code{\link[=typeof]{typeof()}}). The test is

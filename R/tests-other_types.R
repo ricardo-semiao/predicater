@@ -1,131 +1,173 @@
 
+#' @include tests-helpers.R tests-menu.R
+NULL
+
+
+
 # Other types ------------------------------------------------------------------
 
 #' Tests - Other types
 #'
 #' @description
-#' Test if an object is of various special base R types, including `NULL`,
-#' promises, dots (`...`), weak references, bytecode, or external pointers.
+#' Test if an object is of various special base R types, including promises,
+#' dots (`...`), weak references, bytecode, or external pointers.
 #'
 #' @param x \[`any`] An object to test.
 #' @param len `r ROXY$x_n("len")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
 #' @returns `r ROXY$test_returns()`
 #'
 #' @name tests-other_types
 NULL
 
-core_null <- function(x, sentinels = NULL, custom = NULL, env = caller_env()) {
-  # Main:
-  tests <- initialize_tests("type", sentinels, custom)
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests) 
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_null(x) %@@% c(type = typeof(x))
-  if (!tests$type) return(tests)
-
-  tests$custom <- test_custom(x, custom, env)
-  tests
+core_null <- function(
+  x,
+  short_circuit
+) {
+  run_tests(
+    x,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, test_arg, params) is_null(x) %@@% c(type = typeof(x))
+    )
+  )
 }
 
-core_promise <- function(x, sentinels = NULL, custom = NULL, env = caller_env()) {
-  # Main:
-  tests <- initialize_tests("type", sentinels, custom)
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests) 
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_promise(x) %@@% c(type = typeof(x))
-  if (!tests$type) return(tests)
-
-  tests$custom <- test_custom(x, custom, env)
-  tests
+core_promise <- function(
+  x, sentinels = NULL, custom = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, custom,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, test_arg, params) is_promise(x) %@@% c(type = typeof(x))
+    )
+  )
 }
 
-core_dots <- function(x, len = NULL, sentinels = NULL, custom = NULL, env = caller_env()) {
-  # Main:
-  tests <- initialize_tests("type", sentinels, len, custom)
+core_dots <- function(
+  x, len = NULL, sentinels = NULL, custom = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, custom,
+    tests_pars = list(l = length(x)), short = short_circuit,
+    menu_add = list(
+      type = \(x, test_arg, params) is_dots(x) %@@% c(type = typeof(x))
+    )
+  )
+}
+# CHECK: consider some test about the names (contains, all named, etc.). This
+# can be left to an additional names test, as usual
 
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests) 
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_dots(x) %@@% c(type = typeof(x))
-  if (!tests$type) return(tests)
-
-  l <- length(x)
-  tests$len <- test_in_range(l, len, l) %@@% c(n = l)
-  tests$custom <- test_custom(x, custom, env)
-  tests
+core_weakref <- function(
+  x, sentinels = NULL, custom = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, custom,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, test_arg, params) is_weakref(x) %@@% c(type = typeof(x))
+    )
+  )
 }
 
-core_weakref <- function(x, sentinels = NULL, custom = NULL, env = caller_env()) {
-  # Main:
-  tests <- initialize_tests("type", sentinels, custom)
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests) 
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_weakref(x) %@@% c(type = typeof(x))
-  if (!tests$type) return(tests)
-
-  tests$custom <- test_custom(x, custom, env)
-  tests
+core_bytecode <- function(
+  x, sentinels = NULL, custom = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, custom,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, test_arg, params) is_bytecode(x) %@@% c(type = typeof(x))
+    )
+  )
 }
 
-core_bytecode <- function(x, sentinels = NULL, custom = NULL, env = caller_env()) {
-  # Main:
-  tests <- initialize_tests("type", sentinels, custom)
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests) 
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type <- is_bytecode(x) %@@% c(type = typeof(x))
-  if (!tests$type) return(tests)
-
-  tests$custom <- test_custom(x, custom, env)
-  tests
+core_externalptr <- function(
+  x, sentinels = NULL, custom = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, custom,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, test_arg, params) is_externalptr(x) %@@% c(type = typeof(x))
+    )
+  )
 }
 
-core_externalptr <- function(x, sentinels = NULL, custom = NULL, env = caller_env()) {
-  # Main:
-  tests <- initialize_tests("type", sentinels, custom)
 
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests) 
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
+# Test functions:
 
-  tests$type <- is_externalptr(x) %@@% c(type = typeof(x))
-  if (!tests$type) return(tests)
+#' @rdname tests-other_types
+#' @export
+test_promise <- fn_core_to_test(core_promise)
 
-  tests$custom <- test_custom(x, custom, env)
-  tests
-}
+#' @rdname tests-other_types
+#' @export
+test_dots <- fn_core_to_test(core_dots)
+
+#' @rdname tests-other_types
+#' @export
+test_weakref <- fn_core_to_test(core_weakref)
+
+#' @rdname tests-other_types
+#' @export
+test_bytecode <- fn_core_to_test(core_bytecode)
+
+#' @rdname tests-other_types
+#' @export
+test_externalptr <- fn_core_to_test(core_externalptr)
+
+
+# Assert functions:
+
+#' @rdname tests-other_types
+#' @export
+assert_null <- fn_core_to_assert(core_null, list(
+  type = \(x, test_arg, params) glue("`{x}` is not `NULL`")
+))
+
+#' @rdname tests-other_types
+#' @export
+assert_promise <- fn_core_to_assert(core_promise, list(
+  type = \(x, test_arg, params) glue("`{x}` is not of type {.val promise}.")
+))
+
+#' @rdname tests-other_types
+#' @export
+assert_dots <- fn_core_to_assert(core_dots, list(
+  type = \(x, test_arg, params) glue("`{x}` is not of type {.val ...}.")
+))
+
+#' @rdname tests-other_types
+#' @export
+assert_weakref <- fn_core_to_assert(core_weakref, list(
+  type = \(x, test_arg, params) glue("`{x}` is not of type weak reference.")
+))
+
+#' @rdname tests-other_types
+#' @export
+assert_bytecode <- fn_core_to_assert(core_bytecode, list(
+  type = \(x, test_arg, params) glue("`{x}` is not bytecode.")
+))
+
+#' @rdname tests-other_types
+#' @export
+assert_externalptr <- fn_core_to_assert(core_externalptr, list(
+  type = \(x, test_arg, params) glue("`{x}` is not an external pointer.")
+))
 
 
 
@@ -138,95 +180,108 @@ core_externalptr <- function(x, sentinels = NULL, custom = NULL, env = caller_en
 #' names, environments, S3 generics, and methods.
 #'
 #' @param x \[`any`] An object to test.
-#' @param type \[`character()` | `NULL`] Expected function type(s) out of `"closure"`,
-#'   `"primitive"`, `"builtin"`, or `"special"`. Set to `NULL` to not test.
-#' @param arg_names \[`character()` | `NULL`] Expected exact argument names of the function.
-#'   Set to `NULL` to not test.
-#' @param env \[`environment` | `NULL`] Expected environment of the function. Checks
-#'   if `fn_env(x)` is identical to `env` or inherits from it via [env_inherits()].
-#'   Set to `NULL` to not test.
-#' @param dots \[`logical(1)` | `NULL`] Test if the function has `...` in its arguments.
-#'   Set to `NULL` to not test.
-#' @param generic \[`logical(1)` | `NULL`] Test if the function is an S3 generic via
-#'   [sloop::is_s3_generic()]. Set to `NULL` to not test.
-#' @param method \[`logical(1)` | `NULL`] Test if the function is an S3 method via
-#'   [sloop::is_s3_method()]. Set to `NULL` to not test.
+#' @param mode \[`character()` | `NULL`] Expected function type(s) out of
+#'   `"closure"`, `"primitive"`, `"builtin"`, or `"special"`. Set to `NULL` to
+#'   not test.
+#' @param args_names \[`character()` | `NULL`] Expected exact argument names of
+#'   the function. Set to `NULL` to not test.
+#' @param fn_env \[`environment` | `NULL`] Expected environment of the function.
+#'   Checks if `fn_env(x)` is identical to `env` or inherits from it via
+#'   [rlang::env_inherits()]. Set to `NULL` to not test.
+#' @param dots \[`TRUE` | `FALSE` | `NULL`] Test if the function has `...` in
+#'   its arguments. Set to `NULL` to not test.
+#' @param generic,method \[`TRUE` | `FALSE` | `NULL` each] Test if the function
+#'   is an S3 generic or method via
+#'   [sloop::is_s3_generic()]/[sloop::is_s3_method()]. Set to `NULL` to not
+#'   test.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
 #'
 #' @returns `r ROXY$test_returns("function")`
 #'
-#' @name tests-function
+#' @name test_function
 NULL
-
 
 core_function <- function(
   x,
-  type = NULL, arg_names = NULL, env = NULL, dots = NULL,
-  generic = NULL, method = NULL, sentinels = NULL, custom = NULL,
-  caller_env = caller_env()
+  mode = NULL, args_names = NULL, fn_env = NULL, dots = NULL,
+  generic = NULL, method = NULL,
+  sentinels = NULL, custom = NULL,
+  short_circuit
 ) {
-  # Checks:
-  # TODO:
-
-
-  # Main:
-  tests <- initialize_tests(
-    "type_is", sentinels, type, arg_names, env,
-    dots, generic, method, custom
+  run_tests(
+    x, sentinels, args_names, env, dots, generic, method, custom,
+    tests_pars = list(), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) test_fn_type(x, arg),
+      args_names = \(x, arg, pars) identical(fn_fmls_names(x), arg),
+      fn_env = \(x, arg, pars) test_fn_env(x, arg),
+      dots = \(x, arg, pars) ("..." %in% fn_fmls_names(x)) == arg,
+      generic = \(x, arg, pars) {
+        if (check_installed2("sloop")) {
+          sloop::is_s3_generic(x) == arg
+        } else {
+          cli_abort("Package {.pkg sloop} is required to run test {.arg generic}.")
+        }
+      },
+      method <- \(x, arg, pars) {
+        if (check_installed2("sloop")) {
+          sloop::is_s3_method(x) == arg
+        } else {
+          cli_abort("Package {.pkg sloop} is required to run test {.arg method}.")
+        }
+      }
+    )
   )
-
-  res_sentinels <- test_sentinels(x, sentinels)
-  if (is_true(res_sentinels)) {
-    tests$sentinels <- TRUE
-    return(tests)
-  }
-  tests$sentinels <- res_sentinels %&&% TRUE
-
-  tests$type_is <- is_function(x) %@@% c(type = typeof(x))
-  if (!tests$type_is) {
-    return(tests)
-  }
-
-  args <- fn_fmls_names(x)
-
-  tests$type <- test_fn_type(x, type)
-  tests$arg_names <- if (!is_null(arg_names)) identical(args, arg_names)
-  tests$env <- test_fn_env(x, env)
-  tests$dots <- if (!is_null(dots)) ("..." %in% args) == dots
-  tests$generic <- if (!is_null(generic)) sloop::is_s3_generic(x) == generic
-  tests$method <- if (!is_null(method)) sloop::is_s3_method(x) == method
-  tests$custom <- test_custom(x, custom, caller_env)
-
-  tests
 }
-# TODO: make slopp suggest with check_installed2
+
+#' @rdname test_function
+#' @export
+test_function <- fn_core_to_test(core_function)
+
+#' @rdname test_function
+#' @export
+assert_function <- fn_core_to_assert(core_function, list(
+  type = \(x, test_arg, params) glue("`{x}` is not a function."),
+  args_names = \(x, test_arg, params) {
+    glue("`{x}` does not have the expected argument names.")
+  },
+  fn_env = \(x, test_arg, params) {
+    glue("`{x}` does not have the expected environment.")
+  },
+  dots = \(x, test_arg, params) {
+    glue("`{x}` does not have the expected `...` argument.")
+  },
+  generic = \(x, test_arg, params) {
+    glue("`{x}` is not an S3 generic function.")
+  },
+  method = \(x, test_arg, params) {
+    glue("`{x}` is not an S3 method function.")
+  }
+))
 
 
 
 # Helpers ----------------------------------------------------------------------
 
 test_fn_type <- function(x, type) {
-  if (is_null(type)) {
-    return(NULL)
-  }
-
   type_x <- typeof(x)
-
   switch(
     type,
     primitive = type_x %in% c("builtin", "special"),
     builtin = type_x == "builtin",
     special = type_x == "special",
     closure = type_x == "closure"
-  )
+  ) %@@%
+    c(type = type_x)
 }
 
 test_fn_env <- function(x, target_env) {
-  if (is_null(target_env)) {
-    return(NULL)
-  }
-
   if (is_primitive(x)) {
     identical(target_env, base_env())
   }

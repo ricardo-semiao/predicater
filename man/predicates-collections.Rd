@@ -30,7 +30,7 @@ is_collection(x, n = NULL, expr = TRUE, pairlist = TRUE, env = TRUE)
 or environment as collections.}
 }
 \value{
-[\code{logical(1)}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
 }
 \description{
 In R, there are several types (\code{\link[=typeof]{typeof()}}) that can "store elements":
@@ -63,7 +63,7 @@ All collection types:
 \item Can have \code{\link[=names]{names()}}.
 \item Can have their elements accessed by names (if present) via \code{[}, \code{[[}, and \code{$}.
 \item All but environment can have their elements accessed by integer indexes
-too, and their names set via \code{\link{names(x) <- value}}.
+too, and their names set via \code{names(x) <- value}.
 }
 
 Note that the result of acessing out-of-bounds indexes depends on the type and

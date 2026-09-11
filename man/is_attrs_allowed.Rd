@@ -17,7 +17,8 @@ If no match, the condition is re-thrown. Defaults to allow any message.}
 to throw the warning as an error.}
 }
 \value{
-[\code{logical(1)}] Whether attributes can be set on \code{x}, or re-throws
+[\code{TRUE} | \code{FALSE}] Whether attributes can be set on \code{x}, or
+re-throws
 the catched condition.
 }
 \description{

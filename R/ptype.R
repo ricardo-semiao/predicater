@@ -27,8 +27,9 @@
 #'   \[`character(1)` | `\(vx, vp) {}`] How to check the attributes -- each
 #'   argument is an attribute name -- of `.x` against `.ptype`. With a function
 #'   or string (same as above).
-#' @param .named \[`logical(1)`] For `is_ptype_list()`, whether to use the names
-#'   of `.x` and `.ptype` for matching them (`TRUE`), or the order (`FALSE`).
+#' @param .named \[`TRUE` | `FALSE`] For `is_ptype_list()`, whether to use the
+#'   names of `.x` and `.ptype` for matching them (`TRUE`), or the order
+#'   (`FALSE`).
 #' @param .depth \[`integer(1)`] For `is_ptype_list()`, how many levels of
 #'   recursion to check. `1` means check the first level elements only.
 #'
@@ -143,8 +144,6 @@ is_ptype_list <- function(.x, .ptype, .named = TRUE, .depth = 1, ...) {
   # - .depth must be >= 0 integerish(1)
   # - .x and .ptype must conform
   # TODO:
-  #test_msg(checkmate::check_flag, .named)
-  #test_msg(checkmate::check_integerish, .depth, len = 1, lower = 0)
 
   if (! is_list(.x) || ! is_list(.ptype)) {
     cli_abort("is_ptype_list() only works for lists.")

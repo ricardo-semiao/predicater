@@ -18,7 +18,7 @@ names3(x, repair = "unique", how = "names") <- value
 
 dimnames2(x, repair = "unique", how = "dimnames")
 
-dimnames2(x, repair = repair, how = "dimnames") <- value
+dimnames2(x, repair = "unique", how = "dimnames") <- value
 
 rownames2(x, repair = "unique", how = "dimnames")
 
