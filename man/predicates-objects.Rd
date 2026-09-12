@@ -10,7 +10,7 @@
 \alias{is_object}
 \title{Types - Objects}
 \usage{
-has_class(x)
+has_class(x, empty = "t", bad = "f")
 
 has_object_bit(x)
 
@@ -24,6 +24,9 @@ is_object_like(x, bad = "warn")
 }
 \arguments{
 \item{x}{[\code{any}] Object to check.}
+
+\item{empty}{[\code{"t"} | \code{"f"}] How to handle empty class attribute in
+\code{has_class()}: \code{"t"} to return \code{TRUE}, \code{"f"} to return \code{FALSE}.}
 
 \item{bad}{[\code{character(1)}] How to handle inconsistencies in
 \code{is_object_like()}: \code{"warn"} to issue a warning, \code{"stop"} to throw an

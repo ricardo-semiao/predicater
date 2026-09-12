@@ -14,7 +14,7 @@ is_ptype(
   class = "==_0n",
   dim = "==_0n",
   names = "==_0n",
-  rownames = "==_0n",
+  row.names = "==_0n",
   dimnames = "id_0n",
   ...
 )
@@ -34,7 +34,7 @@ takes the metadata's value of \code{.x} (\code{vx}) and \code{.ptype} (\code{vp}
 and returns a boolean; or a string that specifies a predefined function (see
 \href{#details}{Details}).}
 
-\item{class, dim, names, rownames, dimnames, ...}{[\code{character(1)} | \verb{\\(vx, vp) \{\}}] How to check the attributes -- each
+\item{class, dim, names, row.names, dimnames, ...}{[\code{character(1)} | \verb{\\(vx, vp) \{\}}] How to check the attributes -- each
 argument is an attribute name -- of \code{.x} against \code{.ptype}. With a function
 or string (same as above).}
 

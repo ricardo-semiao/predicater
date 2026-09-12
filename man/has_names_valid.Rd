@@ -19,15 +19,13 @@ has_names_valid(
 
 \item{na, empty, dups, invalid}{[\code{character(1)}] How to handle NA, empty,
 duplicate, or invalid names: \code{"f"} to return \code{FALSE}, or \code{"t"} return
-\code{TRUE}. \code{na} can also be \code{"na"} to return \code{NA}. A \code{"w"} suffix can be added
-(e.g. \code{"tw"}) to also issue a warning.}
+\code{TRUE}.}
+
+\item{zero_len}{[\code{character(1)}] How to handle an empty collection \code{x}:
+\code{"f"} to return \code{FALSE}, or \code{"t"} return \code{TRUE}..}
 
 \item{how}{[\code{character(1)}] How to extract names: "names" for \code{names(x)}, or
 "attr" for \code{attr(x, "names")}.}
-
-\item{non_collection, zero_len}{[\code{character(1)}] How to handle non-vector or
-zero-length inputs: \code{"f"} to return \code{FALSE}, or \code{"t"} return \code{TRUE}. A \code{"w"}
-suffix can be added (e.g. \code{"tw"}) to also issue a warning.}
 }
 \value{
 [\code{TRUE} | \code{FALSE}] Whether \code{x} has names according to the specified

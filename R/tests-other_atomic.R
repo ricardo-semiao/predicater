@@ -23,6 +23,7 @@ NULL
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns()`
 #'
@@ -35,11 +36,11 @@ NULL
 core_logical <- function(
   x,
   len = NULL, na_n = NULL, true_n = NULL,
-  sentinels = NULL, custom = NULL, custom_map = NULL,
+  sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, len, na_n, true_n, custom, custom_map,
+    x, sentinels, len, na_n, true_n, custom,
     tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_logical(x) %@@% c(type = typeof(x)),
@@ -55,11 +56,11 @@ core_logical <- function(
 core_raw <- function(
   x,
   len = NULL,
-  sentinels = NULL, custom = NULL, custom_map = NULL,
+  sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, len, custom, custom_map,
+    x, sentinels, len, custom,
     tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_raw(x) %@@% c(type = typeof(x))
@@ -129,6 +130,7 @@ assert_raw <- fn_core_to_assert(
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("character")`
 #'
@@ -155,6 +157,7 @@ core_character <- function(
     )
   )
 }
+# TODO: add empty_n to count ""
 
 
 #' @rdname test_character

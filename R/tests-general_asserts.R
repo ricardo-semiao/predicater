@@ -22,10 +22,8 @@ NULL
 #' @param args_fun \[`list()`] Additional arguments to pass to `fun`.
 #' @param x_names \[`character()` | `NULL`] The names of `...` to print in
 #'   messages. In `NULL`, the name is inferred from `x`'s expression.
-#' @param env \[`environment()`] The environment to use for the condition. Often
-#'   useful to remove this helper from the trace stack.
-#' @param args_abort \[`list()`] Additional arguments to pass to
-#'   [cli::cli_abort()], which rethrows the error.
+#' @param env `r ROXY$env()`
+#' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
 #' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
@@ -49,7 +47,7 @@ NULL
 #' @export
 assert_from_msgs <- function(
   fun, ..., args_fun = list(),
-  x_names = NULL, env = caller_env(), args_abort = list()
+  x_names = NULL, env = caller_env(), args_cnd = list()
 ) {
   # Setup:
   x_exprs <- enexprs(...)
@@ -85,7 +83,7 @@ assert_from_msgs <- function(
         class = "rs_assert_from_error",
         rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
         call = env,
-        args_abort
+        args_cnd
       )
       do.call(cli_abort, cnd_args)
     }
@@ -99,7 +97,7 @@ assert_from_msgs <- function(
 #' @export
 assert_from_error <- function(
   fun, ..., args_fun = list(),
-  x_names = NULL, env = caller_env(), args_abort = list()
+  x_names = NULL, env = caller_env(), args_cnd = list()
 ) {
   # Setup:
   x_exprs <- enexprs(...)
@@ -135,7 +133,7 @@ assert_from_error <- function(
           class = "rs_assert_from_error",
           rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
           call = env,
-          args_abort
+          args_cnd
         )
         do.call(cli_abort, cnd_args)
       }
@@ -163,9 +161,8 @@ assert_from_error <- function(
 #'   If `NULL`, a default message is generated.
 #' @param x_names \[`character(1)` | `NULL`] The name of `x` to print in
 #'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
-#' @param env \[`environment()`] The environment to use for the condition. Often
-#'   useful to remove this helper form the trace stack.
-#' @param args_cnd \[`list()`] Additional arguments to pass to `cnd_fun`.
+#' @param env `r ROXY$env()`
+#' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
 #' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
@@ -178,7 +175,7 @@ assert_from_error <- function(
 #' #> ! Argument `x` is not of prototype `numeric()`.
 #'
 #' @export
-test_ptype <- function(
+assert_ptype <- function(
   ptype, ..., args_ptype = list(),
   msg = NULL, x_names = NULL,
   env = caller_env(), args_cnd = list()
@@ -222,10 +219,10 @@ test_ptype <- function(
 }
 
 
-#' Tests - if object passes custom expression
+#' Tests - Custom predicate
 #'
-#' This function evaluates a custom expression on an object and aborts with a
-#' custom message if the check fails. It is useful for testing function
+#' This function evaluates a custom predicate function on an object and aborts
+#' with a custom message if the check fails. It is useful for testing function
 #' arguments.
 #'
 #' @param fun \[`\(){}`] The predicate function to run. Must recieve the object
@@ -236,9 +233,8 @@ test_ptype <- function(
 #'   If `NULL`, a default message is generated.
 #' @param x_names \[`character(1)` | `NULL`] The name of `x` to print in
 #'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
-#' @param env \[`environment()`] The environment to use for the condition. Often
-#'   useful to remove this helper form the trace stack.
-#' @param cnd_args \[`list()`] Additional arguments to pass to `cnd_fun`.
+#' @param env `r ROXY$env()`
+#' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
 #' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
 #'
@@ -337,6 +333,12 @@ assert_predicate <- function(
 #' @param types \[`character()`] A character vector of types to check against.
 #' @param ... \[`list()` each] Lists of arguments to pass to the test function
 #'   for each type. The list names
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("multi")`
 #'

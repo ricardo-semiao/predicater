@@ -8,8 +8,8 @@
 test_environment(
   x,
   len = NULL,
-  has = NULL,
-  sees = NULL,
+  env_has = NULL,
+  env_sees = NULL,
   parents = NULL,
   namespace = NULL,
   sentinels = NULL,
@@ -20,8 +20,8 @@ test_environment(
 assert_environment(
   x,
   len = NULL,
-  has = NULL,
-  sees = NULL,
+  env_has = NULL,
+  env_sees = NULL,
   parents = NULL,
   namespace = NULL,
   sentinels = NULL,
@@ -41,13 +41,17 @@ assert_environment(
 \item{len}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length. The options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
-\item A single non-negative number to test for \code{. == arg}.
+\item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
 \item A single negative number to test for \code{. == length(x) + arg}.
 \item A vector of two non-negative numbers to test for \verb{arg[1] <= . <= arg[2]} (\code{Inf} is allowed).
 \item A vector of three or more non-negative numbers to test for \code{. \%in\% arg}.
 \item A function that recieves the value to test and the length of \code{x}, and
 returns a single \code{TRUE} or \code{FALSE}.
 }}
+
+\item{env_has, env_sees}{[\code{character()} | \code{NULL}] Symbol names that must exist
+directly in \code{x}, or inherited from one of its parents, respectively (see
+\code{\link[rlang:env_has]{rlang::env_has()}}). Set to \code{NULL} to not test.}
 
 \item{parents}{[\code{environment()} | \code{list()} | \code{NULL}] Environment or list of
 environments to test as parents of \code{x}. If a single environment is
@@ -60,7 +64,8 @@ environment via \code{\link[rlang:is_namespace]{rlang::is_namespace()}}. Set to 
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
-\item \code{"null"} for \code{NULL}
+\item \code{"null"} for \code{NULL}.
+\item \code{"empty"} for any zero-length object.
 \item \code{"na"} for any \code{NA} type, or \code{"na_logical"} for \code{NA}, \code{"na_integer"} for     \code{NA_integer_}, \code{"na_real"} for \code{NA_real_}, \code{"na_complex"} for     \code{NA_complex_}, and \code{"na_character"} for \code{NA_character_}.
 \item \code{"nan"} for \code{NaN}.
 \item \code{"+inf"} for \code{+Inf}, \code{"-inf"} for \code{-Inf}, and \code{"inf"} for both.
@@ -92,9 +97,7 @@ environment via \code{\link[rlang:is_namespace]{rlang::is_namespace()}}. Set to 
 
 \item{report_untested}{[\code{TRUE} | \code{FALSE}] If \code{TRUE}, the tests that were not run due to short-  circuiting will be reported as untested, else, ignored.}
 
-\item{env_has, env_sees}{[\code{character()} | \code{NULL}] Symbol names that must exist
-directly in \code{x}, or inherited from one of its parents, respectively (see
-\code{\link[rlang:env_has]{rlang::env_has()}}). Set to \code{NULL} to not test.}
+\item{args_cnd}{[\code{list()}] Additional arguments passed to \code{\link[cli:cli_abort]{cli::cli_abort()}}, \code{\link[cli:cli_abort]{cli::cli_warn()}},   or \code{\link[cli:cli_abort]{cli::cli_inform()}}, based on the chosen \code{action}.}
 }
 \value{
 \itemize{

@@ -2,13 +2,6 @@
 #' @include tests-helpers.R tests-menu.R
 NULL
 
-# TODO: is_code with: is_code args, valid, sentinels, custom
-# is_code <- function(x, sym = TRUE, call = TRUE, literal = TRUE) {
-#   (sym && is_symbol(x)) ||
-#     (call && is_language(x)) ||
-#     (literal && is_syntactic_literal(x))
-# }
-
 
 
 # Expression -------------------------------------------------------------------
@@ -22,8 +15,8 @@ NULL
 #' its input, aborting if it fails the test.
 #'
 #' @param x \[`any`] An object to test.
-#' @param len,null_n,call_n,sym_n,literal_n,depth_n
-#'   `r ROXY$x_n("len,null_n,call_n,sym_n,literal_n,depth_n")`
+#' @param len,null_n,call_n,sym_n,literal_n
+#'   `r ROXY$x_n("len,null_n,call_n,sym_n,literal_n,")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_map `r ROXY$custom_map()`
@@ -32,6 +25,7 @@ NULL
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("expression")`
 #'
@@ -64,6 +58,7 @@ core_expression <- function(
     )
   )
 }
+# TODO: invalid_n (unparseable)?
 
 #' @rdname test_expression
 #' @export
@@ -108,6 +103,7 @@ assert_expression <- fn_core_to_assert(
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("symbol")`
 #'
@@ -189,6 +185,7 @@ assert_symbol <- fn_core_to_assert(
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("language")`
 #'

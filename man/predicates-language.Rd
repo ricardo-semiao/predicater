@@ -3,34 +3,47 @@
 \name{predicates-language}
 \alias{predicates-language}
 \alias{is_syntactic_literal}
-\alias{is_symbol}
-\alias{is_symbol_valid}
+\alias{is_call}
+\alias{is_symbol2}
 \alias{is_language}
-\alias{is_language_valid}
 \alias{is_expression2}
+\alias{is_code}
 \title{Types - Language objects}
 \usage{
 is_syntactic_literal(x)
 
-is_symbol(x, name = NULL)
+is_symbol2(x, name = NULL, valid = FALSE, empty = TRUE)
 
-is_symbol_valid(x)
+is_language(x, valid = FALSE)
 
-is_language(x)
+is_call(x, name = NULL, n = NULL, ns = NULL)
 
-is_language_valid(x)
+is_expression2(x, n = NULL, valid = FALSE)
 
-is_expression2(x, n = NULL)
-
-is_code(x)
+is_code(
+  x, sym = TRUE, call = TRUE, literal = TRUE,
+  name = NULL, valid = FALSE, empty = TRUE
+)
 }
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
-
 \item{name}{[\code{character(1)} | \code{NULL}] An optional name or vector of names
-that the symbol should match. Set to \code{NULL} to not test.}
+that the symbol or call should match. Set to \code{NULL} to not test.}
+
+\item{valid}{[\code{TRUE} | \code{FALSE}] Whether to test if the code is 'valid', i.e.
+can be \code{\link[=parse]{parse()}}'d, or is a syntatic symbol.}
+
+\item{empty}{[\code{TRUE} | \code{FALSE}] Whether to allow the empty symbol.}
+
+\item{n}{[\code{integer(1)} | \code{NULL}] Number of elements in the expression vector
+or arguments in the call, set to \code{NULL} to not test.}
+
+\item{sym, call, literal}{[\code{TRUE} | \code{FALSE}] Whether to allow symbols, calls,
+or syntactic literals.}
+
+\item{ns}{[\code{character(1)} | \code{NULL}] Namespace of the call, set to \code{NULL} to
+not test.}
 }
 \value{
 [\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
@@ -49,13 +62,12 @@ of type \code{"language"} (LANGSXP).
 For testing these building blocks, there are the following predicates:
 \itemize{
 \item Syntatic literals: \code{\link[rlang:is_expression]{rlang::is_syntactic_literal()}}.
-\item Symbols: \code{\link[rlang:is_symbol]{rlang::is_symbol()}}. A symbol is parseable from R code
-if it passes \code{is_symbol_valid()}.
-\item Function calls: \code{is_language()}. A function call is parseable from R code
-if it passes \code{is_language_valid()}. Also consider \code{\link[rlang:is_call]{rlang::is_call()}} for
+\item Symbols: \code{is_symbol2} (based on \code{\link[rlang:is_symbol]{rlang::is_symbol()}}).
+\item Function calls: \code{is_language()}. Also consider \code{\link[rlang:is_call]{rlang::is_call()}} for
 testing the name, namespace, and number of arguments of a call.
 \item Expressions vector: R has an additional type, \code{"expression"}, which is a
 list of elements from any of the three building blocks above. It can be
 tested with \code{is_expression2()}.
+\item Any of the above: \code{is_code()}.
 }
 }

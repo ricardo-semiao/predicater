@@ -2,12 +2,15 @@
 % Please edit documentation in R/types-atomic_na.R
 \name{predicates-true-false}
 \alias{predicates-true-false}
+\alias{is_bool}
 \alias{are_true}
 \alias{is_true2}
 \alias{are_false}
 \alias{is_false2}
 \title{Types - TRUE and FALSE values}
 \usage{
+is_bool(x)
+
 are_true(x, na = "f")
 
 is_true2(x, na = "f")
@@ -31,5 +34,5 @@ an object to test.}
 }
 \description{
 Check if an object is literally \code{TRUE} or \code{FALSE}, controlling for \code{NA}
-values.
+values. \code{\link[rlang:scalar-type-predicates]{rlang::is_bool()}} checks for either \code{TRUE} or \code{FALSE}.
 }

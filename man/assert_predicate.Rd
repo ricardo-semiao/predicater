@@ -2,7 +2,7 @@
 % Please edit documentation in R/tests-general_asserts.R
 \name{assert_predicate}
 \alias{assert_predicate}
-\title{Tests - if object passes custom expression}
+\title{Tests - Custom predicate}
 \usage{
 assert_predicate(
   fun,
@@ -28,10 +28,15 @@ If \code{NULL}, a default message is generated.}
 \item{x_names}{[\code{character(1)} | \code{NULL}] The name of \code{x} to print in
 messages. In \code{NULL}, the name is inferred from \code{x}'s symbol, if possible.}
 
-\item{env}{[\code{environment()}] The environment to use for the condition. Often
-useful to remove this helper form the trace stack.}
+\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
+\itemize{
+\item An environment in the call stack or a hard-coded defused call.
+\item \code{NULL} for no information.
+\item \code{missing_arg()} to use the assert function itself.
+\item The default is \code{caller_env()}, to display the function where the assertion     was called.
+}}
 
-\item{cnd_args}{[\code{list()}] Additional arguments to pass to \code{cnd_fun}.}
+\item{args_cnd}{[\code{list()}] Additional arguments passed to \code{\link[cli:cli_abort]{cli::cli_abort()}}.}
 }
 \value{
 [\code{TRUE}] Invisibly \code{TRUE}, or aborts if the check fails.
@@ -39,8 +44,8 @@ useful to remove this helper form the trace stack.}
 [\code{TRUE}] Invisibly \code{TRUE}, or aborts if the check fails.
 }
 \description{
-This function evaluates a custom expression on an object and aborts with a
-custom message if the check fails. It is useful for testing function
+This function evaluates a custom predicate function on an object and aborts
+with a custom message if the check fails. It is useful for testing function
 arguments.
 }
 \examples{

@@ -14,40 +14,47 @@
 #'
 #' For testing these building blocks, there are the following predicates:
 #' - Syntatic literals: [rlang::is_syntactic_literal()].
-#' - Symbols: [rlang::is_symbol()]. A symbol is parseable from R code
-#'   if it passes `is_symbol_valid()`.
-#' - Function calls: `is_language()`. A function call is parseable from R code
-#'   if it passes `is_language_valid()`. Also consider [rlang::is_call()] for
+#' - Symbols: `is_symbol2` (based on [rlang::is_symbol()]).
+#' - Function calls: `is_language()`. Also consider [rlang::is_call()] for
 #'   testing the name, namespace, and number of arguments of a call.
 #' - Expressions vector: R has an additional type, `"expression"`, which is a
 #'   list of elements from any of the three building blocks above. It can be
 #'   tested with `is_expression2()`.
+#' - Any of the above: `is_code()`.
 #'
 #' @usage
 #' is_syntactic_literal(x)
 #'
-#' is_symbol(x, name = NULL)
+#' is_symbol2(x, name = NULL, valid = FALSE, empty = TRUE)
 #'
-#' is_symbol_valid(x)
+#' is_language(x, valid = FALSE)
 #'
-#' is_language(x)
+#' is_call(x, name = NULL, n = NULL, ns = NULL)
 #'
-#' is_language_valid(x)
+#' is_expression2(x, n = NULL, valid = FALSE)
 #'
-#' is_expression2(x, n = NULL)
-#'
-#' is_code(x)
-#'
+#' is_code(
+#'   x, sym = TRUE, call = TRUE, literal = TRUE,
+#'   name = NULL, valid = FALSE, empty = TRUE
+#' )
 #'
 #' @param x \[`any`] An object to test.
-#' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #' @param name \[`character(1)` | `NULL`] An optional name or vector of names
-#'   that the symbol should match. Set to `NULL` to not test.
+#'   that the symbol or call should match. Set to `NULL` to not test.
+#' @param valid \[`TRUE` | `FALSE`] Whether to test if the code is 'valid', i.e.
+#'   can be [parse()]'d, or is a syntatic symbol.
+#' @param empty \[`TRUE` | `FALSE`] Whether to allow the empty symbol.
+#' @param n \[`integer(1)` | `NULL`] Number of elements in the expression vector
+#'   or arguments in the call, set to `NULL` to not test.
+#' @param ns \[`character(1)` | `NULL`] Namespace of the call, set to `NULL` to
+#'   not test.
+#' @param sym,call,literal \[`TRUE` | `FALSE`] Whether to allow symbols, calls,
+#'   or syntactic literals.
 #'
 #' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
-#' @aliases is_syntactic_literal is_symbol
-#' @rawNamespace export(is_syntactic_literal, is_symbol)
+#' @aliases is_syntactic_literal is_call
+#' @rawNamespace export(is_syntactic_literal, is_call)
 #'
 #' @name predicates-language
 NULL
@@ -56,42 +63,44 @@ NULL
 #' @rdname predicates-language
 #' @usage NULL
 #' @export
-is_symbol_valid <- function(x) {
-  is_symbol(x) && is_parseable(x)
+is_symbol2 <- function(x, name = NULL, valid = FALSE, empty = TRUE) {
+  is_symbol(x, name) &&
+    (!valid || x == sym(make.names(x))) &&
+    (!empty || identical(x, expr()))
 }
 
 
 #' @rdname predicates-language
 #' @usage NULL
 #' @export
-is_language <- function(x) {
-  typeof(x) == "language"
+is_language <- function(x, valid = FALSE) {
+  (typeof(x) == "language") && (!valid || is_parseable(x))
 }
 
 
 #' @rdname predicates-language
 #' @usage NULL
 #' @export
-is_language_valid <- function(x) {
-  is_language(x) && is_parseable(x)
-}
-
-
-#' @rdname predicates-language
-#' @usage NULL
-#' @export
-is_expression2 <- function(x, n = NULL) {
+is_expression2 <- function(x, n = NULL, valid = FALSE) {
   # Checks:
   # - n must pass is_integer_like(n, 1) or be NULL
   # TODO:
 
-  typeof(x) == "expression" && (is.null(n) || length(x) == n)
+  (typeof(x) == "expression") &&
+    (is.null(n) || length(x) == n) &&
+    (!valid || all(vapply_lgl(x, is_parseable)))
 }
 
 
-is_code <- function(x, sym = TRUE, call = TRUE, literal = TRUE) {
-  (sym && is_symbol(x)) ||
-    (call && is_language(x)) ||
+#' @rdname predicates-language
+#' @usage NULL
+#' @export
+is_code <- function(
+  x, sym = TRUE, call = TRUE, literal = TRUE,
+  name = NULL, valid = FALSE, empty = TRUE
+) {
+  (sym && is_symbol2(x, name, valid, empty)) ||
+    (call && is_language(x, valid)) ||
     (literal && is_syntactic_literal(x))
 }
 

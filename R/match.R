@@ -68,6 +68,7 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 
 # TODO: empty RHS returns the value of last non-empty RHS
 # TODO: _ptype and _id versions with a fixed tab
+# TODO: try catch user code
 
 #' Match - Pattern matching
 #'
@@ -143,7 +144,7 @@ match_hash <- function(x, ..., nomatch = NULL, htab = NULL, type, size) {
 
   utils::gethash(htab, x, nomatch = nomatch)
 }
-# TODO: use maybe_missing
+# TODO: use maybe_missing, better, type = missing_arg()
 
 
 #' @rdname match_hash

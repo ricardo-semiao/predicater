@@ -11,7 +11,7 @@ assert_from_msgs(
   args_fun = list(),
   x_names = NULL,
   env = caller_env(),
-  args_abort = list()
+  args_cnd = list()
 )
 
 assert_from_error(
@@ -20,7 +20,7 @@ assert_from_error(
   args_fun = list(),
   x_names = NULL,
   env = caller_env(),
-  args_abort = list()
+  args_cnd = list()
 )
 }
 \arguments{
@@ -36,11 +36,15 @@ an error if the check fails.}
 \item{x_names}{[\code{character()} | \code{NULL}] The names of \code{...} to print in
 messages. In \code{NULL}, the name is inferred from \code{x}'s expression.}
 
-\item{env}{[\code{environment()}] The environment to use for the condition. Often
-useful to remove this helper from the trace stack.}
+\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
+\itemize{
+\item An environment in the call stack or a hard-coded defused call.
+\item \code{NULL} for no information.
+\item \code{missing_arg()} to use the assert function itself.
+\item The default is \code{caller_env()}, to display the function where the assertion     was called.
+}}
 
-\item{args_abort}{[\code{list()}] Additional arguments to pass to
-\code{\link[cli:cli_abort]{cli::cli_abort()}}, which rethrows the error.}
+\item{args_cnd}{[\code{list()}] Additional arguments passed to \code{\link[cli:cli_abort]{cli::cli_abort()}}.}
 }
 \value{
 [\code{TRUE}] Invisibly \code{TRUE}, or aborts if the check fails.

@@ -1,5 +1,6 @@
 
-# TODO: add user input checks
+# TODO: add user input checks, here and inside core_ functions that have
+# specific subtests
 
 TESTS_MENU <- list()
 
@@ -62,12 +63,28 @@ TESTS_MENU$sorted <- function(x, arg, pars) {
 # TODO: what to do with na.rm = TRUE?
 
 TESTS_MENU$set <- function(x, arg, pars) {
-  if (is_list(set)) {
-    all(x %in% set$yes && ! x %in% set$no)
-  } else if (is_list(set)) {
-    all(x %in% set)
+  if (! is_list(arg)) {
+    all(x %in% arg)
+
+  } else {
+    if (! is_empty(arg$no) && any(x %in% arg$no)) {
+      return(FALSE)
+    }
+
+    if (is_empty(yes <- arg$yes)) {
+      return(TRUE)
+    }
+
+    x_in_yes <- x %in% arg$yes
+    switch(arg$mode %||% "all",
+      all = all(x_in_yes),
+      any = any(x_in_yes),
+      only = all(x_in_yes) && all(arg$yes %in% x)
+    )
   }
 }
+# CHECK: would be nice to be able to enforce order too
+# CHECK: we dont allow multi-valued x's, e.g. "any of '1' or c('2', '3')"
 
 TESTS_MENU$custom <- function(x, arg, pars) {
   test_custom(x, arg, pars$env)
@@ -91,6 +108,12 @@ TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
 
   } else if ("na" %in% arg) {
     is_na(x)
+
+  } else if ("empty" %in% arg) {
+    length(x) == 0
+
+  } else if ("nan" %in% arg) {
+    is_nan(x, na = "f")
 
   } else if ("inf" %in% arg) {
     is_inf(x, 1, na = "f")
@@ -164,6 +187,9 @@ test_in_range <- function(n, range, l) {
   if (is_function(range)) {
     range(n, l)
   } else if (length(range) == 1) {
+    if (is_inf(range, signs = "+")) {
+      range <- l
+    }
     all(n == range)
   } else if (length(range) == 2) {
     all(n >= range[1] & n <= range[2])

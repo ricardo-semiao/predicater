@@ -32,6 +32,7 @@
 #' is_any(x)
 #'
 #' @param x \[`any`] An object to test.
+#' @param type \[`character(1)`] A type to test for, as returned by [typeof()].
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
 #' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
@@ -195,16 +196,17 @@ NULL
 #'
 #' is_environment2(x, n = NULL)
 #'
-#' is_expression2(x, n = NULL)
-#'
 #' is_vector(x, n = NULL)
 #'
-#' is_collection(x, n = NULL, expr = TRUE, pairlist = TRUE, env = TRUE)
+#' is_collection(
+#'   x, n = NULL,
+#'   expr = TRUE, pairlist = TRUE, env = TRUE, null = FALSE, dots = FALSE
+#' )
 #'
 #' @param x \[`any`] An object to test.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
-#' @param expr,pairlist,env \[`flag`] Whether to include expression, pairlist,
-#'   or environment as collections.
+#' @param expr,pairlist,env,null,dots \[`flag`] Whether to include expression,
+#'   pairlist, environment, `NILL`, or the `...` objects as collections.
 #'
 #' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
@@ -280,4 +282,3 @@ is_collection <- function(
       (dots && is_dots(x))
   )
 }
-# TODO: rethink null and dots (... is a collection of promises, can have names)

@@ -13,17 +13,6 @@ ROXY$test_returns <- function(fun_name = NULL) {
 
 # Assert args ------------------------------------------------------------------
 
-# ROXY$assert_args <- function() {
-#   args <- c("action", "env", "short_circuit", "x_name", "report_untested")
-#   params <- set_names(character(length(args)), args)
-#   for (arg in args) {
-#     params[[arg]] <- paste0("@param ", ROXY[[arg]]())
-#   }
-
-#   paste0(params, collapse = "\n")
-# }
-# Aparently, doesn't work
-
 ROXY$action <- function() {
   glue(r"(
   \[`"abort"` | `"warn"` | `"inform"`] Action to take when the test fails:
@@ -67,6 +56,19 @@ ROXY$report_untested <- function() {
   )")
 }
 
+ROXY$args_cnd <- function(action = TRUE) {
+  if (action) {
+    glue(r"(
+    \[`list()`] Additional arguments passed to [cli::cli_abort()], [cli::cli_warn()], \
+      or [cli::cli_inform()], based on the chosen `action`.
+    )")
+  } else {
+    glue(r"(
+    \[`list()`] Additional arguments passed to [cli::cli_abort()].
+    )")
+  }
+}
+
 
 
 # Test args --------------------------------------------------------------------
@@ -75,7 +77,8 @@ ROXY$sentinels <- function() {
   glue(r"(
   \[`character()` | `NULL`] Each entry in this character vector allows `x` to \
   also be some scalar sentinel below. Set to `NULL` to disconsider sentinels.
-    - `"null"` for `NULL`
+    - `"null"` for `NULL`.
+    - `"empty"` for any zero-length object.
     - `"na"` for any `NA` type, or `"na_logical"` for `NA`, `"na_integer"` for \
       `NA_integer_`, `"na_real"` for `NA_real_`, `"na_complex"` for \
       `NA_complex_`, and `"na_character"` for `NA_character_`.
@@ -102,7 +105,8 @@ ROXY$x_n <- function(args) {
     literal_n = "number of syntactic literal elements",
     depth_n = "number of parents",
     true_n = "number of `TRUE` elements",
-    char_n = "number of characters (vectorized)"
+    char_n = "number of characters (vectorized)",
+    invalid_n = "number of non-syntatic elements"
   )
 
   args_text <- paste0(args_labels[args], collapse = ", ") # TODO: pluralize, 'respectively'
@@ -111,7 +115,8 @@ ROXY$x_n <- function(args) {
   \[`numeric()` | `\(){{}}` | `NULL`] Possible values for the {args_text}. The \
   options {if (length(args) > 0) "of each argument 'arg' "}are:
     - `NULL` to not test.
-    - A single non-negative number to test for `. == arg`.
+    - A single non-negative number to test for `. == arg`. If `Inf`, \
+      `. == length(x)`.
     - A single negative number to test for `. == length(x) + arg`.
     - A vector of two non-negative numbers to test for `arg[1] <= . <=
       arg[2]` (`Inf` is allowed).
@@ -124,9 +129,11 @@ ROXY$x_n <- function(args) {
 
 ROXY$set <- function(type) {
   glue(r"(
-  \[`{type}()` | `list(yes = , no = )` | `NULL`] Test if all values
-    of `x` are in a set of allowed values. Use a list with `yes` and `no`
-    elements to defined allowed and disallowed values. Set to `NULL` to not test.
+  \[`{type}()` | `list(yes = , no = , mode = )` | `NULL`] Test if all values \
+    of `x` are in a set of allowed values. Use a list with `yes` and/or `no` \
+  elements to defined allowed and disallowed values, with `mode`s `"all"` \
+  (all `x` in `yes`, the default), `"only"` (all and only `x` in `yes`), or \
+  `"any"` (any `x` in `yes`). Set to `NULL` to not test.
   )")
 }
 

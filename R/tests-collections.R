@@ -26,6 +26,7 @@ NULL
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("list")`
 #'
@@ -55,6 +56,8 @@ core_list <- function(
   )
 }
 # TODO: see if other ops are easily generic for lists (e.g. ordered, set)
+# TODO: add depth_n for lists/language
+# TODO: add custom_recurse for lists/language
 
 #' @rdname test_list
 #' @export
@@ -98,6 +101,7 @@ assert_list <- fn_core_to_assert(core_list, list(
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("environment")`
 #'
@@ -106,14 +110,14 @@ NULL
 
 core_environment <- function(
   x,
-  len = NULL, has = NULL, sees = NULL, parents = NULL, namespace = NULL,
+  len = NULL, env_has = NULL, env_sees = NULL, parents = NULL, namespace = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
   short_circuit
 ) {
   l <- length(x)
 
   run_tests(
-    x, sentinels, len, namespace, parents, has, sees, custom, custom_map,
+    x, sentinels, len, namespace, parents, env_has, env_sees, custom, custom_map,
     tests_pars = list(l = l), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_environment(x) %@@% c(type = typeof(x)),

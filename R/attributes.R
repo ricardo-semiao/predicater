@@ -67,9 +67,11 @@ is_attrs_allowed <- function(x, cnd_match = NULL, warn = "tw") {
     }
   )
 }
+# TODO: pass arg to, by default, run static check (i.e. type not "primitive",
+# "symbol", "NULL")
 
 
-#' Attribute - Get attribute of object
+#' Attributes - Get attribute of object
 #'
 #' Identical to [attr()] but with `exact = TRUE` by default.
 #'
@@ -283,11 +285,9 @@ attrs_filter <- function(
 #'   "attr" for `attr(x, "names")`.
 #' @param na,empty,dups,invalid \[`character(1)`] How to handle NA, empty,
 #'   duplicate, or invalid names: `"f"` to return `FALSE`, or `"t"` return
-#'   `TRUE`. `na` can also be `"na"` to return `NA`. A `"w"` suffix can be added
-#'   (e.g. `"tw"`) to also issue a warning.
-#' @param non_collection,zero_len \[`character(1)`] How to handle non-vector or
-#'   zero-length inputs: `"f"` to return `FALSE`, or `"t"` return `TRUE`. A `"w"`
-#'   suffix can be added (e.g. `"tw"`) to also issue a warning.
+#'   `TRUE`.
+#' @param zero_len \[`character(1)`] How to handle an empty collection `x`:
+#'   `"f"` to return `FALSE`, or `"t"` return `TRUE`..
 #'
 #' @returns \[`TRUE` | `FALSE`] Whether `x` has names according to the specified
 #'   checks.
@@ -347,6 +347,7 @@ has_names_valid <- function(
 # NOTE: language and promise accept names<-; ... and environment have names();
 # S4 accepts attr(x, "names")<- but object doesnt
 # NOTE: we could fix na and empty to "f" to simplify the API
+# CHECK: change to TRUE/FALSE instead of "t"/"f"?
 
 
 are_names_valid <- function(
@@ -400,6 +401,8 @@ are_names_valid <- function(
 #'   [attr()].
 #' - For rownames: `"rownames"` for [rownames()], `"dimnames"` for the first
 #'   element of [dimnames()], and `"attr"` for [attr()].
+#' @param n \[`integer(1)`] Number of dimensions to check for. Set to `NULL` to
+#'   not test.
 #'
 #' @returns
 #' - \[integer(1)] For `n_dims()` and `n_dimnames()`.
@@ -449,15 +452,14 @@ n_dimnames <- function(
 
 #' @rdname attributes-dimensions
 #' @export
-has_dimnames <- function(x, how = "dimnames") {
+has_dimnames <- function(x, n = NULL, how = "dimnames") {
   dimnames <- switch(how,
     dimnames = dimnames(x),
     attr = attr(x, "dimnames", TRUE)
   )
 
-  is_null(dimnames)
+  is_list(dimnames, n = n)
 }
-# TODO: consider adding n = NULL check? or too similar with n_dimnames()?
 
 
 #' @rdname attributes-dimensions
@@ -469,21 +471,20 @@ has_rownames <- function(x, how = "dimnames") {
     row.names = attr(x, "row.names", TRUE)
   )
 
-  is_null(rownames)
+  ! is_null(rownames)
 }
 
 
 #' @rdname attributes-dimensions
 #' @export
-has_dim <- function(x, how = "dim") {
+has_dim <- function(x, n = NULL, how = "dim") {
   dim <- switch(how,
     dim = dim(x),
     attr = attr(x, "dim", TRUE)
   )
 
-  is_null(dim)
+  is_numeric(dim, n = n)
 }
-# TODO: consider adding n = NULL check? or too similar with n_dims()?
 
 
 
@@ -495,8 +496,8 @@ has_dim <- function(x, how = "dim") {
 #' requiring a specific 'quality' of the values.
 #'
 #' @param x \[`any`] Object to get or set attribute from.
-#' @inheritParams vctrs::vec_as_names
 #' @param value \[`character()`] Value to set the attribute to.
+#' @inheritParams vctrs::vec_as_names
 #' @param how
 #' \[`character(1)`] How to get or set the attribute:
 #' - For `names3()`: `"names"` for [names()] and `"attr"` for [attr()].
@@ -542,7 +543,7 @@ names3 <- function(x, repair = "unique", how = "names") {
 
 #' @rdname attributes-getters-setters
 #' @export
-`names3<-` <- function(x, value, repair = "unique", how = "names") {
+`names3<-` <- function(x, repair = "unique", how = "names", value) {
   # Checks:
   # - x is a collection
   # - value is character(length(x))
@@ -593,7 +594,7 @@ dimnames2 <- function(x, repair = "unique", how = "dimnames") {
 
 #' @rdname attributes-getters-setters
 #' @export
-`dimnames2<-` <- function(x, value, repair = "unique", how = "dimnames") {
+`dimnames2<-` <- function(x, repair = "unique", how = "dimnames", value) {
   # Checks:
   # - x is a collection with dimensions
   # - value has lenght equal to length(dim(x)); each value[[i]] has length equal
@@ -644,7 +645,7 @@ rownames2 <- function(x, repair = "unique", how = "dimnames") {
 
 #' @rdname attributes-getters-setters
 #' @export
-`rownames2<-` <- function(x, value, repair = "unique", how = "dimnames") {
+`rownames2<-` <- function(x, repair = "unique", how = "dimnames", value) {
   # Checks:
   # - x is a collection with dimensions
   # - value has length equal to dim(x)[1]
@@ -686,7 +687,7 @@ class2 <- function(x, how = "class") {
 
 #' @rdname attributes-getters-setters
 #' @export
-`class2<-` <- function(x, value, how = "class") {
+`class2<-` <- function(x, how = "class", value) {
   # Checks:
   # - how is "class" or "attr"
   # - value must be character without NAs, "", and dups

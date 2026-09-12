@@ -15,7 +15,7 @@
 #'   for inconsistencies with the other properties above.
 #'
 #' @usage
-#' has_class(x)
+#' has_class(x, empty = "t", bad = "f")
 #'
 #' has_object_bit(x)
 #'
@@ -28,6 +28,8 @@
 #' is_object_like(x, bad = "warn")
 #'
 #' @param x \[`any`] Object to check.
+#' @param empty \[`"t"` | `"f"`] How to handle empty class attribute in
+#'   `has_class()`: `"t"` to return `TRUE`, `"f"` to return `FALSE`.
 #' @param bad \[`character(1)`] How to handle inconsistencies in
 #'   `is_object_like()`: `"warn"` to issue a warning, `"stop"` to throw an
 #'   error, or `"f"` to return `FALSE`.
@@ -53,15 +55,17 @@ has_s4_bit <- isS4
 #' @rdname predicates-objects
 #' @usage NULL
 #' @export
-has_class <- function(x, bad = "t") {
+has_class <- function(x, empty = "t", bad = "f") {
   # Checks:
   # - bad must be one of t, f
   class <- attr(x, "class", TRUE)
 
   if (is_null(class)) {
     FALSE
-  } else if (!is_character(class) || anyNA(class) || any(class == "")) {
+  } else if (!has_object_bit(x) || !is_character(class) || anyNA(class)) {
     switch(bad, t = TRUE, f = FALSE)
+  } else if (any(class == "")) {
+    switch(empty, t = TRUE, f = FALSE)
   } else {
     TRUE
   }
@@ -189,7 +193,7 @@ object_system <- function(x) {
 
   if (! is_object_like(x)) {
     "base"
-  } else if (isS4(x)) {
+  } else if (has_s4_bit(x)) {
     if (methods::is(x, "refClass")) { # CHECK: try to remove this dep on methods
       "RC"
     } else {

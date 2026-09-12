@@ -15,11 +15,12 @@ is_pairlist2(x, n = NULL)
 
 is_environment2(x, n = NULL)
 
-is_expression2(x, n = NULL)
-
 is_vector(x, n = NULL)
 
-is_collection(x, n = NULL, expr = TRUE, pairlist = TRUE, env = TRUE)
+is_collection(
+  x, n = NULL,
+  expr = TRUE, pairlist = TRUE, env = TRUE, null = FALSE, dots = FALSE
+)
 }
 \arguments{
 \item{x}{[\code{any}] An object to test.}

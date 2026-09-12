@@ -45,7 +45,7 @@ to \code{NULL} to not test.}
 \item{args_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the NA. The options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
-\item A single non-negative number to test for \code{. == arg}.
+\item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
 \item A single negative number to test for \code{. == length(x) + arg}.
 \item A vector of two non-negative numbers to test for \verb{arg[1] <= . <= arg[2]} (\code{Inf} is allowed).
 \item A vector of three or more non-negative numbers to test for \code{. \%in\% arg}.
@@ -64,7 +64,8 @@ to \code{NULL} to not test.}
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
-\item \code{"null"} for \code{NULL}
+\item \code{"null"} for \code{NULL}.
+\item \code{"empty"} for any zero-length object.
 \item \code{"na"} for any \code{NA} type, or \code{"na_logical"} for \code{NA}, \code{"na_integer"} for     \code{NA_integer_}, \code{"na_real"} for \code{NA_real_}, \code{"na_complex"} for     \code{NA_complex_}, and \code{"na_character"} for \code{NA_character_}.
 \item \code{"nan"} for \code{NaN}.
 \item \code{"+inf"} for \code{+Inf}, \code{"-inf"} for \code{-Inf}, and \code{"inf"} for both.
@@ -93,6 +94,8 @@ to \code{NULL} to not test.}
 \item{short_circuit}{[\code{TRUE} | \code{FALSE}] If \code{TRUE}, the tests results will be reported up to the   first failure. Else, all tests results are reported. The former is more   efficient, while the latter is more informative.}
 
 \item{report_untested}{[\code{TRUE} | \code{FALSE}] If \code{TRUE}, the tests that were not run due to short-  circuiting will be reported as untested, else, ignored.}
+
+\item{args_cnd}{[\code{list()}] Additional arguments passed to \code{\link[cli:cli_abort]{cli::cli_abort()}}, \code{\link[cli:cli_abort]{cli::cli_warn()}},   or \code{\link[cli:cli_abort]{cli::cli_inform()}}, based on the chosen \code{action}.}
 }
 \value{
 \itemize{

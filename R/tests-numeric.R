@@ -42,6 +42,7 @@ NULL
 #' @param x_name `r ROXY$x_name()`
 #' @param short_circuit `r ROXY$short_circuit()`
 #' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns()`
 #'

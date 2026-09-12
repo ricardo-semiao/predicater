@@ -13,11 +13,11 @@ n_dims(x, count_empty = TRUE, how = "dim")
 
 n_dimnames(x, count_empty = TRUE, count_invalid = TRUE, how = "dimnames")
 
-has_dimnames(x, how = "dimnames")
+has_dimnames(x, n = NULL, how = "dimnames")
 
 has_rownames(x, how = "dimnames")
 
-has_dim(x, how = "dim")
+has_dim(x, n = NULL, how = "dim")
 }
 \arguments{
 \item{x}{[\code{any}] Object to check.}
@@ -36,6 +36,9 @@ element of \code{\link[=dimnames]{dimnames()}}, and \code{"attr"} for \code{\lin
 
 \item{count_invalid}{[\code{TRUE} | \code{FALSE}] Whether to dimension names that have
 only non-NA or non-empty values.}
+
+\item{n}{[\code{integer(1)}] Number of dimensions to check for. Set to \code{NULL} to
+not test.}
 }
 \value{
 \itemize{

@@ -34,6 +34,8 @@ is_any(x)
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
+\item{type}{[\code{character(1)}] A type to test for, as returned by \code{\link[=typeof]{typeof()}}.}
+
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{

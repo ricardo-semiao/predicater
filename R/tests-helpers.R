@@ -86,6 +86,7 @@ fn_core_to_test <- function(core) {
   new_function(args, body, caller_env())
 }
 
+
 fn_core_to_assert <- function(core, msgs_add) {
   core_sym <- ensym(core)
   assert_name <- gsub("^core_", "assert_", as_string(core_sym))
@@ -149,6 +150,9 @@ fn_core_to_assert <- function(core, msgs_add) {
 }
 # TODO: add functionality to recieve modifiers for each test's message and the
 # top message
+
+# CRAN dot removal:
+utils::globalVariables(c("action", "args_cnd", "report_untested", "x"))
 
 
 create_tests_msgs <- function(tests, msgs_fns, report_untested) {

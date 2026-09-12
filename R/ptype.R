@@ -23,7 +23,7 @@
 #'  takes the metadata's value of `.x` (`vx`) and `.ptype` (`vp`) as arguments
 #'  and returns a boolean; or a string that specifies a predefined function (see
 #'  [Details](#details)).
-#' @param class,dim,names,rownames,dimnames,...
+#' @param class,dim,names,row.names,dimnames,...
 #'   \[`character(1)` | `\(vx, vp) {}`] How to check the attributes -- each
 #'   argument is an attribute name -- of `.x` against `.ptype`. With a function
 #'   or string (same as above).
@@ -72,15 +72,15 @@ is_ptype <- function(
   .x, .ptype,
   .typeof = "==", .length = "==_0n", .attrs = "no",
   class = "==_0n", dim = "==_0n",
-  names = "==_0n", rownames = "==_0n", dimnames = "id_0n",
+  names = "==_0n", row.names = "==_0n", dimnames = "id_0n",
   ...
 ) {
   # Checks:
-  # - .typeof, .length, .attrs, class, dim, names, rownames, dimnames, ... must
+  # - .typeof, .length, .attrs, class, dim, names, row.names, dimnames, ... must
   #   conform to docs
   ptype_check_ops(
     .typeof, .length, .attrs,
-    class, dim, names, rownames, dimnames, ...
+    class, dim, names, row.names, dimnames, ...
   )
 
 
@@ -107,7 +107,7 @@ is_ptype <- function(
 
   checks_available <- c(names(checks_extra), checks_available)
   checks <- c(checks_extra, checks)
-  for (c in c("class", "dim", "names", "rownames", "dimnames")) {
+  for (c in c("class", "dim", "names", "row.names", "dimnames")) {
     if (! c %in% names(checks)) checks[[c]] <- get(c)
   }
   checks_in_x <- c(checks_in_x, ".typeof", ".length", ".attrs")

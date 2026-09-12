@@ -6,15 +6,18 @@
 \alias{is_na2}
 \title{Types - NA values}
 \usage{
-are_na2(x, nan = "f", type = NULL)
+are_na2(x, nan = "f", types = NULL)
 
-is_na2(x, n = NULL, nan = "f", type = NULL)
+is_na2(x, n = NULL, nan = "f", types = NULL)
 }
 \arguments{
 \item{x}{[\code{any}] Any R object.}
 
 \item{nan}{[\code{character(1)}] How to treat \code{NaN} values: \code{"f"} to return
 \code{FALSE}, \code{"t"} to return \code{TRUE}, or \code{"na"} to return \code{NA}.}
+
+\item{types}{[\code{character()} | \code{NULL}] A character vector of allowed \code{NA}
+types (see \code{\link{NA}}). Set to \code{NULL} to allow all types.}
 
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
