@@ -283,11 +283,12 @@ core_code <- function(
   x,
   sym = TRUE, lang = TRUE, literal = TRUE,
   valid = NULL, empty = NULL,
-  sentinels = NULL, custom = NULL
+  sentinels = NULL, custom = NULL,
+  short_circuit
 ) {
   run_tests(
     x, sentinels, valid, empty, custom,
-    tests_pars = list(), short = TRUE,
+    tests_pars = list(), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_code(x, sym, lang, literal) %@@% c(type = typeof(x)),
       valid = \(x, arg, pars) {

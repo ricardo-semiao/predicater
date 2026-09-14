@@ -1,5 +1,5 @@
 
-#' Test objects for exact equality with more flexibility
+#' Compare - Exact equality with more flexibility
 #'
 #' @description
 #' Similar to [identical()] but with more flexibility on how to handle data and

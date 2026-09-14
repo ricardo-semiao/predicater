@@ -4,7 +4,7 @@
 # From https://github.com/Yunuuuu/standalone/blob/main/R/standalone-tibble.R
 # at 11/09/2026
 
-#' @title Match - Vectorized if-else
+#' @title Compare - Vectorized if-else
 #' @inherit funs::if_else
 if_else2 <- function(condition, true, false, na = NULL) {
   # output size from `condition`
@@ -34,7 +34,7 @@ if_else2 <- function(condition, true, false, na = NULL) {
   out
 }
 
-#' @title Match - Vectorized nested if-else
+#' @title Compare - Vectorized nested if-else
 #' @inherit dplyr::case_when
 case_when2 <- function(.default, ..., .ptype = NULL) {
   if (is.null(.ptype)) {
@@ -70,7 +70,7 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 # TODO: _ptype and _id versions with a fixed tab
 # TODO: try catch user code
 
-#' Match - Pattern matching
+#' Compare - Pattern matching
 #'
 #' Pattern matching functions to return a value based on a case of `x`. Similar
 #' to [switch()] but allows for any type for object as the case. Cases are two

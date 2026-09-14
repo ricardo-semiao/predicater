@@ -85,6 +85,7 @@ export(is_list, is_vector)
 
 export(is_logical, is_integer, is_double, is_complex, is_character, is_raw, is_atomic)
 
+export(is_matching_set)
 export(is_na2)
 export(is_nan)
 export(is_null, is_weakref)
@@ -97,6 +98,7 @@ export(is_promise)
 export(is_ptype)
 export(is_ptype_list)
 export(is_s4)
+export(is_sorted)
 export(is_symbol2)
 export(is_syntactic_literal, is_call)
 

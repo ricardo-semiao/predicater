@@ -1,7 +1,7 @@
 
 # Prototypes -------------------------------------------------------------------
 
-#' Check if object is of prototype
+#' Compare - Check if object is of prototype
 #'
 #' @description
 #' Check if `.x` has the same attributes as `.ptype`, with more flexibility than

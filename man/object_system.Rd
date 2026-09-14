@@ -3,7 +3,7 @@
 \name{object_system}
 \alias{object_system}
 \alias{is_system}
-\title{Determine object-oriented system of object}
+\title{Types - Determine object-oriented system of object}
 \usage{
 object_system(x)
 

@@ -73,34 +73,6 @@ pall_na <- function(..., nan = "f") {
 # }
 
 
-#' Check for duplicate values
-#'
-#' @description
-#' - `any_duplicated`: is identical to [vctrs::vec_duplicate_any()], and detects
-#'   the presence of duplicated values, similar to [anyDuplicated()].
-#' - `are_duplicated()` is identical to [vctrs::vec_duplicate_detect()], and
-#'   returns a logical vector describing if each element of the vector is
-#'   duplicated elsewhere. Unlike duplicated(), it reports all duplicated
-#'   values, not just the second and subsequent repetitions.
-#'
-#' @inheritParams vctrs::vec_duplicate_any
-#'
-#' @returns
-#' - \[`TRUE` | `FALSE`] For `any_duplicated()`: the scalar result of the test.
-#' - \[`logical(length(x))`] For `are_duplicated()`: a logical vector of the same
-#'   size as `x`, describing if each element is duplicated elsewhere.
-#'
-#' @inheritSection vctrs::vec_duplicate_any Missing values
-#'
-#' @export
-any_duplicated <- vctrs::vec_duplicate_any
-
-#' @rdname any_duplicated
-#' @export
-are_duplicated <- vctrs::vec_duplicate_detect
-# TODO: add control over considering NAs, NaNs, and Infs as duplicates or not
-
-
 
 # Functional -------------------------------------------------------------------
 

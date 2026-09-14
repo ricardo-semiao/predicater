@@ -53,45 +53,26 @@ TESTS_MENU$empty_n <- function(x, arg, pars) {
 # Others -----------------------------------------------------------------------
 
 TESTS_MENU$sorted <- function(x, arg, pars) {
-  if (arg == "asc") {
-    !is.unsorted(x)
-  } else if (arg == "desc") {
-    !is.unsorted(rev(x))
-  } %@@%
-    c(sorted = arg)
+  is_sorted(x, arg, na.rm = TRUE) %@@% c(sorted = arg)
 }
 # TODO: what to do with na.rm = TRUE?
 
 TESTS_MENU$set <- function(x, arg, pars) {
   if (! is_list(arg)) {
     all(x %in% arg)
-
   } else {
-    if (! is_empty(arg$no) && any(x %in% arg$no)) {
-      return(FALSE)
-    }
-
-    if (is_empty(yes <- arg$yes)) {
-      return(TRUE)
-    }
-
-    x_in_yes <- x %in% arg$yes
-    switch(arg$mode %||% "all",
-      all = all(x_in_yes),
-      any = any(x_in_yes),
-      only = all(x_in_yes) && all(arg$yes %in% x)
-    )
+    is_matching_set(x, arg$yes, arg$no, arg$mode)
   }
 }
 # CHECK: would be nice to be able to enforce order too
 # CHECK: we dont allow multi-valued x's, e.g. "any of '1' or c('2', '3')"
 
 TESTS_MENU$custom <- function(x, arg, pars) {
-  test_custom(x, arg, pars$env)
+  test_custom(x, arg)
 }
 
 TESTS_MENU$custom_map <- function(x, arg, pars) {
-  all(vapply(x, test_custom, logical(1), custom = arg, env = pars$env))
+  all(vapply(x, test_custom, logical(1), custom = arg))
 }
 
 TESTS_MENU$env_has <- function(x, arg, pars) {

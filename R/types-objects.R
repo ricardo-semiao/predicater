@@ -129,7 +129,7 @@ is_object <- function(x) {
 
 # Object system ----------------------------------------------------------------
 
-#' Determine object-oriented system of object
+#' Types - Determine object-oriented system of object
 #'
 #' @description
 #' R has many object-oriented systems, including S3, S4, RC, R6, R.oo, S7,
