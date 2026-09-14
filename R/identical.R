@@ -1,8 +1,7 @@
 
-# TODO: rethink if we should export identical_vec, etc.
-
 #' Test objects for exact equality with more flexibility
 #'
+#' @description
 #' Similar to [identical()] but with more flexibility on how to handle data and
 #' attributes.
 #' - `identical2()` test two objects for exact equality.
@@ -10,15 +9,18 @@
 #'   returning the comparison results in a list with same structure as `x`.
 #'   Useful to flag where `x` and `y` differ.
 #'
+#' To see if multiple objects are identical, wrap them in a list and use
+#' [reduce_predicate()]. To vectorize over two lists, checking that each pair of
+#' elements between them are identical, use `Map(identical2, x, y)` (see
+#' [Map()]).
+#'
 #' @param x,y \[`any`] Any R object.
-#' @param single_NA \[`TRUE` | `FALSE`] Whether to treat `NA` values as a
-#'   identical to each other.
-#' @param single_zero \[`TRUE` | `FALSE`] Whether to treat `+0` and `-0` as
-#'   identical to each other.
+#' @param single_NA,single_zero \[`TRUE` | `FALSE` each] Whether to treat `NA`
+#'   values as a identical to each other, and the same for `+0` vs. `-0`.
 #' @param ord_data,ord_attrs \[`TRUE` | `FALSE` each] Whether to keep the order
 #'   of the data and attributes in `x` and `y`.
-#' @param tol_type \[`character(1)`] Type of tolerance to use when comparing
-#'   numeric values. One of:
+#' @param tol_type \[`"none"` | `"abs"` | `"rel"`] Type of tolerance to use when
+#'   comparing numeric values. One of:
 #'   - `"none"`: no tolerance (default).
 #'   - `"abs"`: absolute tolerance.
 #'   - `"rel"`: relative tolerance.
@@ -28,16 +30,13 @@
 #'   [rlang::names2()].
 #' @param ignore_attrs \[`list()`] Arguments to pass to [attrs_rmv()] to remove
 #'   attributes from `x` and `y`
-#' @param ... For variants, arguments passed to `identical2()`.
-#' @param fun \[`character(1)`] For variants, function to use for comparison.
-#'   One of `"identical"` or `"identical2"`.
-#' @param l \[`list()`] For `identical_reduce()`, a list of objects to compare.
-#' @param accumulate \[`TRUE` | `FALSE`] For `identical_reduce()`, whether to
-#'   return the accumulated tests' results or just the final result.
+#' @param ... For `identical_flag()`: arguments passed to `identical2()` or
+#'   [identical()].
+#' @param fun \[`"identical"` | `"identical2"`] For `identical_flag()`: function to use for
+#'   comparison.
 #'
 #' @returns
-#' - \[`TRUE` | `FALSE`] for `identical2()` and `identical_reduce()`.
-#' - \[`logical(length(x))`] for `identical_vec()`.
+#' - \[`TRUE` | `FALSE`] for `identical2()`.
 #' - `identical_flag()` returns a object with the same structure as `x` and
 #'   logical elements.
 #'
@@ -55,10 +54,6 @@
 #'
 #' # No sorting but accept up to 2.1 numerical absolute tolerance:
 #' identical2(x, y, tol_type = "abs", tol = 2.1, ignore_attrs = "c") #> TRUE
-#'
-#' # Vectorized comparison:
-#' identical_vec(list(x, y, x, x), list(x, y, y, y))
-#' #> TRUE  TRUE  FALSE  FALSE
 #'
 #' # Understading where the differences are:
 #' identical_flag(x, y)
@@ -133,7 +128,6 @@ identical2 <- function(
 # TODO: order data by names, values, or both (currently only by values)
 # TODO: allow ignore_data to accept vector of names or vector of indices. later
 # could even accept mixed, regex, etc.
-# TODO: cite using reduce_predicate and Map(identical) usages
 # NOTE: Less important but possible: make C header metadata matter
 
 
@@ -147,6 +141,10 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
 
 
   # Main:
+  fun <- switch(fun,
+    identical = identical,
+    identical2 = identical2
+  )
   res <- list(.data = NA, .attrs = NA)
   attrs_x <- attributes(x)
   attrs_y <- attributes(y)
@@ -166,7 +164,8 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
       res$.data[[i]] <- identical_flag(x[[i]], y[[i]], ..., fun = fun)
     }
   } else if (is_atomic(x)) {
-    res$.data <- identical_vec(x, y, ..., fun = fun)
+    #res$.data <- identical_vec(x, y, ..., fun = fun)
+    res$.data <- fun(x, y, ...)
   }
 
   attrs_x_none <- is_null(attrs_x) || identical(names(attrs_x), "names")
@@ -180,7 +179,6 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
   res
 }
 # TODO: allow attrib as set
-
 
 
 # identical2 Helpers ----------------------------------------------------------

@@ -34,8 +34,8 @@
 #' is_expression2(x, n = NULL, valid = FALSE)
 #'
 #' is_code(
-#'   x, sym = TRUE, call = TRUE, literal = TRUE,
-#'   name = NULL, valid = FALSE, empty = TRUE
+#'   x, sym = TRUE, lang = TRUE, literal = TRUE,
+#'   valid = FALSE, empty = TRUE
 #' )
 #'
 #' @param x \[`any`] An object to test.
@@ -48,8 +48,8 @@
 #'   or arguments in the call, set to `NULL` to not test.
 #' @param ns \[`character(1)` | `NULL`] Namespace of the call, set to `NULL` to
 #'   not test.
-#' @param sym,call,literal \[`TRUE` | `FALSE`] Whether to allow symbols, calls,
-#'   or syntactic literals.
+#' @param sym,lang,literal \[`TRUE` | `FALSE`] Whether to allow symbols,
+#'   language objects, or syntactic literals.
 #'
 #' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
@@ -96,11 +96,11 @@ is_expression2 <- function(x, n = NULL, valid = FALSE) {
 #' @usage NULL
 #' @export
 is_code <- function(
-  x, sym = TRUE, call = TRUE, literal = TRUE,
-  name = NULL, valid = FALSE, empty = TRUE
+  x, sym = TRUE, lang = TRUE, literal = TRUE,
+  valid = FALSE, empty = TRUE
 ) {
-  (sym && is_symbol2(x, name, valid, empty)) ||
-    (call && is_language(x, valid)) ||
+  (sym && is_symbol2(x, valid = valid, empty = empty)) ||
+    (lang && is_language(x, valid)) ||
     (literal && is_syntactic_literal(x))
 }
 

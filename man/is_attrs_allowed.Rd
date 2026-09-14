@@ -7,7 +7,7 @@
 is_attrs_allowed(x, cnd_match = NULL, warn = "tw")
 }
 \arguments{
-\item{x}{[\code{any}] Object to check.}
+\item{x}{[\code{any}] An object to test.}
 
 \item{cnd_match}{[\code{character(1)}] String to match in the condition message.
 If no match, the condition is re-thrown. Defaults to allow any message.}

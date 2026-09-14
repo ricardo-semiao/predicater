@@ -15,8 +15,8 @@ NULL
 #' its input, aborting if it fails the test.
 #'
 #' @param x \[`any`] An object to test.
-#' @param len,null_n,call_n,sym_n,literal_n
-#'   `r ROXY$x_n("len,null_n,call_n,sym_n,literal_n,")`
+#' @param len,null_n,call_n,sym_n,literal_n,invalid_n
+#'   `r ROXY$x_n("len,null_n,call_n,sym_n,literal_n,invalid_n")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_map `r ROXY$custom_map()`
@@ -34,7 +34,7 @@ NULL
 
 core_expression <- function(
   x,
-  len = NULL, null_n = NULL, call_n = NULL, sym_n = NULL, literal_n = NULL,
+  len = NULL, null_n = NULL, call_n = NULL, sym_n = NULL, literal_n = NULL, invalid_n = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
   short_circuit
 ) {
@@ -54,6 +54,10 @@ core_expression <- function(
       literal_n = \(x, arg, pars) {
         n_lit <- sum(vapply_lgl(pars$x_list, is_syntactic_literal))
         test_in_range(n_lit, arg, pars$l) %@@% c(n = n_lit)
+      },
+      invalid_n = \(x, arg, pars) {
+        n_invalid <- sum(vapply_lgl(pars$x_list, \(x) !is_parseable(x)))
+        test_in_range(n_invalid, arg, pars$l) %@@% c(n = n_invalid)
       }
     )
   )
@@ -93,6 +97,8 @@ assert_expression <- fn_core_to_assert(
 #' @param valid \[`TRUE` | `FALSE` | `NULL`] Test if the symbol name is a valid
 #'   syntactic R name (i.e. unchanged when processed by [make.names()]).
 #'   Set to `NULL` to not test.
+#' @param empty \[`TRUE` | `FALSE` | `NULL`] Test if the symbol is empty (i.e.
+#'   `""`). Set to `NULL` to not test.
 #' @param env_has,env_seen \[`environment` | `NULL`] Environment in which the
 #'   symbol exists directly, or inherited from one of its parents, respectively
 #'   (see [rlang::env_has()]). Set to `NULL` to not test.
@@ -112,7 +118,7 @@ NULL
 
 core_symbol <- function(
   x,
-  char_n = NULL, valid = NULL, env_has = NULL, env_seen = NULL,
+  char_n = NULL, valid = NULL, empty = NULL, env_has = NULL, env_seen = NULL,
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
@@ -129,6 +135,9 @@ core_symbol <- function(
       },
       valid = \(x, arg, pars) {
         (make.names(pars$sym_str) == pars$sym_str) == arg
+      },
+      empty = \(x, arg, pars) {
+        (pars$sym_str == "") == arg
       },
       env_has = \(x, arg, pars) {
         TESTS_MENU$test_env_has(arg, pars$sym_str, inherit = FALSE)
@@ -234,5 +243,74 @@ assert_language <- fn_core_to_assert(
     arg_names = \(attrs) "argument names do not match expected values.",
     simple = \(attrs) "simple call check failed.",
     valid = \(attrs) "call parseability check failed."
+  )
+)
+
+
+
+# Code -------------------------------------------------------------------------
+
+#' Tests - Code Objects
+#'
+#' @description
+#' Test if an input is a R language code object (symbol, language/call, or
+#' syntactic literal), and optionally check if it is valid parseable code or
+#' an empty symbol.
+#'
+#' `test_code()` is the predicate test, while `assert_code()` validates
+#' its input, aborting if it fails the test.
+#'
+#' @param x \[`any`] An object to test.
+#' @param sym,lang,literal \[`TRUE` | `FALSE` | `NULL`] Whether to allow symbols, language objects (calls), or syntatic literals.
+#' @param valid \[`logical(1)` | `NULL`] Whether the code object must be
+#'   parseable code.
+#' @param empty \[`logical(1)` | `NULL`] Whether empty symbols are permitted.
+#' @param sentinels `r ROXY$sentinels()`
+#' @param custom `r ROXY$custom()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
+#'
+#' @returns `r ROXY$test_returns("code")`
+#'
+#' @name test_code
+NULL
+
+core_code <- function(
+  x,
+  sym = TRUE, lang = TRUE, literal = TRUE,
+  valid = NULL, empty = NULL,
+  sentinels = NULL, custom = NULL
+) {
+  run_tests(
+    x, sentinels, valid, empty, custom,
+    tests_pars = list(), short = TRUE,
+    menu_add = list(
+      type = \(x, arg, pars) is_code(x, sym, lang, literal) %@@% c(type = typeof(x)),
+      valid = \(x, arg, pars) {
+        is_code(x, sym, lang, literal, valid = TRUE) == arg
+      },
+      empty = \(x, arg, pars) {
+        is_code(x, sym, lang, literal, empty = TRUE) == arg
+      }
+    )
+  )
+}
+
+#' @rdname test_code
+#' @export
+test_code <- fn_core_to_test(core_code)
+
+#' @rdname test_code
+#' @export
+assert_code <- fn_core_to_assert(
+  core_code,
+  msgs_add = list(
+    type = \(attrs) glue("had type `{attrs$type}`, which is not valid language code."),
+    valid = \(attrs) "code validity check failed.",
+    empty = \(attrs) "empty symbol status does not match expected setting."
   )
 )

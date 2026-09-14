@@ -144,6 +144,82 @@ assert_environment <- fn_core_to_assert(
 
 
 
+# Vector -----------------------------------------------------------------------
+
+#' Tests - General vectors
+#'
+#' @description
+#' Test if an input is a vector of a given mode (atomic, list, expression, or
+#' pairlist) and optionally validate length, missing values, duplicate counts,
+#' set inclusion, and ordering constraints.
+#'
+#' `test_vector()` is the predicate test, while `assert_vector()` validates
+#' its input, aborting if it fails the test.
+#'
+#' @param x \[`any`] An object to test.
+#' @param mode \[`"atomic"` | `"list"` | `"expression"` | `"pairlist"`] Allowed
+#'   vector types. They are additive: `"atomic"` allows atomic vectors, `list`
+#'   allows atomic and lists, `expression` allows atomic, lists, and expression
+#'   objects, and `pairlist` allows all.
+#' @param len,na_n,null_n,empty_n,dup_n `r ROXY$x_n("len,na_n,null_n,empty_n,dup_n")`
+#' @param sentinels `r ROXY$sentinels()`
+#' @param custom `r ROXY$custom()`
+#' @param custom_map `r ROXY$custom_map()`
+#' @param action `r ROXY$action()`
+#' @param env `r ROXY$env()`
+#' @param x_name `r ROXY$x_name()`
+#' @param short_circuit `r ROXY$short_circuit()`
+#' @param report_untested `r ROXY$report_untested()`
+#' @param args_cnd `r ROXY$args_cnd()`
+#'
+#' @returns `r ROXY$test_returns("vector")`
+#'
+#' @name test_vector
+NULL
+
+core_vector <- function(
+  x, mode = "atomic",
+  len = NULL, na_n = NULL, null_n = NULL, empty_n = NULL, dup_n = NULL,
+  sentinels = NULL, custom = NULL, custom_map = NULL,
+  short_circuit
+) {
+  run_tests(
+    x, sentinels, len, na_n, null_n, empty_n, dup_n,
+    custom, custom_map,
+    tests_pars = list(l = length(x), mode = mode), short = short_circuit,
+    menu_add = list(
+      type = \(x, arg, pars) {
+        mode <- pars$mode
+        switch(mode,
+          atomic = is_atomic(x),
+          list = is_atomic(x) || typeof(x) == "list",
+          expression = is_atomic(x) || typeof(x) %in% c("list", "expression"),
+          pairlist = is_atomic(x) || typeof(x) %in% c("list", "expression", "pairlist")
+        ) %@@%
+          c(type = typeof(x), mode = mode)
+      }
+    )
+  )
+}
+# NOTE: na_n don't work for raw and non-atomic, null_n and empty_n don't work
+# for atomic, but they probably work gracefully regardless
+# CHECK: we can create a atomic = T/F, list = T/F, ... scheme, for more control
+
+#' @rdname test_vector
+#' @export
+test_vector <- fn_core_to_test(core_vector)
+
+#' @rdname test_vector
+#' @export
+assert_vector <- fn_core_to_assert(
+  core_vector,
+  msgs_add = list(
+    type = \(attrs) glue("had type `{attrs$type}`, which does not match mode '{attrs$mode}'.")
+  )
+)
+
+
+
 # Helpers ----------------------------------------------------------------------
 
 test_env_parents <- function(x, parents) {

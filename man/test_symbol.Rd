@@ -9,6 +9,7 @@ test_symbol(
   x,
   char_n = NULL,
   valid = NULL,
+  empty = NULL,
   env_has = NULL,
   env_seen = NULL,
   sentinels = NULL,
@@ -19,6 +20,7 @@ assert_symbol(
   x,
   char_n = NULL,
   valid = NULL,
+  empty = NULL,
   env_has = NULL,
   env_seen = NULL,
   sentinels = NULL,
@@ -48,6 +50,9 @@ returns a single \code{TRUE} or \code{FALSE}.
 \item{valid}{[\code{TRUE} | \code{FALSE} | \code{NULL}] Test if the symbol name is a valid
 syntactic R name (i.e. unchanged when processed by \code{\link[=make.names]{make.names()}}).
 Set to \code{NULL} to not test.}
+
+\item{empty}{[\code{TRUE} | \code{FALSE} | \code{NULL}] Test if the symbol is empty (i.e.
+\code{""}). Set to \code{NULL} to not test.}
 
 \item{env_has, env_seen}{[\code{environment} | \code{NULL}] Environment in which the
 symbol exists directly, or inherited from one of its parents, respectively

@@ -15,7 +15,7 @@ has_names_valid(
 )
 }
 \arguments{
-\item{x}{[\code{any}] Object to check for names.}
+\item{x}{[\code{any}] An object to test.}
 
 \item{na, empty, dups, invalid}{[\code{character(1)}] How to handle NA, empty,
 duplicate, or invalid names: \code{"f"} to return \code{FALSE}, or \code{"t"} return
@@ -32,8 +32,8 @@ duplicate, or invalid names: \code{"f"} to return \code{FALSE}, or \code{"t"} re
 checks.
 }
 \description{
-A more flexible version of \code{\link[rlang:is_named]{rlang::is_named()}} that allows the user to
-specify how to handle edge cases in names.
+Test if \code{x} has names with more flexiblility than \code{\link[rlang:is_named]{rlang::is_named()}},
+handling NA, empty, duplicate, and invalid names, as well as empty vectors.
 }
 \details{
 The default argument values guaratee that \code{x} can be safely iterated by its

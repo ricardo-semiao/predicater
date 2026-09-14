@@ -22,8 +22,9 @@ vapply_lgl <- function(.x, .f = as.logical, ..., .n = 1L) {
 }
 # TODO: export in rstools?
 
-atomic_from_list_scalars <- function(x, type) {
-  res <- vector(type)
+
+atomic_from_list_of_scalars <- function(x, type = NULL) {
+  res <- vector(type %||% typeof(x[[1]]))
   j <- 0
   for (i in seq_along(x)) {
     if (! is_null(x[[i]])) {

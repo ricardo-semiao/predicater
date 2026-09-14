@@ -80,7 +80,7 @@ fn_core_to_test <- function(core) {
   body <- expr({
     # Tests left to core
     tests <- (!!core_sym)(!!!args_syms, short_circuit = TRUE)
-    all(atomic_from_list_scalars(tests, "logical"))
+    all(atomic_from_list_of_scalars(tests, "logical"))
   })
 
   new_function(args, body, caller_env())
@@ -112,7 +112,7 @@ fn_core_to_assert <- function(core, msgs_add) {
 
     tests <- (!!core_sym)(!!!args_core_syms)
 
-    if (all(atomic_from_list_scalars(tests, "logical"))) {
+    if (all(atomic_from_list_of_scalars(tests, "logical"))) {
       return(invisible(x))
     }
 

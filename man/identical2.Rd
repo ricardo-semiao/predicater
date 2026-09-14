@@ -23,17 +23,14 @@ identical_flag(x, y, ..., fun = "identical2")
 \arguments{
 \item{x, y}{[\code{any}] Any R object.}
 
-\item{single_NA}{[\code{TRUE} | \code{FALSE}] Whether to treat \code{NA} values as a
-identical to each other.}
-
-\item{single_zero}{[\code{TRUE} | \code{FALSE}] Whether to treat \code{+0} and \code{-0} as
-identical to each other.}
+\item{single_NA, single_zero}{[\code{TRUE} | \code{FALSE} each] Whether to treat \code{NA}
+values as a identical to each other, and the same for \code{+0} vs. \code{-0}.}
 
 \item{ord_data, ord_attrs}{[\code{TRUE} | \code{FALSE} each] Whether to keep the order
 of the data and attributes in \code{x} and \code{y}.}
 
-\item{tol_type}{[\code{character(1)}] Type of tolerance to use when comparing
-numeric values. One of:
+\item{tol_type}{[\code{"none"} | \code{"abs"} | \code{"rel"}] Type of tolerance to use when
+comparing numeric values. One of:
 \itemize{
 \item \code{"none"}: no tolerance (default).
 \item \code{"abs"}: absolute tolerance.
@@ -49,20 +46,15 @@ elements to ignore when comparing \code{x} and \code{y}. Names are compared agai
 \item{ignore_attrs}{[\code{list()}] Arguments to pass to \code{\link[=attrs_rmv]{attrs_rmv()}} to remove
 attributes from \code{x} and \code{y}}
 
-\item{...}{For variants, arguments passed to \code{identical2()}.}
+\item{...}{For \code{identical_flag()}: arguments passed to \code{identical2()} or
+\code{\link[=identical]{identical()}}.}
 
-\item{fun}{[\code{character(1)}] For variants, function to use for comparison.
-One of \code{"identical"} or \code{"identical2"}.}
-
-\item{l}{[\code{list()}] For \code{identical_reduce()}, a list of objects to compare.}
-
-\item{accumulate}{[\code{TRUE} | \code{FALSE}] For \code{identical_reduce()}, whether to
-return the accumulated tests' results or just the final result.}
+\item{fun}{[\code{"identical"} | \code{"identical2"}] For \code{identical_flag()}: function to use for
+comparison.}
 }
 \value{
 \itemize{
-\item [\code{TRUE} | \code{FALSE}] for \code{identical2()} and \code{identical_reduce()}.
-\item [\code{logical(length(x))}] for \code{identical_vec()}.
+\item [\code{TRUE} | \code{FALSE}] for \code{identical2()}.
 \item \code{identical_flag()} returns a object with the same structure as \code{x} and
 logical elements.
 }
@@ -76,6 +68,11 @@ attributes.
 returning the comparison results in a list with same structure as \code{x}.
 Useful to flag where \code{x} and \code{y} differ.
 }
+
+To see if multiple objects are identical, wrap them in a list and use
+\code{\link[=reduce_predicate]{reduce_predicate()}}. To vectorize over two lists, checking that each pair of
+elements between them are identical, use \code{Map(identical2, x, y)} (see
+\code{\link[=Map]{Map()}}).
 }
 \examples{
 x <- structure(c(1, 2, 3), a = "a", b = "b", c = "c")
@@ -91,10 +88,6 @@ identical2(x, y, ord_data = FALSE, ignore_attrs = "c", ord_attrs = TRUE) #> FALS
 
 # No sorting but accept up to 2.1 numerical absolute tolerance:
 identical2(x, y, tol_type = "abs", tol = 2.1, ignore_attrs = "c") #> TRUE
-
-# Vectorized comparison:
-identical_vec(list(x, y, x, x), list(x, y, y, y))
-#> TRUE  TRUE  FALSE  FALSE
 
 # Understading where the differences are:
 identical_flag(x, y)

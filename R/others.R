@@ -1,5 +1,179 @@
 
-# check_installed2 ----------------------------------------------------------
+# Unrelated functions ----------------------------------------------------------
+
+#' Combine many vectors into one vector
+#'
+#' @description
+#' Combine all arguments into a new vector of common type. This function is a
+#' renaming of [vctrs::vec_c()].
+#'
+#' @inheritParams vctrs::vec_c
+#'
+#' @inherit vctrs::vec_c return
+#'
+#' @inherit vctrs::vec_c examples
+c2 <- function(..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal") {
+  vctrs::vec_c(..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal")
+}
+
+
+
+# Parallel and NA --------------------------------------------------------------
+
+#' Parallel any and all
+#'
+#' @description
+#' These functions are wrappers around [vctrs::vec_pany()] and
+#' [vctrs::vec_pall()], varyiants of [any()] and [all()] that work in parallel
+#' on multiple inputs at once. They work similarly to how [pmin()] and [pmax()]
+#' are parallel variants of [min()] and [max()].
+#'
+#' `pany_na()` and `pall_na()` are variants that check for `NA` values in
+#' parallel.
+#'
+#' @param ... \[`logical()` each] Logical vectors with the same size.
+#' @param na \[`"na"` | `"t"` | `"f"`] What to return when encountering `NA`
+#'   values: `"na"` for `NA`, `"t"` for `TRUE`, and `"f"` for `FALSE`.
+#' @param nan \[`"t"` | `"f"`] For `*_na()` functions: wether to consider `NaN`
+#'   values as `NA` or not.
+#'
+#' @returns \[`logical()`] A logical vector of the same size as the inputs.
+#'
+#' @export
+pany <- function(..., na = "na") {
+  missing <- switch(na, na = NA, t = TRUE, f = FALSE)
+  vctrs::vec_pany(..., .missing = missing)
+}
+
+#' @rdname pany
+#' @export
+pall <- function(..., na = "na") {
+  missing <- switch(na, na = NA, t = TRUE, f = FALSE)
+  vctrs::vec_pall(..., .missing = missing)
+}
+
+#' @rdname pany
+#' @export
+pany_na <- function(..., nan = "f") {
+  vctrs::vec_pany(!!!lapply(list2(...), are_na2, nan = nan))
+}
+
+#' @rdname pany
+#' @export
+pall_na <- function(..., nan = "f") {
+  vctrs::vec_pall(!!!lapply(list2(...), are_na2, nan = nan))
+}
+
+# any_na <- function(x) {
+#   any(are_na2(x))
+# }
+
+# all_na <- function(x) {
+#   all(are_na2(x))
+# }
+
+
+#' Check for duplicate values
+#'
+#' @description
+#' - `any_duplicated`: is identical to [vctrs::vec_duplicate_any()], and detects
+#'   the presence of duplicated values, similar to [anyDuplicated()].
+#' - `are_duplicated()` is identical to [vctrs::vec_duplicate_detect()], and
+#'   returns a logical vector describing if each element of the vector is
+#'   duplicated elsewhere. Unlike duplicated(), it reports all duplicated
+#'   values, not just the second and subsequent repetitions.
+#'
+#' @inheritParams vctrs::vec_duplicate_any
+#'
+#' @returns
+#' - \[`TRUE` | `FALSE`] For `any_duplicated()`: the scalar result of the test.
+#' - \[`logical(length(x))`] For `are_duplicated()`: a logical vector of the same
+#'   size as `x`, describing if each element is duplicated elsewhere.
+#'
+#' @inheritSection vctrs::vec_duplicate_any Missing values
+#'
+#' @export
+any_duplicated <- vctrs::vec_duplicate_any
+
+#' @rdname any_duplicated
+#' @export
+are_duplicated <- vctrs::vec_duplicate_detect
+# TODO: add control over considering NAs, NaNs, and Infs as duplicates or not
+
+
+
+# Functional -------------------------------------------------------------------
+
+#' Reduce binary predicate over a list
+#'
+#' @description
+#' This function applies a binary predicate function `.f` over a list `.l`,
+#' checking if the result is `TRUE` for any or all ordered pairs within `.l`.
+#'
+#' `accumulate_predicate()` is similar, but returns a logical vector of the
+#' accumulated results of the tests.
+#'
+#' @param .l \[`list()`] A list of objects to compare.
+#' @param .op \[`"or"` | `"and"`] Whether to check if the predicate is `TRUE`
+#'   for any or any or all ordered pairs within `.l`.
+#' @param .f \[`function()`] A binary predicate function, that uses their first
+#'   two arguments for the operation, and returns a single `TRUE` or `FALSE`.
+#' @param ... Additional arguments passed to `.f`.
+#'
+#' @returns
+#' - \[`logical(1)`] For `reduce_predicate()`: the scalar result of the test.
+#' - \[`logical(length(.l) - 1)`] For `accumulate_predicate()`: the accumulated
+#'   results.
+#'
+#' @export
+reduce_predicate <- function(.l, .op = "or", .f, ...) {
+  i <- 1
+  n <- length(.l)
+
+  if (.op == "or") {
+    res <- FALSE
+    while (! res && i <= n) {
+      res <- .f(.l[[i]], .l[[i + 1]], ...)
+      i <- i + 1
+    }
+  } else if (.op == "and") {
+    res <- TRUE
+    while (res && i <= n) {
+      res <- .f(.l[[i]], .l[[i + 1]], ...)
+      i <- i + 1
+    }
+  }
+
+  res
+}
+
+#' @rdname reduce_predicate
+#' @export
+accumulate_predicate <- function(.l, .op = "or", .f, ...) {
+  n <- length(.l)
+  res <- vector("list", n - 1)
+
+  if (.op == "or") {
+    res[[1]] <- .f(.l[[1]], .l[[2]], ...)
+    for (i in seq(2, n - 1)) {
+      res[[i]] <- res[[i - 1]] || .f(.l[[i]], .l[[i + 1]], ...)
+    }
+  } else if (.op == "and") {
+    res[[1]] <- .f(.l[[1]], .l[[2]], ...)
+    for (i in seq(2, n - 1)) {
+      res[[i]] <- res[[i - 1]] && .f(.l[[i]], .l[[i + 1]], ...)
+    }
+  }
+
+  res
+}
+# TODO: wrap in user provided try catch
+# NOTE: purrr has other predicate functionals at
+# https://purrr.tidyverse.org/reference/index.html#predicate-functionals
+
+
+
+# check_installed2 -------------------------------------------------------------
 
 args_check_installed <- set_names(syms(fn_fmls_names(check_installed)))
 names(args_check_installed)[names(args_check_installed) == "..."] <- ""

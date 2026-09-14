@@ -21,8 +21,8 @@ is_call(x, name = NULL, n = NULL, ns = NULL)
 is_expression2(x, n = NULL, valid = FALSE)
 
 is_code(
-  x, sym = TRUE, call = TRUE, literal = TRUE,
-  name = NULL, valid = FALSE, empty = TRUE
+  x, sym = TRUE, lang = TRUE, literal = TRUE,
+  valid = FALSE, empty = TRUE
 )
 }
 \arguments{
@@ -39,8 +39,8 @@ can be \code{\link[=parse]{parse()}}'d, or is a syntatic symbol.}
 \item{n}{[\code{integer(1)} | \code{NULL}] Number of elements in the expression vector
 or arguments in the call, set to \code{NULL} to not test.}
 
-\item{sym, call, literal}{[\code{TRUE} | \code{FALSE}] Whether to allow symbols, calls,
-or syntactic literals.}
+\item{sym, lang, literal}{[\code{TRUE} | \code{FALSE}] Whether to allow symbols,
+language objects, or syntactic literals.}
 
 \item{ns}{[\code{character(1)} | \code{NULL}] Namespace of the call, set to \code{NULL} to
 not test.}

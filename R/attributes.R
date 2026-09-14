@@ -17,7 +17,7 @@
 #' Besides these, objects of type `"char"` and `"any"`, which exist only in the
 #' internals of R, always return `FALSE`.
 #'
-#' @param x \[`any`] Object to check.
+#' @param x `r ROXY$x()`
 #' @param cnd_match \[`character(1)`] String to match in the condition message.
 #'   If no match, the condition is re-thrown. Defaults to allow any message.
 #' @param warn \[`character(1)`] How to handle erros: `"f"` to return `FALSE`;
@@ -116,7 +116,7 @@ attr2 <- function(x, which, exact = TRUE) {
 #' - `has_attrs_only()` returns `TRUE` if all and only the selected attributes
 #'   are present.
 #'
-#' @param x \[`any`] Object to remove attributes from.
+#' @param x \[`any`] Object to test for or remove attributes from.
 #' @param abbr \[`character(1)`] String of characters specifying attributes to
 #'   keep: `"n"` for 'names', `"d"` for 'dim', `"c"` for 'class', `"r"` for both
 #'   rownames and dimnames.
@@ -277,10 +277,10 @@ attrs_filter <- function(
 
 #' Attributes - Names
 #'
-#' A more flexible version of [rlang::is_named()] that allows the user to
-#' specify how to handle edge cases in names.
+#' Test if `x` has names with more flexiblility than [rlang::is_named()],
+#' handling NA, empty, duplicate, and invalid names, as well as empty vectors.
 #'
-#' @param x \[`any`] Object to check for names.
+#' @param x `r ROXY$x()`
 #' @param how \[`character(1)`] How to extract names: "names" for `names(x)`, or
 #'   "attr" for `attr(x, "names")`.
 #' @param na,empty,dups,invalid \[`character(1)`] How to handle NA, empty,
