@@ -5,20 +5,20 @@
 \alias{accumulate_predicate}
 \title{Reduce binary predicate over a list}
 \usage{
-reduce_predicate(.l, .op = "or", .f, ...)
+reduce_predicate(.l, .f, ..., .op = "or")
 
-accumulate_predicate(.l, .op = "or", .f, ...)
+accumulate_predicate(.l, .f, ..., .op = "or")
 }
 \arguments{
 \item{.l}{[\code{list()}] A list of objects to compare.}
-
-\item{.op}{[\code{"or"} | \code{"and"}] Whether to check if the predicate is \code{TRUE}
-for any or any or all ordered pairs within \code{.l}.}
 
 \item{.f}{[\verb{function()}] A binary predicate function, that uses their first
 two arguments for the operation, and returns a single \code{TRUE} or \code{FALSE}.}
 
 \item{...}{Additional arguments passed to \code{.f}.}
+
+\item{.op}{[\code{"or"} | \code{"and"}] Whether to check if the predicate is \code{TRUE}
+for any or any or all ordered pairs within \code{.l}.}
 }
 \value{
 \itemize{

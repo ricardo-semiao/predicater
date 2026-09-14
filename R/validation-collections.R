@@ -1,12 +1,12 @@
 
-#' @include tests-helpers.R tests-menu.R
+#' @include validation-helpers.R validation-menu.R
 NULL
 
 
 
 # Lists ------------------------------------------------------------------------
 
-#' Tests - List
+#' Validation - List
 #'
 #' @description
 #' Test if an object is a list.
@@ -73,7 +73,7 @@ assert_list <- fn_core_to_assert(core_list, list(
 
 # Environment ------------------------------------------------------------------
 
-#' Tests - Environment
+#' Validation - Environment
 #'
 #' @description
 #' Test if an object is an environment.
@@ -146,7 +146,7 @@ assert_environment <- fn_core_to_assert(
 
 # Vector -----------------------------------------------------------------------
 
-#' Tests - General vectors
+#' Validation - General vectors
 #'
 #' @description
 #' Test if an input is a vector of a given mode (atomic, list, expression, or

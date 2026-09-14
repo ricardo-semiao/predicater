@@ -29,8 +29,8 @@ values as a identical to each other, and the same for \code{+0} vs. \code{-0}.}
 \item{ord_data, ord_attrs}{[\code{TRUE} | \code{FALSE} each] Whether to keep the order
 of the data and attributes in \code{x} and \code{y}.}
 
-\item{tol_type}{[\code{"none"} | \code{"abs"} | \code{"rel"}] Type of tolerance to use when
-comparing numeric values. One of:
+\item{tol_type}{[\code{"none"} | \code{"abs"} | \code{"rel"}]
+Type of tolerance to use when comparing numeric values. One of:
 \itemize{
 \item \code{"none"}: no tolerance (default).
 \item \code{"abs"}: absolute tolerance.
@@ -49,8 +49,8 @@ attributes from \code{x} and \code{y}}
 \item{...}{For \code{identical_flag()}: arguments passed to \code{identical2()} or
 \code{\link[=identical]{identical()}}.}
 
-\item{fun}{[\code{"identical"} | \code{"identical2"}] For \code{identical_flag()}: function to use for
-comparison.}
+\item{fun}{[\code{"identical"} | \code{"identical2"}] For \code{identical_flag()}: function
+to use for comparison.}
 }
 \value{
 \itemize{

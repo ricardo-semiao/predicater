@@ -1,5 +1,5 @@
 
-#' Data - Is vector sorted?
+#' Data checks - Check if object is ordered
 #'
 #' This function is a wrapper around [is.unsorted()] to check if a vector is
 #' sorted in ascending or descending order.
@@ -25,7 +25,7 @@ is_sorted <- function(x, order = "asc", na.rm = FALSE, strictly = FALSE) {
 # TODO: checks
 
 
-#' Data - Is object in (and/or not in) a set?
+#' Data checks - Check if object is in (and/or not in) a set
 #'
 #' This function checks if an object is in a set of values, and optionally if it
 #' is not in another set of values. It can check if all, any, or only the values
@@ -61,7 +61,7 @@ is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
 # TODO: checks, deal with NA, cite in ROXY$set
 
 
-#' Data - Check for duplicate values
+#' Data checks - Check for duplicate values
 #'
 #' @description
 #' - `any_duplicated`: is identical to [vctrs::vec_duplicate_any()], and detects

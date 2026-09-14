@@ -1,7 +1,7 @@
 
 # Infinite-related -------------------------------------------------------------
 
-#' Types - Inf and NaN
+#' Type checks - Inf and NaN
 #'
 #' @description
 #' Check if an object is `Inf`, `-Inf`, `NaN`, or none of them, flexibly dealing
@@ -147,7 +147,7 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 
 # Integer-like -----------------------------------------------------------------
 
-#' Types - Integer-like values
+#' Type checks - Integer-like values
 #'
 #' @description
 #' Check if an object can be considerd integer in 4 different interpretations
@@ -253,11 +253,11 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 #' are_integer_like(c(1L, NA_integer_), na = "na")
 # [1] TRUE TRUE
 #'
-#' @name predicates-integer-like
+#' @name is_integer_like
 NULL
 
 
-#' @rdname predicates-integer-like
+#' @rdname is_integer_like
 #' @export
 are_integer_like <- function(
   x, mode = "range", tol = sqrt(.Machine$double.eps), na = "t"
@@ -309,7 +309,7 @@ are_integer_like <- function(
 # TODO: rethink modes names
 
 
-#' @rdname predicates-integer-like
+#' @rdname is_integer_like
 #' @export
 is_integer_like <- function(
   x, n = NULL, mode = "range", tol = sqrt(.Machine$double.eps), na = "t"

@@ -1,12 +1,12 @@
 
-#' @include tests-helpers.R tests-menu.R
+#' @include validation-helpers.R validation-menu.R
 NULL
 
 
 
 # Core functions ---------------------------------------------------------------
 
-#' Tests - Numeric vectors
+#' Validation - Numeric vectors
 #'
 #' @description
 #' Test if an object is a numeric vector:

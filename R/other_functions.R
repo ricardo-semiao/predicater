@@ -63,6 +63,7 @@ pany_na <- function(..., nan = "f") {
 pall_na <- function(..., nan = "f") {
   vctrs::vec_pall(!!!lapply(list2(...), are_na2, nan = nan))
 }
+# TODO: use .na/.nan instead of na/nan
 
 # any_na <- function(x) {
 #   any(are_na2(x))
@@ -86,11 +87,11 @@ pall_na <- function(..., nan = "f") {
 #' accumulated results of the tests.
 #'
 #' @param .l \[`list()`] A list of objects to compare.
-#' @param .op \[`"or"` | `"and"`] Whether to check if the predicate is `TRUE`
-#'   for any or any or all ordered pairs within `.l`.
 #' @param .f \[`function()`] A binary predicate function, that uses their first
 #'   two arguments for the operation, and returns a single `TRUE` or `FALSE`.
 #' @param ... Additional arguments passed to `.f`.
+#' @param .op \[`"or"` | `"and"`] Whether to check if the predicate is `TRUE`
+#'   for any or any or all ordered pairs within `.l`.
 #'
 #' @returns
 #' - \[`logical(1)`] For `reduce_predicate()`: the scalar result of the test.
@@ -98,7 +99,7 @@ pall_na <- function(..., nan = "f") {
 #'   results.
 #'
 #' @export
-reduce_predicate <- function(.l, .op = "or", .f, ...) {
+reduce_predicate <- function(.l, .f, ..., .op = "or") {
   i <- 1
   n <- length(.l)
 
@@ -121,7 +122,7 @@ reduce_predicate <- function(.l, .op = "or", .f, ...) {
 
 #' @rdname reduce_predicate
 #' @export
-accumulate_predicate <- function(.l, .op = "or", .f, ...) {
+accumulate_predicate <- function(.l, .f, ..., .op = "or") {
   n <- length(.l)
   res <- vector("list", n - 1)
 
@@ -147,10 +148,7 @@ accumulate_predicate <- function(.l, .op = "or", .f, ...) {
 
 # check_installed2 -------------------------------------------------------------
 
-args_check_installed <- set_names(syms(fn_fmls_names(check_installed)))
-names(args_check_installed)[names(args_check_installed) == "..."] <- ""
-
-#' Check if the user accepted a package installation
+#' Check if user accepted a package installation
 #'
 #' @description
 #' This function returns `TRUE` if `pkg` is already installed, and prompt the
@@ -174,7 +172,7 @@ names(args_check_installed)[names(args_check_installed) == "..."] <- ""
 #'     # If the package is installed or the user chooses to install it
 #'     # Some code such as `crazy_print_package::crazy_print(x)`
 #'   } else {
-#'     # If the package is the user refused to install it
+#'     # If the package is not installed and the user refused to install it
 #'     print(x)
 #'   }
 #' }
@@ -186,7 +184,7 @@ check_installed2 <- new_function(
     tryCatch(
       withRestarts(
         {
-          rlang::check_installed(!!!args_check_installed)
+          rlang::check_installed(!!!fn_fmls_syms(check_installed))
           TRUE
         },
         abort = \(cnd) FALSE

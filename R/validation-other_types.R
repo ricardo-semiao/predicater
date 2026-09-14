@@ -1,12 +1,12 @@
 
-#' @include tests-helpers.R tests-menu.R
+#' @include validation-helpers.R validation-menu.R
 NULL
 
 
 
 # Other types ------------------------------------------------------------------
 
-#' Tests - Other types
+#' Validation - Other types
 #'
 #' @description
 #' Test if an object is of various special base R types, including promises,
@@ -174,7 +174,7 @@ assert_externalptr <- fn_core_to_assert(core_externalptr, list(
 
 # Function ---------------------------------------------------------------------
 
-#' Tests - Function
+#' Validation - Function
 #'
 #' @description
 #' Test if an object is a function, with options to inspect function type, argument

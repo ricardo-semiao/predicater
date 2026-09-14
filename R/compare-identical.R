@@ -19,8 +19,8 @@
 #'   values as a identical to each other, and the same for `+0` vs. `-0`.
 #' @param ord_data,ord_attrs \[`TRUE` | `FALSE` each] Whether to keep the order
 #'   of the data and attributes in `x` and `y`.
-#' @param tol_type \[`"none"` | `"abs"` | `"rel"`] Type of tolerance to use when
-#'   comparing numeric values. One of:
+#' @param tol_type \[`"none"` | `"abs"` | `"rel"`]
+#'   Type of tolerance to use when comparing numeric values. One of:
 #'   - `"none"`: no tolerance (default).
 #'   - `"abs"`: absolute tolerance.
 #'   - `"rel"`: relative tolerance.
@@ -32,8 +32,8 @@
 #'   attributes from `x` and `y`
 #' @param ... For `identical_flag()`: arguments passed to `identical2()` or
 #'   [identical()].
-#' @param fun \[`"identical"` | `"identical2"`] For `identical_flag()`: function to use for
-#'   comparison.
+#' @param fun \[`"identical"` | `"identical2"`] For `identical_flag()`: function
+#'   to use for comparison.
 #'
 #' @returns
 #' - \[`TRUE` | `FALSE`] for `identical2()`.
@@ -129,6 +129,7 @@ identical2 <- function(
 # TODO: allow ignore_data to accept vector of names or vector of indices. later
 # could even accept mixed, regex, etc.
 # NOTE: Less important but possible: make C header metadata matter
+# TODO: attrs_rmv or attrs_keep? or attrs_filt?
 
 
 #' @rdname identical2

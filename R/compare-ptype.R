@@ -24,7 +24,8 @@
 #'  and returns a boolean; or a string that specifies a predefined function (see
 #'  [Details](#details)).
 #' @param class,dim,names,row.names,dimnames,...
-#'   \[`character(1)` | `\(vx, vp) {}`] How to check the attributes -- each
+#'   \[`character(1)` | `\(vx, vp) {}`]
+#'   How to check the attributes -- each
 #'   argument is an attribute name -- of `.x` against `.ptype`. With a function
 #'   or string (same as above).
 #' @param .named \[`TRUE` | `FALSE`] For `is_ptype_list()`, whether to use the

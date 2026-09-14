@@ -1,7 +1,7 @@
 
 # Length -----------------------------------------------------------------------
 
-#' Metadata - Check if a collection is empty
+#' Metadata checks - Check if a collection is empty
 #'
 #' @description
 #' Is a collection object (see [is_collection()]) empty, i.e. has zero length?

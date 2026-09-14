@@ -1,7 +1,7 @@
 
 # Other types ------------------------------------------------------------------
 
-#' Types - Other types
+#' Type checks - Other types
 #'
 #' @description
 #' Test if object is of a specific type ([typeof()]). The test is invariant to
@@ -11,25 +11,6 @@
 #' See the Details section for the full list of types.
 #'
 #' Functions from rlang: [rlang::is_null()], [rlang::is_weakref()].
-#'
-#' @usage
-#' is_type(x, type, n = NULL)
-#'
-#' is_null(x)
-#'
-#' is_promise(x)
-#'
-#' is_dots(x, n = NULL)
-#'
-#' is_weakref(x)
-#'
-#' is_bytecode(x)
-#'
-#' is_externalptr(x)
-#'
-#' is_char(x)
-#'
-#' is_any(x)
 #'
 #' @param x \[`any`] An object to test.
 #' @param type \[`character(1)`] A type to test for, as returned by [typeof()].
@@ -58,9 +39,6 @@
 #' - Weak reference: _"weakref"/WEAKREFSXP_.
 #' - Internal-only: _"char"/CHARSXP_, _"any"/ANYSXP_.
 #'
-#' @aliases is_null is_weakref
-#' @rawNamespace export(is_null, is_weakref)
-#'
 #' @name predicates-other-types
 
 
@@ -79,7 +57,11 @@ is_type <- function(x, type, n = NULL) {
 
 
 #' @rdname predicates-other-types
-#' @usage NULL
+#' @export
+is_null <- is_null
+
+
+#' @rdname predicates-other-types
 #' @export
 is_promise <- function(x) {
   typeof(x) == "promise"
@@ -87,7 +69,6 @@ is_promise <- function(x) {
 
 
 #' @rdname predicates-other-types
-#' @usage NULL
 #' @export
 is_dots <- function(x, n = NULL) {
   typeof(x) == "..." && (is.null(n) || length(x) == n)
@@ -95,7 +76,11 @@ is_dots <- function(x, n = NULL) {
 
 
 #' @rdname predicates-other-types
-#' @usage NULL
+#' @export
+is_weakref <- is_weakref
+
+
+#' @rdname predicates-other-types
 #' @export
 is_bytecode <- function(x) {
   typeof(x) == "bytecode"
@@ -103,7 +88,6 @@ is_bytecode <- function(x) {
 
 
 #' @rdname predicates-other-types
-#' @usage NULL
 #' @export
 is_externalptr <- function(x) {
   typeof(x) == "externalptr"
@@ -111,7 +95,6 @@ is_externalptr <- function(x) {
 
 
 #' @rdname predicates-other-types
-#' @usage NULL
 #' @export
 is_char <- function(x) {
   typeof(x) == "char"
@@ -119,7 +102,6 @@ is_char <- function(x) {
 
 
 #' @rdname predicates-other-types
-#' @usage NULL
 #' @export
 is_any <- function(x) {
   typeof(x) == "any"
@@ -129,7 +111,7 @@ is_any <- function(x) {
 
 # Functions --------------------------------------------------------------------
 
-#' Types - Functions
+#' Type checks - Functions
 #'
 #' @description
 #' There are three types ([typeof()]) of functions in R: `"closure"` (standard
@@ -160,14 +142,14 @@ is_any <- function(x) {
 #' @aliases is_function is_closure is_primitive is_primitive_eager is_primitive_lazy
 #' @rawNamespace export(is_function, is_closure, is_primitive, is_primitive_eager, is_primitive_lazy)
 #'
-#' @name predicates-functions
+#' @name is_function
 NULL
 
 
 
 # Collections ------------------------------------------------------------------
 
-#' Types - Collection types
+#' Type checks - Collection types
 #'
 #' @description
 #' In R, there are several types ([typeof()]) that can "store elements":
@@ -188,20 +170,6 @@ NULL
 #' - [rlang::is_vector()] tests for atomic or generic (list) vectors.
 #' - `is_collection()` tests for any of the above collection types, with options
 #'   to exclude any of them.
-#'
-#' @usage
-#' is_list(x, n = NULL)
-#'
-#' is_pairlist2(x, n = NULL)
-#'
-#' is_environment2(x, n = NULL)
-#'
-#' is_vector(x, n = NULL)
-#'
-#' is_collection(
-#'   x, n = NULL,
-#'   expr = TRUE, pairlist = TRUE, env = TRUE, null = FALSE, dots = FALSE
-#' )
 #'
 #' @param x \[`any`] An object to test.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
@@ -237,16 +205,15 @@ NULL
 #'
 #' See [rlang::is_namespace()] for another environment-related test.
 #'
-#' @aliases is_list is_vector
-#' @rawNamespace export(is_list, is_vector)
-#'
 #' @name predicates-collections
 NULL
-# TODO: move atomic here?
+
+#' @rdname predicates-collections
+#' @export
+is_list <- is_list
 
 
 #' @rdname predicates-collections
-#' @usage NULL
 #' @export
 is_pairlist2  <- function(x, n = NULL) {
   typeof(x) == "pairlist" && (is.null(n) || length(x) == n)
@@ -254,7 +221,6 @@ is_pairlist2  <- function(x, n = NULL) {
 
 
 #' @rdname predicates-collections
-#' @usage NULL
 #' @export
 is_environment2 <- function(x, n = NULL) {
   typeof(x) == "environment" && (is.null(n) || length(x) == n)
@@ -262,7 +228,11 @@ is_environment2 <- function(x, n = NULL) {
 
 
 #' @rdname predicates-collections
-#' @usage NULL
+#' @export
+is_vector <- is_vector
+
+
+#' @rdname predicates-collections
 #' @export
 is_collection <- function(
   x, n = NULL, expr = TRUE, pairlist = TRUE, env = TRUE, null = FALSE, dots = FALSE

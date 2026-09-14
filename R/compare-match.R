@@ -69,6 +69,9 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 # TODO: empty RHS returns the value of last non-empty RHS
 # TODO: _ptype and _id versions with a fixed tab
 # TODO: try catch user code
+# TODO: named cases save the result as a variable in the env for the next case
+# evaluation. Then, maybe add a . prefix to arg names (but this one is easier
+# for the user to avoid)
 
 #' Compare - Pattern matching
 #'
@@ -87,7 +90,8 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 #' table.
 #'
 #' @param x \[`any`] Object to match.
-#' @param ... \[`<formula>` each] Cases to match. Each case is a formula with
+#' @param ... \[`<formula>` each]
+#'   Cases to match. Each case is a formula with
 #'   the left-hand side being the value to match against and the right-hand side
 #'   being the value to return if the case matches. Cases are evaluated in
 #'   order, and in the caller environment.
@@ -118,7 +122,10 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 #' match_when("oi", grepl("1", .x) ~ "1", grepl("o", .x) ~ "o") #> "o"
 #'
 #' @export
-match_hash <- function(x, ..., nomatch = NULL, htab = NULL, type, size) {
+match_hash <- function(
+  x, ..., nomatch = NULL,
+  htab = NULL, type = missing_arg(), size = missing_arg()
+) {
   # Setup:
   cases <- list2(...)
   env <- caller_env()

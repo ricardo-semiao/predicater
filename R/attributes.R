@@ -1,7 +1,7 @@
 
 # General attributes functions -------------------------------------------------
 
-#' Attributes - Test if object allows attributes
+#' Attributes - Check if object allows attributes
 #'
 #' @description
 #' In R, some objects do not allow attributes to be set on them. This function
@@ -25,8 +25,7 @@
 #'   to throw the warning as an error.
 #'
 #' @returns \[`TRUE` | `FALSE`] Whether attributes can be set on `x`, or
-#' re-throws
-#'   the catched condition.
+#'   re-throws the catched condition.
 #'
 #' @examples
 #' is_attrs_allowed(mtcars) #> TRUE
@@ -97,7 +96,10 @@ attr2 <- function(x, which, exact = TRUE) {
 }
 
 
-#' Attributes - Test for and filter attributes from object
+
+# Filter -----------------------------------------------------------------------
+
+#' Attributes - Check for and filter attributes from object
 #'
 #' @description
 #' Functions to test for and filter attributes from an object. Attributes can be
@@ -380,7 +382,7 @@ are_names_valid <- function(
 
 # Dimensions -------------------------------------------------------------------
 
-#' Attributes - Dimensions
+#' Attributes - Dimensions existance and sizes
 #'
 #' @description
 #' Functions for the presence and number of dimensions and dimensions names of

@@ -7,7 +7,14 @@
 \alias{match_when}
 \title{Compare - Pattern matching}
 \usage{
-match_hash(x, ..., nomatch = NULL, htab = NULL, type, size)
+match_hash(
+  x,
+  ...,
+  nomatch = NULL,
+  htab = NULL,
+  type = missing_arg(),
+  size = missing_arg()
+)
 
 match_id(x, ..., nomatch = NULL, fun = "identical", args_id = list())
 
@@ -18,7 +25,8 @@ match_when(x, ..., nomatch = NULL)
 \arguments{
 \item{x}{[\code{any}] Object to match.}
 
-\item{...}{[\verb{<formula>} each] Cases to match. Each case is a formula with
+\item{...}{[\verb{<formula>} each]
+Cases to match. Each case is a formula with
 the left-hand side being the value to match against and the right-hand side
 being the value to return if the case matches. Cases are evaluated in
 order, and in the caller environment.}

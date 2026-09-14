@@ -2,7 +2,7 @@
 % Please edit documentation in R/other_functions.R
 \name{check_installed2}
 \alias{check_installed2}
-\title{Check if the user accepted a package installation}
+\title{Check if user accepted a package installation}
 \usage{
 check_installed2(
   pkg,
@@ -64,7 +64,7 @@ f <- function(x) {
     # If the package is installed or the user chooses to install it
     # Some code such as `crazy_print_package::crazy_print(x)`
   } else {
-    # If the package is the user refused to install it
+    # If the package is not installed and the user refused to install it
     print(x)
   }
 }

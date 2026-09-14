@@ -1,7 +1,7 @@
 
 # Base type tests --------------------------------------------------------------
 
-#' Types - Language objects
+#' Type checks - Language objects
 #'
 #' @description
 #' In R, there are three building blocks that compose the language itself:
@@ -22,22 +22,6 @@
 #'   tested with `is_expression2()`.
 #' - Any of the above: `is_code()`.
 #'
-#' @usage
-#' is_syntactic_literal(x)
-#'
-#' is_symbol2(x, name = NULL, valid = FALSE, empty = TRUE)
-#'
-#' is_language(x, valid = FALSE)
-#'
-#' is_call(x, name = NULL, n = NULL, ns = NULL)
-#'
-#' is_expression2(x, n = NULL, valid = FALSE)
-#'
-#' is_code(
-#'   x, sym = TRUE, lang = TRUE, literal = TRUE,
-#'   valid = FALSE, empty = TRUE
-#' )
-#'
 #' @param x \[`any`] An object to test.
 #' @param name \[`character(1)` | `NULL`] An optional name or vector of names
 #'   that the symbol or call should match. Set to `NULL` to not test.
@@ -53,15 +37,14 @@
 #'
 #' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
 #'
-#' @aliases is_syntactic_literal is_call
-#' @rawNamespace export(is_syntactic_literal, is_call)
-#'
 #' @name predicates-language
 NULL
 
+#' @rdname predicates-language
+#' @export
+is_syntactic_literal <- is_syntactic_literal
 
 #' @rdname predicates-language
-#' @usage NULL
 #' @export
 is_symbol2 <- function(x, name = NULL, valid = FALSE, empty = TRUE) {
   is_symbol(x, name) &&
@@ -69,17 +52,17 @@ is_symbol2 <- function(x, name = NULL, valid = FALSE, empty = TRUE) {
     (!empty || identical(x, expr()))
 }
 
-
 #' @rdname predicates-language
-#' @usage NULL
 #' @export
 is_language <- function(x, valid = FALSE) {
   (typeof(x) == "language") && (!valid || is_parseable(x))
 }
 
+#' @rdname predicates-language
+#' @export
+is_call <- is_call
 
 #' @rdname predicates-language
-#' @usage NULL
 #' @export
 is_expression2 <- function(x, n = NULL, valid = FALSE) {
   # Checks:
@@ -91,9 +74,7 @@ is_expression2 <- function(x, n = NULL, valid = FALSE) {
     (!valid || all(vapply_lgl(x, is_parseable)))
 }
 
-
 #' @rdname predicates-language
-#' @usage NULL
 #' @export
 is_code <- function(
   x, sym = TRUE, lang = TRUE, literal = TRUE,

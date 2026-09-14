@@ -1,7 +1,7 @@
 
 # Base checks ------------------------------------------------------------------
 
-#' Types - Atomic vectors
+#' Type checks - Atomic vectors
 #'
 #' @description
 #' Check if an object is of a specific atomic type ([typeof()]). The test is
@@ -60,13 +60,12 @@ is_numeric <- function(x, n = NULL) {
 
 # TRUE and FALSE ---------------------------------------------------------------
 
-#' Types - TRUE and FALSE values
+# CHECK: reconsider adding a @name, maybe use is_bool
+
+#' Type checks - TRUE and FALSE values
 #'
 #' Check if an object is literally `TRUE` or `FALSE`, controlling for `NA`
 #' values. [rlang::is_bool()] checks for either `TRUE` or `FALSE`.
-#'
-#' @usage
-#' is_bool(x)
 #'
 #' @param x \[`logical()`, `any`] For `are_*()`, a logical vector; for `is_*()`,
 #'   an object to test.
@@ -76,9 +75,6 @@ is_numeric <- function(x, n = NULL) {
 #' @returns
 #' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
 #' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
-#'
-#' @aliases is_bool
-#' @rawNamespace export(is_bool)
 #'
 #' @name predicates-true-false
 NULL
@@ -146,11 +142,15 @@ is_false2 <- function(x, na = "f") {
   is_logical(x, 1) && !is.na(x) && !x
 }
 
+#' @rdname predicates-true-false
+#' @export
+is_bool <- is_bool
+
 
 
 # NAs --------------------------------------------------------------------------
 
-#' Types - NA values
+#' Type checks - NA values
 #'
 #' @description
 #' Checks if an object is `NA`, `NA_integer_`, `NA_real_`, `NA_complex_`, or
@@ -192,10 +192,10 @@ is_false2 <- function(x, na = "f") {
 #' # To test for a single NA value, use the n argument:
 #' is_na2(NA, n = 1) #> TRUE
 #'
-#' @name predicates-na
+#' @name is_na2
 NULL
 
-#' @rdname predicates-na
+#' @rdname is_na2
 #' @export
 are_na2 <- function(x, nan = "f", types = NULL) {
   # Checks:
@@ -218,7 +218,7 @@ are_na2 <- function(x, nan = "f", types = NULL) {
 }
 
 
-#' @rdname predicates-na
+#' @rdname is_na2
 #' @export
 is_na2 <- function(x, n = NULL, nan = "f", types = NULL) {
   # Checks: left to rlang and are_na2

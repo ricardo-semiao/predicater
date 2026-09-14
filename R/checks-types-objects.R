@@ -1,7 +1,7 @@
 
 # Base tests -------------------------------------------------------------------
 
-#' Types - Objects
+#' Type checks - Objects
 #'
 #' @description
 #' Functions to test for 'object'-related properties:
@@ -129,7 +129,7 @@ is_object <- function(x) {
 
 # Object system ----------------------------------------------------------------
 
-#' Types - Determine object-oriented system of object
+#' Type checks - Determine object-oriented system of object
 #'
 #' @description
 #' R has many object-oriented systems, including S3, S4, RC, R6, R.oo, S7,
