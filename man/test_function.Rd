@@ -7,7 +7,7 @@
 \usage{
 test_function(
   x,
-  mode = NULL,
+  mode = "function",
   args_names = NULL,
   fn_env = NULL,
   dots = NULL,
@@ -19,7 +19,7 @@ test_function(
 
 assert_function(
   x,
-  mode = NULL,
+  mode = "function",
   args_names = NULL,
   fn_env = NULL,
   dots = NULL,
@@ -38,9 +38,11 @@ assert_function(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{mode}{[\code{character()} | \code{NULL}] Expected function type(s) out of
-\code{"closure"}, \code{"primitive"}, \code{"builtin"}, or \code{"special"}. Set to \code{NULL} to
-not test.}
+\item{mode}{[\code{"function"} | \code{"closure"} | \code{"builtin"} | \code{"special"} |
+\code{"primitive"} | \code{NULL}]
+Expected function type(s) out of \code{"function"} (any function), \code{"closure"},
+\code{"builtin"}, \code{"special"}, or \code{"primitive"} (any of the former two). Set to
+\code{NULL} to not test.}
 
 \item{args_names}{[\code{character()} | \code{NULL}] Expected exact argument names of
 the function. Set to \code{NULL} to not test.}
@@ -101,4 +103,26 @@ test.}
 \description{
 Test if an object is a function, with options to inspect function type, argument
 names, environments, S3 generics, and methods.
+}
+\examples{
+x <- function(a, b = 1, ...) {
+  a + b
+}
+
+args <- list(
+  mode = "closure",            # Must be a standard closure function (will pass)
+  args_names = c("a", "b"),    # Exact argument names must match (will fail)
+  fn_env = rlang::global_env(),
+  # Function environment must equal or inherit from global env (will pass)
+  dots = TRUE,                 # Function must accept `...` in arguments (will pass)
+  generic = FALSE,             # Must not be an S3 generic (will pass)
+  method = FALSE,              # Must not be an S3 method (will pass)
+  sentinels = c("null"),       # Allow NULL function (not the case of x)
+  custom = NULL                # No custom predicate
+)
+
+do.call(test_function, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_function, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

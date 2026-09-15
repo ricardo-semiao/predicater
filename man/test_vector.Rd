@@ -9,10 +9,10 @@ test_vector(
   x,
   mode = "atomic",
   len = NULL,
-  na_n = NULL,
-  null_n = NULL,
-  empty_n = NULL,
-  dup_n = NULL,
+  n_na = NULL,
+  n_null = NULL,
+  n_empty = NULL,
+  n_dup = NULL,
   sentinels = NULL,
   custom = NULL,
   custom_map = NULL
@@ -22,10 +22,10 @@ assert_vector(
   x,
   mode = "atomic",
   len = NULL,
-  na_n = NULL,
-  null_n = NULL,
-  empty_n = NULL,
-  dup_n = NULL,
+  n_na = NULL,
+  n_null = NULL,
+  n_empty = NULL,
+  n_dup = NULL,
   sentinels = NULL,
   custom = NULL,
   custom_map = NULL,
@@ -45,7 +45,7 @@ Allowed vector types. They are additive: \code{"atomic"} allows atomic vectors,
 \code{list} allows atomic and lists, \code{expression} allows atomic, lists, and
 expression objects, and \code{pairlist} allows all.}
 
-\item{len, na_n, null_n, empty_n, dup_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of \code{NULL} elements, number of elements with zero length, number of duplicate elements. The   options of each argument 'arg' are:
+\item{len, n_na, n_null, n_empty, n_dup}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of \code{NULL} elements, number of elements with zero length, number of duplicate elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -106,4 +106,25 @@ set inclusion, and ordering constraints.
 
 \code{test_vector()} is the predicate test, while \code{assert_vector()} validates
 its input, aborting if it fails the test.
+}
+\examples{
+x <- list(1, 2, NA, 2, NULL)
+
+args <- list(
+  mode = "list",          # Allow atomic vectors and lists (will pass)
+  len = c(1, 10),         # Length must be between 1 and 10 (will pass)
+  n_na = 0,               # No NA values allowed (will fail)
+  n_null = c(0, 1),       # At most 1 NULL element allowed (will pass)
+  n_empty = 0,            # No empty elements allowed (will pass)
+  n_dup = 0,              # No duplicate elements allowed (will fail)
+  sentinels = c("null"),  # Allow NULL x (not the case of x)
+  custom = NULL,          # Not tested
+  custom_map = \(elt) length(elt) <= 1
+  # All list elements must have length <= 1 (will pass)
+)
+
+do.call(test_vector, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_vector, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

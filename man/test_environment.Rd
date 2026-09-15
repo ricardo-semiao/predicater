@@ -111,3 +111,24 @@ Test if an object is an environment.
 \code{test_environment()} is the predicate test, while \code{assert_environment()}
 validates its input, aborting if it fails the test.
 }
+\examples{
+x <- rlang::new_environment(list(a = 1, b = 2), parent = rlang::global_env())
+
+args <- list(
+  len = c(1, 5),         # Length (number of bindings) must be between 1 and 5 (will pass)
+  env_has = c("a", "b"), # Environment must directly bind "a" and "b" (will pass)
+  env_sees = "__x__",    # Environment or its parents must see symbol "__x__" (will fail)
+  parents = rlang::global_env(),
+  # Must inherit from the global environment (will pass)
+  namespace = TRUE,      # Must be a package namespace (will fail)
+  sentinels = c("null"), # Allow NULL environment (not the case of x)
+  custom = NULL,         # Not test
+  custom_map = \(val) is.numeric(val)
+  # All binding values must be numeric (will pass)
+)
+
+do.call(test_environment, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_environment, c(list(x), args, short_circuit = FALSE))) #> Error
+
+}

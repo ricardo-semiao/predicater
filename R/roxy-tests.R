@@ -94,19 +94,19 @@ ROXY$x_n <- function(args) {
 
   args_labels <- c(
     len = "length",
-    na_n = "number of `NA` elements",
-    dup_n = "number of duplicate elements",
-    nan_n = "number of `NaN` elements",
-    inf_n = "number of `Inf` elements",
-    null_n = "number of `NULL` elements",
-    empty_n = "number of elements with zero length",
-    call_n = "number of 'language' elements",
-    sym_n = "number of 'symbol' elements",
-    literal_n = "number of syntactic literal elements",
-    depth_n = "number of parents",
-    true_n = "number of `TRUE` elements",
-    char_n = "number of characters (vectorized)",
-    invalid_n = "number of non-syntatic elements"
+    n_na = "number of `NA` elements",
+    n_dup = "number of duplicate elements",
+    n_nan = "number of `NaN` elements",
+    n_inf = "number of `Inf` elements",
+    n_null = "number of `NULL` elements",
+    n_empty = "number of elements with zero length",
+    n_call = "number of 'language' elements",
+    n_sym = "number of 'symbol' elements",
+    n_literal = "number of syntactic literal elements",
+    n_depth = "number of parents",
+    n_true = "number of `TRUE` elements",
+    n_char = "number of characters (vectorized)",
+    n_invalid = "number of non-syntatic elements"
   )
 
   args_text <- paste0(args_labels[args], collapse = ", ") # TODO: pluralize, 'respectively'
@@ -141,7 +141,7 @@ ROXY$set <- function(type) {
 ROXY$sorted <- function() {
   glue(r"(
   \[`"asc"` | `"desc"` | `NULL`] Test if `x` is sorted in ascending (`"asc"`) \
-    or descending (`"desc"`) order. Set to `NULL` to not test. Pair with `dup_n` \
+    or descending (`"desc"`) order. Set to `NULL` to not test. Pair with `n_dup` \
     to test for strictly sorted values.
   )")
 }

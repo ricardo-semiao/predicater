@@ -97,3 +97,28 @@ vectors, or a vector with \code{NA} values.
 \code{test_class()} is the predicate test, while \code{assert_class()} validates
 its input, aborting if it fails the test.
 }
+\examples{
+x <- structure(
+  list(a = 1),
+  class = c("another_class", "custom_df", "data.frame")
+)
+
+args <- list(
+  classes = list(
+    all = c("custom_df", "data.frame"),
+    none = "matrix"
+  ),
+  # Must inherit from both custom_df and data.frame, and not matrix (will pass)
+  tests_char = list(n_na = 0, n_dup = 0),
+  # Class names vector must contain no NAs or duplicates (will pass)
+  how = "class",         # Extract class vector via `class(x)` (will pass)
+  sentinels = c("null"), # Allow NULL class attribute (not the case of x)
+  custom = \(x) has_dim(x)
+  # Object must have a dim() value (will fail)
+)
+
+do.call(test_class, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_class, c(list(x), args, short_circuit = FALSE))) #> Error
+
+}

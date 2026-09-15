@@ -7,28 +7,28 @@
 \usage{
 test_names(
   x,
-  na_n = NULL,
-  empty_n = NULL,
-  dup_n = NULL,
-  invalid_n = NULL,
+  n_na = NULL,
+  n_empty = NULL,
+  n_dup = NULL,
+  n_invalid = NULL,
   set = NULL,
-  char_tests = NULL,
+  tests_char = NULL,
   how = "names",
-  empty = NULL,
+  empty = FALSE,
   sentinels = NULL,
   custom = NULL
 )
 
 assert_names(
   x,
-  na_n = NULL,
-  empty_n = NULL,
-  dup_n = NULL,
-  invalid_n = NULL,
+  n_na = NULL,
+  n_empty = NULL,
+  n_dup = NULL,
+  n_invalid = NULL,
   set = NULL,
-  char_tests = NULL,
+  tests_char = NULL,
   how = "names",
-  empty = NULL,
+  empty = FALSE,
   sentinels = NULL,
   custom = NULL,
   action = "abort",
@@ -43,7 +43,7 @@ assert_names(
 \item{x}{[\code{any}] An object to get names from, or a character vector of names
 to test.}
 
-\item{na_n, dup_n, empty_n, invalid_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the number of \code{NA} elements, number of duplicate elements, number of elements with zero length, number of non-syntatic elements. The   options of each argument 'arg' are:
+\item{n_na, n_dup, n_empty, n_invalid}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the number of \code{NA} elements, number of duplicate elements, number of elements with zero length, number of non-syntatic elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -56,7 +56,7 @@ returns a single \code{TRUE} or \code{FALSE}.
 
 \item{set}{[\code{character()} | \code{list(yes = , no = , mode = )} | \code{NULL}] Test if all values   of \code{x} are in a set of allowed values. Use a list with \code{yes} and/or \code{no} elements to defined allowed and disallowed values, with \code{mode}s \code{"all"} (all \code{x} in \code{yes}, the default), \code{"only"} (all and only \code{x} in \code{yes}), or \code{"any"} (any \code{x} in \code{yes}). Set to \code{NULL} to not test.}
 
-\item{char_tests}{[\code{list}] A list of additional arguments passed to
+\item{tests_char}{[\code{list}] A list of additional arguments passed to
 \code{\link[=test_character]{test_character()}}.}
 
 \item{how}{[\code{"names"} | \code{"x"} | \code{"attr"} | \code{"colnames"} | \code{"row.names"} |
@@ -66,8 +66,8 @@ How to extract names from \code{x}: \code{"x"} for \code{x} directly; \code{"nam
 \code{colnames(x)}; \code{"row.names"} for \code{attr(x, "row.names")}; or a positive
 integer for \code{dimnames(x)[[how]]}.}
 
-\item{empty}{[\code{TRUE} | \code{FALSE} | \code{NULL}] Whether to early pass or fail the
-test if the underlying vector \code{x} is empty. Set to \code{NULL} to not test.}
+\item{empty}{[\code{TRUE} | \code{FALSE}] Whether to early pass or fail the test if
+the underlying vector \code{x} is empty.}
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
@@ -118,4 +118,26 @@ conditions.
 its input, aborting if it fails the test.
 
 Hint: use \code{sentinels = c("null")} to allow no (\code{NULL}) names, and \code{empty = TRUE} to always pass the test if the underlying vector \code{x} is empty.
+}
+\examples{
+x <- rlang::set_names(1:6, c("a", "b", "c", NA, "", ""))
+
+args <- list(
+  n_na = 0,              # No NA names (will fail)
+  n_dup = NULL,          # Don't test for duplicates
+  n_empty = c(0, -1),    # Between 0 and length(x) - 1 empty names (will pass)
+  n_invalid = c(0, Inf), # Between 0 and Inf invalid names (same as not testing)
+  set = list(yes = c("a", "b"), no = c("d", "e")),
+  # Names must be only "a" or "b", and not "d" nor "e" (will fail)
+  how = "names",         # Use `names(x)` as the names vector to test
+  empty = FALSE,         # Don't allow empty `x` (will pass)
+  sentinels = c("null"), # Allow `NULL` names (not the case of x)
+  custom = \(x) isTRUE(all(nchar(x) == 1))
+  # All names must be a single character (will fail)
+)
+
+do.call(test_names, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_names, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

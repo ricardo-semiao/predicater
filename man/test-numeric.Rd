@@ -14,15 +14,14 @@ test_integer(
   x,
   mode = "strict",
   len = NULL,
-  na_n = NULL,
-  dup_n = NULL,
-  nan_n = NULL,
-  inf_n = NULL,
+  n_na = NULL,
+  n_dup = NULL,
+  n_nan = NULL,
+  n_inf = NULL,
   range = NULL,
   set = NULL,
   sorted = NULL,
   custom = NULL,
-  custom_map = NULL,
   sentinels = NULL,
   mode_tol = 0
 )
@@ -31,42 +30,39 @@ test_double(
   x,
   mode = "double",
   len = NULL,
-  na_n = NULL,
-  dup_n = NULL,
-  nan_n = NULL,
-  inf_n = NULL,
+  n_na = NULL,
+  n_dup = NULL,
+  n_nan = NULL,
+  n_inf = NULL,
   range = NULL,
   set = NULL,
   sorted = NULL,
   sentinels = NULL,
-  custom = NULL,
-  custom_map = NULL
+  custom = NULL
 )
 
 test_complex(
   x,
-  re_tests = NULL,
-  im_tests = NULL,
-  mod_tests = NULL,
-  arg_tests = NULL,
+  tests_re = NULL,
+  tests_im = NULL,
+  tests_mod = NULL,
+  tests_arg = NULL,
   sentinels = NULL,
-  custom = NULL,
-  custom_map = NULL
+  custom = NULL
 )
 
 assert_integer(
   x,
   mode = "strict",
   len = NULL,
-  na_n = NULL,
-  dup_n = NULL,
-  nan_n = NULL,
-  inf_n = NULL,
+  n_na = NULL,
+  n_dup = NULL,
+  n_nan = NULL,
+  n_inf = NULL,
   range = NULL,
   set = NULL,
   sorted = NULL,
   custom = NULL,
-  custom_map = NULL,
   sentinels = NULL,
   mode_tol = 0,
   action = "abort",
@@ -81,16 +77,15 @@ assert_double(
   x,
   mode = "double",
   len = NULL,
-  na_n = NULL,
-  dup_n = NULL,
-  nan_n = NULL,
-  inf_n = NULL,
+  n_na = NULL,
+  n_dup = NULL,
+  n_nan = NULL,
+  n_inf = NULL,
   range = NULL,
   set = NULL,
   sorted = NULL,
   sentinels = NULL,
   custom = NULL,
-  custom_map = NULL,
   action = "abort",
   env = caller_env(),
   x_name = NULL,
@@ -101,13 +96,12 @@ assert_double(
 
 assert_complex(
   x,
-  re_tests = NULL,
-  im_tests = NULL,
-  mod_tests = NULL,
-  arg_tests = NULL,
+  tests_re = NULL,
+  tests_im = NULL,
+  tests_mod = NULL,
+  tests_arg = NULL,
   sentinels = NULL,
   custom = NULL,
-  custom_map = NULL,
   action = "abort",
   env = caller_env(),
   x_name = NULL,
@@ -119,10 +113,15 @@ assert_complex(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{mode, mode_tol}{[\code{"strict"} | \code{"bounded"} | \code{"unbounded"}, \code{double(1)}]
-For \verb{*_integer()}: the \code{mode} and \code{tol} arguments to pass to \code{\link[=is_integer_like]{is_integer_like()}}.}
+\item{mode}{\itemize{
+\item [\code{"strict"} | \code{"bounded"} | \code{"unbounded"}] For \verb{*_integer()}: the \code{mode}
+argument to pass to \code{\link[=is_integer_like]{is_integer_like()}}.
+\item [\code{"double"} | \code{"numeric"}] For \verb{*_double()}: \code{"double"} to accept only
+\code{\link[=double]{double()}} vectors, or \code{"numeric"} to accept both \code{\link[=double]{double()}} and
+\code{\link[=integer]{integer()}} vectors.
+}}
 
-\item{len, na_n, dup_n, nan_n, inf_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of duplicate elements, number of \code{NaN} elements, number of \code{Inf} elements. The   options of each argument 'arg' are:
+\item{len, n_na, n_dup, n_nan, n_inf}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of duplicate elements, number of \code{NaN} elements, number of \code{Inf} elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -133,17 +132,14 @@ For \verb{*_integer()}: the \code{mode} and \code{tol} arguments to pass to \cod
 returns a single \code{TRUE} or \code{FALSE}.
 }}
 
-\item{range}{[\code{integer()} | \code{NULL}] A vector with the upper and lower bound
-for \code{x} values (\code{Inf} is allowed). Or a vector with three or more values to
-test for \code{. \%in\% range}. Set to \code{NULL} to not test.}
+\item{range}{[\code{numeric()} | \code{NULL}] A vector with the upper and lower bound
+for \code{x} values. Or a vector with three or more values to test for \code{all(x \%in\% range)}. Set to \code{NULL} to not test.}
 
 \item{set}{[\code{integer()} | \code{list(yes = , no = , mode = )} | \code{NULL}] Test if all values   of \code{x} are in a set of allowed values. Use a list with \code{yes} and/or \code{no} elements to defined allowed and disallowed values, with \code{mode}s \code{"all"} (all \code{x} in \code{yes}, the default), \code{"only"} (all and only \code{x} in \code{yes}), or \code{"any"} (any \code{x} in \code{yes}). Set to \code{NULL} to not test.}
 
-\item{sorted}{[\code{"asc"} | \code{"desc"} | \code{NULL}] Test if \code{x} is sorted in ascending (\code{"asc"})   or descending (\code{"desc"}) order. Set to \code{NULL} to not test. Pair with \code{dup_n}   to test for strictly sorted values.}
+\item{sorted}{[\code{"asc"} | \code{"desc"} | \code{NULL}] Test if \code{x} is sorted in ascending (\code{"asc"})   or descending (\code{"desc"}) order. Set to \code{NULL} to not test. Pair with \code{n_dup}   to test for strictly sorted values.}
 
 \item{custom}{[\verb{function(x)} | \code{NULL}] A custom function that takes \code{x} as first argument   and returns a single \code{TRUE} or \code{FALSE}. Set to \code{NULL} to not test.}
-
-\item{custom_map}{[\verb{function(x)} | \code{NULL}] A custom function that is applied to each element   of \code{x}. Must return a single \code{TRUE} or \code{FALSE} for each element. Set to   \code{NULL} to not test.}
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
@@ -155,7 +151,10 @@ test for \code{. \%in\% range}. Set to \code{NULL} to not test.}
 \item \code{"true"}/\code{"t"} for \code{TRUE}, and \code{"false"}/\code{"f"} for \code{FALSE}.
 }}
 
-\item{re_tests, im_tests, mod_tests, arg_tests}{[\code{list()} | \code{NULL}] For
+\item{mode_tol}{[\code{double(1)}] The \code{tol} argument to pass to
+\code{\link[=is_integer_like]{is_integer_like()}}.}
+
+\item{tests_re, tests_im, tests_mod, tests_arg}{[\code{list()} | \code{NULL}] For
 \verb{*_complex()}: a list with the same named arguments as \code{test_double()}, to
 test the real, imaginary, modulus and argument values of \code{x}.}
 
@@ -192,7 +191,7 @@ test the real, imaginary, modulus and argument values of \code{x}.}
 Test if an object is a numeric vector:
 \itemize{
 \item \code{test_integer(x, mode = "strict")} tests for integer vectors.
-\item \verb{test_integer_like(x, mode = *)} tests for integer-like vectors via
+\item \verb{test_integer(x, mode = *)} tests for integer-like vectors via
 \code{\link[=is_integer_like]{is_integer_like()}}, with "bounded" or "unbounded" mode.
 \item \code{test_double(x, mode = "double")} tests for double vectors.
 \item \code{test_double(x, mode = "numeric")} tests for double or integer vectors.
@@ -202,4 +201,51 @@ imaginary, modulus, and argument parts, to \code{test_double()}.
 
 They all are predicate tests, while the \verb{assert_*()} functions validate their
 input, aborting if it fails the test.
+}
+\examples{
+# Example 1: Integer-like vector with a floating-point tolerance error
+x <- c(1.0, 2.0, 3.0 + 1e-100, 4.0, Inf)
+
+args <- list(
+  mode = "unbounded",  # Allow double-precision whole numbers and Inf (will fail on 3.00001)
+  mode_tol = sqrt(.Machine$double.eps),
+  # Standard tolerance for decimal check
+  len = c(1, 10),          # Length must be between 1 and 10 (will pass)
+  n_na = 0,                # No NA values allowed (will pass)
+  n_dup = 0,               # No duplicate values allowed (will pass)
+  n_nan = 0,               # No NaN values allowed (will pass)
+  n_inf = 0,               # At most 1 Inf value allowed (will pass)
+  range = c(0, 10 ),       # Bounds between 0 and Inf (will fail)
+  set = list(no = c(0)),   # Values must not contain 0 (will pass)
+  sentinels = c("null"),   # Allow NULL x (not the case of x)
+  sorted = "desc",         # Must be sorted in decreasing order (will pass)
+  custom = NULL            # No custom predicate
+)
+
+do.call(test_integer, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_integer_like, c(list(x), args, short_circuit = FALSE))) #> Error
+
+
+# Example 2: Testing an integer vector under "numeric" mode
+x <- c(1L, 2L, 5L, 10L)
+
+args <- list(
+  mode = "numeric",                 # Accepts both double and integer vectors (will pass)
+  len = c(1, 10),                   # Length must be between 1 and 10 (will pass)
+  n_na = 0,                         # No NA values allowed (will pass)
+  n_dup = 0,                        # No duplicate values allowed (will pass)
+  n_nan = 0,                        # No NaN values allowed (will pass)
+  n_inf = 0,                        # No Inf values allowed (will pass)
+  range = c(1, 100),                # Values between 1 and 100 (will pass)
+  set = list(yes = c(1L, 2L, 3L)),  # Elements must belong to specified set (will fail)
+  sentinels = c("null"),            # Allow NULL x (not the case of x)
+  sorted = "asc",                   # Must be sorted in ascending order (will pass)
+  custom = NULL                     # No custom predicate
+)
+
+do.call(test_double, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_double, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

@@ -9,7 +9,7 @@ test_language(
   x,
   name = NULL,
   ns = NULL,
-  args_n = NULL,
+  n_args = NULL,
   arg_names = NULL,
   simple = NULL,
   valid = NULL,
@@ -21,7 +21,7 @@ assert_language(
   x,
   name = NULL,
   ns = NULL,
-  args_n = NULL,
+  n_args = NULL,
   arg_names = NULL,
   simple = NULL,
   valid = NULL,
@@ -42,7 +42,7 @@ assert_language(
 namespace of the call, via \code{\link[rlang:call_name]{rlang::call_name()}} and \code{\link[rlang:call_name]{rlang::call_ns()}}. Set
 to \code{NULL} to not test.}
 
-\item{args_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the NA. The   options of each argument 'arg' are:
+\item{n_args}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the NA. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -108,4 +108,23 @@ Test if an object is a call (language object).
 
 \code{test_language()} is the predicate test, while \code{assert_language()} validates
 its input, aborting if it fails the test.
+}
+\examples{
+x <- quote(rlang::env(a = 1, b = 2))
+
+args <- list(
+  name = "fn",             # Function name must be "fn" (will pass)
+  ns = "otherpkg",         # Namespace must be "otherpkg" (will fail)
+  n_args = c(1, 5),        # Number of arguments must be between 1 and 5 (will pass)
+  arg_names = c("a", "b"), # Argument names must match exact character vector (will pass)
+  simple = FALSE,          # Must not be a simple call without names/namespace (will pass)
+  valid = TRUE,            # Must be a parseable, valid call (will pass)
+  sentinels = c("null"),   # Allow NULL call (not the case of x)
+  custom = NULL            # No custom test predicate
+)
+
+rlang::exec(test_language, !!!c(list(x), args)) #> FALSE (not all tests passed)
+
+try(rlang::exec(assert_language, !!!c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

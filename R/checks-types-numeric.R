@@ -294,19 +294,20 @@ are_integer_like <- function(
     return(rep(TRUE, length(x)))
   }
 
+  delta <- abs(x - round(x)) # Testing on delta propagates Inf as NaN values
   if (mode == "unbounded") {
     case_when2(
-      abs(x - round(x)) < tol,
-      are_na2(x) ~ na,
-      is_nan(x, na = FALSE) ~ TRUE,
-      is_inf(x, na = FALSE) ~ TRUE
+      .default = delta < tol,
+      are_na2(delta) ~ na,
+      are_nan(delta, na = FALSE) ~ TRUE,
+      are_inf(delta, na = FALSE) ~ TRUE
     )
   } else {
     case_when2(
-      abs(x) <= .Machine$integer.max & abs(x - round(x)) < tol,
-      are_na2(x) ~ na,
-      is_nan(x, na = FALSE) ~ FALSE,
-      is_inf(x, na = FALSE) ~ FALSE
+      abs(x) <= .Machine$integer.max & delta < tol,
+      are_na2(delta) ~ na,
+      are_nan(delta, na = FALSE) ~ FALSE,
+      are_inf(delta, na = FALSE) ~ FALSE
     )
   }
 }

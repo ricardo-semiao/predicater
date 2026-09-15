@@ -17,7 +17,7 @@ NULL
 #' @param x `r ROXY$x()`
 #' @param mode \[`character()` | `NULL`] Expected vector type(s) out of `"list"` or
 #'   `"pairlist"`. Set to `NULL` to not test.
-#' @param len,null_n,empty_n,dup_n `r ROXY$x_n("len,null_n,empty_n,dup_n")`
+#' @param len,n_null,n_empty,n_dup `r ROXY$x_n("len,n_null,n_empty,n_dup")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_map `r ROXY$custom_map()`
@@ -30,25 +30,44 @@ NULL
 #'
 #' @returns `r ROXY$test_returns("list")`
 #'
+#' @examples
+#' x <- list(a = 1, b = NULL, c = integer(0), d = 1)
+#'
+#' args <- list(
+#'   mode = "list",               # Must be a standard list (will pass)
+#'   len = c(1, 10),              # Length must be between 1 and 10 (will pass)
+#'   n_null = 0,                  # No NULL elements allowed (will fail)
+#'   n_empty = c(0, 1),           # At most 1 empty element allowed (will pass)
+#'   n_dup = 0,                   # No duplicate elements allowed (will fail)
+#'   sentinels = c("null"),       # Allow NULL list (not the case of x)
+#'   custom = \(x) is.list(x),    # Must be a list (will pass)
+#'   custom_map = \(elt) !is.na(elt)
+#'   # All list elements must be non-NA (will pass)
+#' )
+#'
+#' do.call(test_list, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_list, c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test_list
 NULL
 
 core_list <- function(
   x,
-  mode = "list", len = NULL, null_n = NULL, empty_n = NULL, dup_n = NULL,
+  mode = "list", len = NULL, n_null = NULL, n_empty = NULL, n_dup = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, mode, len, null_n, empty_n, dup_n, custom, custom_map,
-    tests_pars = list(l = length(x)), short = short_circuit,
+    x, sentinels, len, n_null, n_empty, n_dup, custom, custom_map,
+    tests_pars = list(mode = mode, l = length(x)), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) {
         mode <- pars$mode
         switch(mode, list = is_list(x), pairlist = is_pairlist(x)) %@@%
           c(type = typeof(x), mode = mode)
       },
-      dup_n = \(x, arg, pars) {
+      n_dup = \(x, arg, pars) {
         test_in_range(n_dups <- sum(duplicated(as.list(unclass(x)))), arg, pars$l) %@@%
           c(n = n_dups)
       }
@@ -104,6 +123,26 @@ assert_list <- fn_core_to_assert(core_list, list(
 #' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("environment")`
+#'
+#' @examples
+#' x <- rlang::new_environment(list(a = 1, b = 2), parent = rlang::global_env())
+#'
+#' args <- list(
+#'   len = c(1, 5),         # Length (number of bindings) must be between 1 and 5 (will pass)
+#'   env_has = c("a", "b"), # Environment must directly bind "a" and "b" (will pass)
+#'   env_sees = "__x__",    # Environment or its parents must see symbol "__x__" (will fail)
+#'   parents = rlang::global_env(),
+#'   # Must inherit from the global environment (will pass)
+#'   namespace = TRUE,      # Must be a package namespace (will fail)
+#'   sentinels = c("null"), # Allow NULL environment (not the case of x)
+#'   custom = NULL,         # Not test
+#'   custom_map = \(val) is.numeric(val)
+#'   # All binding values must be numeric (will pass)
+#' )
+#'
+#' do.call(test_environment, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_environment, c(list(x), args, short_circuit = FALSE))) #> Error
 #'
 #' @name test_environment
 NULL
@@ -161,7 +200,7 @@ assert_environment <- fn_core_to_assert(
 #'   Allowed vector types. They are additive: `"atomic"` allows atomic vectors,
 #'   `list` allows atomic and lists, `expression` allows atomic, lists, and
 #'   expression objects, and `pairlist` allows all.
-#' @param len,na_n,null_n,empty_n,dup_n `r ROXY$x_n("len,na_n,null_n,empty_n,dup_n")`
+#' @param len,n_na,n_null,n_empty,n_dup `r ROXY$x_n("len,n_na,n_null,n_empty,n_dup")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_map `r ROXY$custom_map()`
@@ -174,17 +213,37 @@ assert_environment <- fn_core_to_assert(
 #'
 #' @returns `r ROXY$test_returns("vector")`
 #'
+#' @examples
+#' x <- list(1, 2, NA, 2, NULL)
+#'
+#' args <- list(
+#'   mode = "list",          # Allow atomic vectors and lists (will pass)
+#'   len = c(1, 10),         # Length must be between 1 and 10 (will pass)
+#'   n_na = 0,               # No NA values allowed (will fail)
+#'   n_null = c(0, 1),       # At most 1 NULL element allowed (will pass)
+#'   n_empty = 0,            # No empty elements allowed (will pass)
+#'   n_dup = 0,              # No duplicate elements allowed (will fail)
+#'   sentinels = c("null"),  # Allow NULL x (not the case of x)
+#'   custom = NULL,          # Not tested
+#'   custom_map = \(elt) length(elt) <= 1
+#'   # All list elements must have length <= 1 (will pass)
+#' )
+#'
+#' do.call(test_vector, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_vector, c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test_vector
 NULL
 
 core_vector <- function(
   x, mode = "atomic",
-  len = NULL, na_n = NULL, null_n = NULL, empty_n = NULL, dup_n = NULL,
+  len = NULL, n_na = NULL, n_null = NULL, n_empty = NULL, n_dup = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, len, na_n, null_n, empty_n, dup_n,
+    x, sentinels, len, n_na, n_null, n_empty, n_dup,
     custom, custom_map,
     tests_pars = list(l = length(x), mode = mode), short = short_circuit,
     menu_add = list(
@@ -197,12 +256,17 @@ core_vector <- function(
           pairlist = is_atomic(x) || typeof(x) %in% c("list", "expression", "pairlist")
         ) %@@%
           c(type = typeof(x), mode = mode)
+      },
+      n_na = \(x, arg, pars) {
+        if (pars$mode != "atomic") {
+          return(TRUE %@@% c(n = 0))
+        }
+        test_in_range(n_na <- sum(are_na2(x, nan = FALSE)), arg, pars$l) %@@%
+          c(n = n_na)
       }
     )
   )
 }
-# NOTE: na_n don't work for raw and non-atomic, null_n and empty_n don't work
-# for atomic, but they probably work gracefully regardless
 # CHECK: we can create a atomic = T/F, list = T/F, ... scheme, for more control
 
 #' @rdname test_vector

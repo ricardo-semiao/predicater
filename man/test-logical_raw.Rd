@@ -11,8 +11,8 @@
 test_logical(
   x,
   len = NULL,
-  na_n = NULL,
-  true_n = NULL,
+  n_na = NULL,
+  n_true = NULL,
   sentinels = NULL,
   custom = NULL
 )
@@ -22,8 +22,8 @@ test_raw(x, len = NULL, sentinels = NULL, custom = NULL)
 assert_logical(
   x,
   len = NULL,
-  na_n = NULL,
-  true_n = NULL,
+  n_na = NULL,
+  n_true = NULL,
   sentinels = NULL,
   custom = NULL,
   action = "abort",
@@ -50,7 +50,7 @@ assert_raw(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{len, na_n, true_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of \code{TRUE} elements. The   options of each argument 'arg' are:
+\item{len, n_na, n_true}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of \code{TRUE} elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -107,4 +107,20 @@ Test if an object is a logical or raw vector.
 
 They all are predicate tests, while the \verb{assert_*()} functions validate their
 input, aborting if it fails the test.
+}
+\examples{
+x <- c(TRUE, FALSE, NA, TRUE)
+
+args <- list(
+  len = c(1, 10),              # Length must be between 1 and 10 (will pass)
+  n_na = 0,                    # No NA values allowed (will fail)
+  n_true = c(1, 2),            # Between 1 and 2 TRUE values (will pass)
+  sentinels = c("null"),       # Allow NULL x (not the case of x)
+  custom = NULL                # No custom predicate
+)
+
+do.call(test_logical, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_logical, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

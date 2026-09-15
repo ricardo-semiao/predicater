@@ -11,7 +11,7 @@ NULL
 #' @description
 #' Test if an object is a numeric vector:
 #' - `test_integer(x, mode = "strict")` tests for integer vectors.
-#' - `test_integer_like(x, mode = *)` tests for integer-like vectors via
+#' - `test_integer(x, mode = *)` tests for integer-like vectors via
 #'   [is_integer_like()], with "bounded" or "unbounded" mode.
 #' - `test_double(x, mode = "double")` tests for double vectors.
 #' - `test_double(x, mode = "numeric")` tests for double or integer vectors.
@@ -22,18 +22,23 @@ NULL
 #' input, aborting if it fails the test.
 #'
 #' @param x `r ROXY$x()`
-#' @param mode,mode_tol \[`"strict"` | `"bounded"` | `"unbounded"`, `double(1)`]
-#'   For `*_integer()`: the `mode` and `tol` arguments to pass to [is_integer_like()].
-#' @param len,na_n,dup_n,nan_n,inf_n `r ROXY$x_n("len,na_n,dup_n,nan_n,inf_n")`
-#' @param range \[`integer()` | `NULL`] A vector with the upper and lower bound
-#'   for `x` values (`Inf` is allowed). Or a vector with three or more values to
-#'   test for `. %in% range`. Set to `NULL` to not test.
+#' @param mode
+#' - \[`"strict"` | `"bounded"` | `"unbounded"`] For `*_integer()`: the `mode`
+#'   argument to pass to [is_integer_like()].
+#' - \[`"double"` | `"numeric"`] For `*_double()`: `"double"` to accept only
+#'   [double()] vectors, or `"numeric"` to accept both [double()] and
+#'   [integer()] vectors.
+#' @param len,n_na,n_dup,n_nan,n_inf `r ROXY$x_n("len,n_na,n_dup,n_nan,n_inf")`
+#' @param range \[`numeric()` | `NULL`] A vector with the upper and lower bound
+#'   for `x` values. Or a vector with three or more values to test for `all(x
+#'   %in% range)`. Set to `NULL` to not test.
 #' @param set `r ROXY$set("integer")`
+#' @param mode_tol \[`double(1)`] The `tol` argument to pass to
+#'   [is_integer_like()].
 #' @param sentinels `r ROXY$sentinels()`
 #' @param sorted `r ROXY$sorted()`
 #' @param custom `r ROXY$custom()`
-#' @param custom_map `r ROXY$custom_map()`
-#' @param re_tests,im_tests,mod_tests,arg_tests \[`list()` | `NULL`] For
+#' @param tests_re,tests_im,tests_mod,tests_arg \[`list()` | `NULL`] For
 #'   `*_complex()`: a list with the same named arguments as `test_double()`, to
 #'   test the real, imaginary, modulus and argument values of `x`.
 #' @param action `r ROXY$action()`
@@ -45,21 +50,66 @@ NULL
 #'
 #' @returns `r ROXY$test_returns()`
 #'
+#' @examples
+#' # Example 1: Integer-like vector with a floating-point tolerance error
+#' x <- c(1.0, 2.0, 3.0 + 1e-100, 4.0, Inf)
+#'
+#' args <- list(
+#'   mode = "unbounded",  # Allow double-precision whole numbers and Inf (will fail on 3.00001)
+#'   mode_tol = sqrt(.Machine$double.eps),
+#'   # Standard tolerance for decimal check
+#'   len = c(1, 10),          # Length must be between 1 and 10 (will pass)
+#'   n_na = 0,                # No NA values allowed (will pass)
+#'   n_dup = 0,               # No duplicate values allowed (will pass)
+#'   n_nan = 0,               # No NaN values allowed (will pass)
+#'   n_inf = 0,               # At most 1 Inf value allowed (will pass)
+#'   range = c(0, 10 ),       # Bounds between 0 and Inf (will fail)
+#'   set = list(no = c(0)),   # Values must not contain 0 (will pass)
+#'   sentinels = c("null"),   # Allow NULL x (not the case of x)
+#'   sorted = "desc",         # Must be sorted in decreasing order (will pass)
+#'   custom = NULL            # No custom predicate
+#' )
+#'
+#' do.call(test_integer, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_integer_like, c(list(x), args, short_circuit = FALSE))) #> Error
+#'
+#'
+#' # Example 2: Testing an integer vector under "numeric" mode
+#' x <- c(1L, 2L, 5L, 10L)
+#'
+#' args <- list(
+#'   mode = "numeric",                 # Accepts both double and integer vectors (will pass)
+#'   len = c(1, 10),                   # Length must be between 1 and 10 (will pass)
+#'   n_na = 0,                         # No NA values allowed (will pass)
+#'   n_dup = 0,                        # No duplicate values allowed (will pass)
+#'   n_nan = 0,                        # No NaN values allowed (will pass)
+#'   n_inf = 0,                        # No Inf values allowed (will pass)
+#'   range = c(1, 100),                # Values between 1 and 100 (will pass)
+#'   set = list(yes = c(1L, 2L, 3L)),  # Elements must belong to specified set (will fail)
+#'   sentinels = c("null"),            # Allow NULL x (not the case of x)
+#'   sorted = "asc",                   # Must be sorted in ascending order (will pass)
+#'   custom = NULL                     # No custom predicate
+#' )
+#'
+#' do.call(test_double, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_double, c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test-numeric
 NULL
 
 
 core_integer <- function(
   x, mode = "strict",
-  len = NULL, na_n = NULL, dup_n = NULL, nan_n = NULL, inf_n = NULL,
+  len = NULL, n_na = NULL, n_dup = NULL, n_nan = NULL, n_inf = NULL,
   range = NULL, set = NULL, sorted = NULL,
-  custom = NULL, custom_map = NULL, sentinels = NULL,
+  custom = NULL, sentinels = NULL,
   mode_tol = 0,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, mode, len, na_n, dup_n, nan_n, inf_n, range, set, sorted,
-    custom, custom_map,
+    x, sentinels, len, n_na, n_dup, n_nan, n_inf, range, set, sorted, custom,
     tests_pars = list(l = length(x), mode = mode, mode_tol = mode_tol), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) {
@@ -79,14 +129,13 @@ core_integer <- function(
 
 core_double <- function(
   x, mode = "double",
-  len = NULL, na_n = NULL, dup_n = NULL, nan_n = NULL, inf_n = NULL,
+  len = NULL, n_na = NULL, n_dup = NULL, n_nan = NULL, n_inf = NULL,
   range = NULL, set = NULL, sorted = NULL,
-  sentinels = NULL, custom = NULL, custom_map = NULL,
+  sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, mode, len, na_n, dup_n, nan_n, inf_n, range, set, sorted,
-    custom, custom_map,
+    x, sentinels, len, n_na, n_dup, n_nan, n_inf, range, set, sorted, custom,
     tests_pars = list(l = length(x), mode = mode), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) {
@@ -105,28 +154,28 @@ core_double <- function(
 
 core_complex <- function(
   x,
-  re_tests = NULL, im_tests = NULL, mod_tests = NULL, arg_tests = NULL,
-  sentinels = NULL, custom = NULL, custom_map = NULL,
+  tests_re = NULL, tests_im = NULL, tests_mod = NULL, tests_arg = NULL,
+  sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, re_tests, im_tests, mod_tests, arg_tests, custom, custom_map,
+    x, sentinels, tests_re, tests_im, tests_mod, tests_arg, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_complex(x) %@@% c(type = typeof(x)),
-      re_tests = \(x, arg, pars) {
+      tests_re = \(x, arg, pars) {
         exec(test_double, x = Re(x), !!!arg) %@@%
           c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
-      im_tests = \(x, arg, pars) {
+      tests_im = \(x, arg, pars) {
         exec(test_double, x = Im(x), !!!arg) %@@%
           c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
-      mod_tests = \(x, arg, pars) {
+      tests_mod = \(x, arg, pars) {
         exec(test_double, x = Mod(x), !!!arg) %@@%
           c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
-      arg_tests = \(x, arg, pars) {
+      tests_arg = \(x, arg, pars) {
         exec(test_double, x = Arg(x), !!!arg) %@@%
           c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       }
@@ -187,16 +236,16 @@ assert_complex <- fn_core_to_assert(
     type = \(attrs) {
       glue("had type `{attrs$type}` and did not pass `is_complex`.")
     },
-    re_tests = \(attrs) {
+    tests_re = \(attrs) {
       glue("real component (`Re`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
     },
-    im_tests = \(attrs) {
+    tests_im = \(attrs) {
       glue("imaginary component (`Im`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
     },
-    mod_tests = \(attrs) {
+    tests_mod = \(attrs) {
       glue("modulus component (`Mod`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
     },
-    arg_tests = \(attrs) {
+    tests_arg = \(attrs) {
       glue("argument component (`Arg`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
     }
   )

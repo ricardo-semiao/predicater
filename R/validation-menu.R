@@ -14,36 +14,43 @@ TESTS_MENU$len <- function(x, arg, pars) {
 }
 
 TESTS_MENU$range <- function(x, arg, pars) {
-  test_in_range(x, arg, pars$l) %@@% c(range = arg)
+  res <- if (length(arg) == 2) {
+    all(x >= arg[1] & x <= arg[2])
+
+  } else {
+    all(x %in% arg)
+  }
+
+  res %@@% c(range = arg)
 }
 
-TESTS_MENU$na_n <- function(x, arg, pars) {
+TESTS_MENU$n_na <- function(x, arg, pars) {
   test_in_range(n_na <- sum(are_na2(x, nan = FALSE)), arg, pars$l) %@@%
     c(n = n_na)
 }
 
-TESTS_MENU$dup_n <- function(x, arg, pars) {
+TESTS_MENU$n_dup <- function(x, arg, pars) {
   test_in_range(n_dups <- sum(duplicated(unclass(x))), arg, pars$l) %@@%
     c(n = n_dups)
 }
 # TODO: deal with NA (incomparables)?
 
-TESTS_MENU$nan_n <- function(x, arg, pars) {
+TESTS_MENU$n_nan <- function(x, arg, pars) {
   test_in_range(n_nan <- sum(are_nan(x, na = FALSE)), arg, pars$l) %@@%
     c(n = n_nan)
 }
 
-TESTS_MENU$inf_n <- function(x, arg, pars) {
+TESTS_MENU$n_inf <- function(x, arg, pars) {
   test_in_range(n_inf <- sum(are_inf(x, na = FALSE)), arg, pars$l) %@@%
     c(n = n_inf)
 }
 
-TESTS_MENU$null_n <- function(x, arg, pars) {
+TESTS_MENU$n_null <- function(x, arg, pars) {
   test_in_range(n_null <- sum(vapply_lgl(x, is_null)), arg, pars$l) %@@%
     c(n = n_null)
 }
 
-TESTS_MENU$empty_n <- function(x, arg, pars) {
+TESTS_MENU$n_empty <- function(x, arg, pars) {
   test_in_range(n_empty <- sum(vapply_lgl(x, is_empty)), arg, pars$l) %@@%
     c(n = n_empty)
 }
@@ -60,7 +67,7 @@ TESTS_MENU$set <- function(x, arg, pars) {
   if (! is_list(arg)) {
     all(x %in% arg)
   } else {
-    is_matching_set(x, arg$yes, arg$no, arg$mode)
+    is_matching_set(x, arg$yes, arg$no, arg$mode %||% "all")
   }
 }
 # CHECK: would be nice to be able to enforce order too
@@ -132,10 +139,6 @@ TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
 
 #' @noRd
 test_custom <- function(x, custom) {
-  if (is_null(custom)) {
-    return(NULL)
-  }
-
   tryCatch(
     {
       res <- custom(x)
@@ -165,15 +168,25 @@ test_custom <- function(x, custom) {
 
 test_in_range <- function(n, range, l) {
   if (is_function(range)) {
-    range(n, l)
-  } else if (length(range) == 1) {
-    if (is_inf(range, signs = "+")) {
-      range <- l
+    return(range(n, l))
+  }
+
+  for (i in seq_along(range)) {
+    r <- range[[i]]
+    if (is_inf(r, signs = "+")) {
+      range[[i]] <- l
+    } else if (r < 0 && ! is_inf(r, signs = "-")) {
+      range[[i]] <- l + r
     }
+  }
+
+  if (length(range) == 1) {
     all(n == range)
+
   } else if (length(range) == 2) {
     all(n >= range[1] & n <= range[2])
-  } else if (length(range) > 2) {
+
+  } else {
     all(n %in% range)
   }
 }
@@ -185,10 +198,12 @@ test_in_range <- function(n, range, l) {
 TESTS_MSGS <- list(
   len = \(attrs) glue("had length {{.val {{{attrs$n}}}}}."),
   range = \(attrs) glue("had values outside of {{.val {{{attrs$range}}}}}."),
-  na_n = \(attrs) glue("had {{.val {{{attrs$n}}}}} NA values."),
-  dup_n = \(attrs) glue("had {{.val {{{attrs$n}}}}} duplicated values."),
-  nan_n = \(attrs) glue("had {{.val {{{attrs$n}}}}} NaN values."),
-  inf_n = \(attrs) glue("had {{.val {{{attrs$n}}}}} Inf values."),
+  n_na = \(attrs) glue("had {{.val {{{attrs$n}}}}} NA values."),
+  n_dup = \(attrs) glue("had {{.val {{{attrs$n}}}}} duplicated values."),
+  n_nan = \(attrs) glue("had {{.val {{{attrs$n}}}}} NaN values."),
+  n_inf = \(attrs) glue("had {{.val {{{attrs$n}}}}} Inf values."),
+  n_null = \(attrs) glue("had {{.val {{{attrs$n}}}}} NULL values."),
+  n_empty = \(attrs) glue("had {{.val {{{attrs$n}}}}} empty values."),
   sorted = \(attrs) {
     order <- switch(attrs$sorted, asc = "ascending", desc = "descending")
     glue("was not sorted in {order} order.")

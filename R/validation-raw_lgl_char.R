@@ -15,7 +15,7 @@ NULL
 #' input, aborting if it fails the test.
 #'
 #' @param x `r ROXY$x()`
-#' @param len,na_n,true_n `r ROXY$x_n("len,na_n,true_n")`
+#' @param len,n_na,n_true `r ROXY$x_n("len,n_na,n_true")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param action `r ROXY$action()`
@@ -27,6 +27,21 @@ NULL
 #'
 #' @returns `r ROXY$test_returns()`
 #'
+#' @examples
+#' x <- c(TRUE, FALSE, NA, TRUE)
+#'
+#' args <- list(
+#'   len = c(1, 10),              # Length must be between 1 and 10 (will pass)
+#'   n_na = 0,                    # No NA values allowed (will fail)
+#'   n_true = c(1, 2),            # Between 1 and 2 TRUE values (will pass)
+#'   sentinels = c("null"),       # Allow NULL x (not the case of x)
+#'   custom = NULL                # No custom predicate
+#' )
+#'
+#' do.call(test_logical, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_logical, c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test-logical_raw
 NULL
 
@@ -35,16 +50,16 @@ NULL
 
 core_logical <- function(
   x,
-  len = NULL, na_n = NULL, true_n = NULL,
+  len = NULL, n_na = NULL, n_true = NULL,
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, len, na_n, true_n, custom,
+    x, sentinels, len, n_na, n_true, custom,
     tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_logical(x) %@@% c(type = typeof(x)),
-      true_n = \(x, arg, pars) {
+      n_true = \(x, arg, pars) {
         n_true <- sum(x, na.rm = TRUE)
         test_in_range(n_true, arg, pars$l) %@@% c(n = n_true)
       }
@@ -88,7 +103,7 @@ assert_logical <- fn_core_to_assert(
   core_logical,
   msgs_add = list(
     type = \(attrs) glue("had type `{attrs$type}`, not `logical`."),
-    true_n = \(attrs) "count of TRUE elements does not fall within the expected range."
+    n_true = \(attrs) "count of TRUE elements does not fall within the expected range."
   )
 )
 
@@ -114,7 +129,7 @@ assert_raw <- fn_core_to_assert(
 #' its input, aborting if it fails the test.
 #'
 #' @param x `r ROXY$x()`
-#' @param len,na_n,dup_n,char_n `r ROXY$x_n("len,na_n,dup_n,char_n")`
+#' @param len,n_na,n_dup,n_char `r ROXY$x_n("len,n_na,n_dup,n_char")`
 #' @param set `r ROXY$set("character")`
 #' @param match \[`character()` | `list(yes = , no = )` | `NULL`]
 #'   Test if all elements of `x` match regular expression patterns. Pass a
@@ -134,22 +149,44 @@ assert_raw <- fn_core_to_assert(
 #'
 #' @returns `r ROXY$test_returns("character")`
 #'
+#' @examples
+#' x <- c("apple", "banana", "cherry", "banana")
+#'
+#' args <- list(
+#'   len = c(1, 10),              # Length must be between 1 and 10 (will pass)
+#'   n_na = 0,                    # No NA values allowed (will pass)
+#'   n_dup = 0,                   # No duplicate strings allowed (will fail)
+#'   n_char = c(1, 10),           # Character length of each string between 1 and 10 (will pass)
+#'   set = list(no = c("date")),  # Strings must not contain "date" (will pass)
+#'   match = list(
+#'     yes = "^[a-z]+$",          # All elements must be lowercase letters (will pass)
+#'     no = "x"                   # No element can contain "x" (will pass)
+#'   ),
+#'   sorted = FALSE,              # Don't require vector to be sorted in alphabetical order (will pass)
+#'   sentinels = c("null"),       # Allow NULL x (not the case of x)
+#'   custom = NULL                # No custom predicate
+#' )
+#'
+#' do.call(test_character, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_character, c(list(x), args))) #> Error
+#'
 #' @name test_character
 NULL
 
 core_character <- function(
   x,
-  len = NULL, na_n = NULL, dup_n = NULL, char_n = NULL,
+  len = NULL, n_na = NULL, n_dup = NULL, n_char = NULL,
   set = NULL, match = NULL, sorted = NULL,
   sentinels = NULL, custom = NULL, perl = FALSE,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, len, na_n, dup_n, char_n, set, match, sorted, custom,
+    x, sentinels, len, n_na, n_dup, n_char, set, match, sorted, custom,
     tests_pars = list(l = length(x), perl = perl), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_character(x) %@@% c(type = typeof(x)),
-      char_n = \(x, arg, pars) {
+      n_char = \(x, arg, pars) {
         n_char <- nchar(x)
         test_in_range(n_char, arg, pars$l) %@@% c(n = n_char)
       },
@@ -170,7 +207,7 @@ assert_character <- fn_core_to_assert(
   core_character,
   msgs_add = list(
     type = \(attrs) glue("had type `{attrs$type}`, not `character`."),
-    char_n = \(attrs) "character counts do not fall within the expected range.",
+    n_char = \(attrs) "character counts do not fall within the expected range.",
     match = \(attrs) "had matches outside of the allowed patterns."
   )
 )

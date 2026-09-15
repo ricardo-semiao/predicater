@@ -25,6 +25,9 @@ NULL
 #'
 #' @returns `r ROXY$test_returns()`
 #'
+#' @examples
+#' try(assert_null(integer(0))) #> Error
+#'
 #' @name tests-other_types
 NULL
 
@@ -32,8 +35,10 @@ core_null <- function(
   x,
   short_circuit
 ) {
+  sentinels <- NULL
+  # CHECK: makeshift to allow run_tests to assume sentinels presence
   run_tests(
-    x,
+    x, sentinels,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
       type = \(x, test_arg, params) is_null(x) %@@% c(type = typeof(x))
@@ -181,9 +186,11 @@ assert_externalptr <- fn_core_to_assert(core_externalptr, list(
 #' names, environments, S3 generics, and methods.
 #'
 #' @param x `r ROXY$x()`
-#' @param mode \[`character()` | `NULL`] Expected function type(s) out of
-#'   `"closure"`, `"primitive"`, `"builtin"`, or `"special"`. Set to `NULL` to
-#'   not test.
+#' @param mode \[`"function"` | `"closure"` | `"builtin"` | `"special"` |
+#'   `"primitive"` | `NULL`]
+#'   Expected function type(s) out of `"function"` (any function), `"closure"`,
+#'   `"builtin"`, `"special"`, or `"primitive"` (any of the former two). Set to
+#'   `NULL` to not test.
 #' @param args_names \[`character()` | `NULL`] Expected exact argument names of
 #'   the function. Set to `NULL` to not test.
 #' @param fn_env \[`environment` | `NULL`] Expected environment of the function.
@@ -206,21 +213,42 @@ assert_externalptr <- fn_core_to_assert(core_externalptr, list(
 #'
 #' @returns `r ROXY$test_returns("function")`
 #'
+#' @examples
+#' x <- function(a, b = 1, ...) {
+#'   a + b
+#' }
+#'
+#' args <- list(
+#'   mode = "closure",            # Must be a standard closure function (will pass)
+#'   args_names = c("a", "b"),    # Exact argument names must match (will fail)
+#'   fn_env = rlang::global_env(),
+#'   # Function environment must equal or inherit from global env (will pass)
+#'   dots = TRUE,                 # Function must accept `...` in arguments (will pass)
+#'   generic = FALSE,             # Must not be an S3 generic (will pass)
+#'   method = FALSE,              # Must not be an S3 method (will pass)
+#'   sentinels = c("null"),       # Allow NULL function (not the case of x)
+#'   custom = NULL                # No custom predicate
+#' )
+#'
+#' do.call(test_function, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_function, c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test_function
 NULL
 
 core_function <- function(
   x,
-  mode = NULL, args_names = NULL, fn_env = NULL, dots = NULL,
+  mode = "function", args_names = NULL, fn_env = NULL, dots = NULL,
   generic = NULL, method = NULL,
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
     x, sentinels, args_names, env, dots, generic, method, custom,
-    tests_pars = list(), short = short_circuit,
+    tests_pars = list(mode = mode), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) test_fn_type(x, arg),
+      type = \(x, arg, pars) test_fn_type(x, pars$mode),
       args_names = \(x, arg, pars) identical(fn_fmls_names(x), arg),
       fn_env = \(x, arg, pars) test_fn_env(x, arg),
       dots = \(x, arg, pars) ("..." %in% fn_fmls_names(x)) == arg,
@@ -249,21 +277,21 @@ test_function <- fn_core_to_test(core_function)
 #' @rdname test_function
 #' @export
 assert_function <- fn_core_to_assert(core_function, list(
-  type = \(x, test_arg, params) glue("`{x}` is not a function."),
-  args_names = \(x, test_arg, params) {
-    glue("`{x}` does not have the expected argument names.")
+  type = \(attrs) glue("`{x}` is not a function."),
+  args_names = \(attrs) {
+    glue("does not have the expected argument names.")
   },
-  fn_env = \(x, test_arg, params) {
-    glue("`{x}` does not have the expected environment.")
+  fn_env = \(attrs) {
+    glue("does not have the expected environment.")
   },
-  dots = \(x, test_arg, params) {
-    glue("`{x}` does not have the expected `...` argument.")
+  dots = \(attrs) {
+    glue("does not have the expected `...` argument.")
   },
-  generic = \(x, test_arg, params) {
-    glue("`{x}` is not an S3 generic function.")
+  generic = \(attrs) {
+    glue("is not an S3 generic function.")
   },
-  method = \(x, test_arg, params) {
-    glue("`{x}` is not an S3 method function.")
+  method = \(attrs) {
+    glue("is not an S3 method function.")
   }
 ))
 
@@ -273,8 +301,7 @@ assert_function <- fn_core_to_assert(core_function, list(
 
 test_fn_type <- function(x, type) {
   type_x <- typeof(x)
-  switch(
-    type,
+  switch(type,
     primitive = type_x %in% c("builtin", "special"),
     builtin = type_x == "builtin",
     special = type_x == "special",

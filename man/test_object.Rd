@@ -89,3 +89,25 @@ specific Object-Oriented (OO) system (see \code{\link[=object_system]{object_sys
 \code{test_object()} is the predicate test, while \code{assert_object()} validates
 its input, aborting if it fails the test.
 }
+\examples{
+x <- structure(
+  list(a = 1),
+  class = c("my_s3_class")
+)
+
+args <- list(
+  oo_system = "S3",  # Must be an S3 object (will pass)
+  s4_bit = FALSE,    # Object S4 bit must not be set (will pass)
+  tests_class = list(
+    classes = list(all = c("my_s3_class", "another_class"))
+  ),
+  # Class vector must contain all specified classes (will fail)
+  sentinels = c("null"),    # Allow NULL/unclassed objects (not the case of x)
+  custom = \(x) is_list(x)  # Underlying object structure must be a list (will pass)
+)
+
+do.call(test_object, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_object, c(list(x), args, short_circuit = FALSE))) #> Error
+
+}

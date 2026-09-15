@@ -73,8 +73,8 @@ has_object_bit(xs3) #> TRUE
 has_class(xs4_int) #> TRUE
 
 # S4 objects have the S4 bit set:
-has_s4_bit(xs4_int) #> FALSE
-has_s4_bit(xs4) #> TRUE
+has_s4_bit(xs3) #> FALSE
+has_s4_bit(xs4_int) #> TRUE
 
 # is_s4 test for the typeof() "S4":
 typeof(xs4_int) #> "integer"

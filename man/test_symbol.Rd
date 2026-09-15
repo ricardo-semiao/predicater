@@ -7,7 +7,7 @@
 \usage{
 test_symbol(
   x,
-  char_n = NULL,
+  n_char = NULL,
   valid = NULL,
   empty = NULL,
   env_has = NULL,
@@ -18,7 +18,7 @@ test_symbol(
 
 assert_symbol(
   x,
-  char_n = NULL,
+  n_char = NULL,
   valid = NULL,
   empty = NULL,
   env_has = NULL,
@@ -36,7 +36,7 @@ assert_symbol(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{char_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the number of characters (vectorized). The   options of each argument 'arg' are:
+\item{n_char}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the number of characters (vectorized). The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -104,4 +104,23 @@ Test if an object is a symbol (name).
 
 \code{test_symbol()} is the predicate test, while \code{assert_symbol()} validates
 its input, aborting if it fails the test.
+}
+\examples{
+x <- quote(my_var)
+
+args <- list(
+  n_char = c(1, 10),      # Symbol string length must be between 1 and 10 (will pass)
+  valid = TRUE,           # Must be a valid syntactic R name (will pass)
+  empty = FALSE,          # Symbol must not be the empty symbol (will pass)
+  env_has = rlang::global_env(),
+  # Symbol must exist directly in global environment (will fail)
+  env_seen = NULL,        # Don't test environment inheritance
+  sentinels = c("null"),  # Allow NULL symbol (not the case of x)
+  custom = NULL           # No custom test predicate
+)
+
+rlang::exec(test_symbol, !!!c(list(x), args)) #> FALSE (not all tests passed)
+
+try(rlang::exec(assert_symbol, !!!c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

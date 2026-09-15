@@ -2,6 +2,8 @@
 #' @include validation-helpers.R validation-menu.R
 NULL
 
+# CHECK: why do.call with a symbol/language arguments fails
+
 
 
 # Expression -------------------------------------------------------------------
@@ -15,8 +17,8 @@ NULL
 #' its input, aborting if it fails the test.
 #'
 #' @param x `r ROXY$x()`
-#' @param len,null_n,call_n,sym_n,literal_n,invalid_n
-#'   `r ROXY$x_n("len,null_n,call_n,sym_n,literal_n,invalid_n")`
+#' @param len,n_null,n_call,n_sym,n_literal,n_invalid
+#'   `r ROXY$x_n("len,n_null,n_call,n_sym,n_literal,n_invalid")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_map `r ROXY$custom_map()`
@@ -34,29 +36,29 @@ NULL
 
 core_expression <- function(
   x,
-  len = NULL, null_n = NULL, call_n = NULL, sym_n = NULL, literal_n = NULL,
-  invalid_n = NULL,
+  len = NULL, n_null = NULL, n_call = NULL, n_sym = NULL, n_literal = NULL,
+  n_invalid = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, len, null_n, call_n, sym_n, literal_n, custom, custom_map,
+    x, sentinels, len, n_null, n_call, n_sym, n_literal, custom, custom_map,
     tests_pars = list(l = length(x), x_list = as.list(x)), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_expression2(x) %@@% c(type = typeof(x)),
-      call_n = \(x, arg, pars) {
+      n_call = \(x, arg, pars) {
         n_call <- sum(vapply_lgl(pars$x_list, is_call))
         test_in_range(n_call, arg, pars$l) %@@% c(n = n_call)
       },
-      sym_n = \(x, arg, pars) {
+      n_sym = \(x, arg, pars) {
         n_sym <- sum(vapply_lgl(pars$x_list, is_symbol))
         test_in_range(n_sym, arg, pars$l) %@@% c(n = n_sym)
       },
-      literal_n = \(x, arg, pars) {
+      n_literal = \(x, arg, pars) {
         n_lit <- sum(vapply_lgl(pars$x_list, is_syntactic_literal))
         test_in_range(n_lit, arg, pars$l) %@@% c(n = n_lit)
       },
-      invalid_n = \(x, arg, pars) {
+      n_invalid = \(x, arg, pars) {
         n_invalid <- sum(vapply_lgl(pars$x_list, \(x) !is_parseable(x)))
         test_in_range(n_invalid, arg, pars$l) %@@% c(n = n_invalid)
       }
@@ -74,9 +76,9 @@ assert_expression <- fn_core_to_assert(
   core_expression,
   msgs_add = list(
     type = \(attrs) "must be an expression.",
-    call_n = \(attrs) "count of call elements does not fall within the expected range.",
-    sym_n = \(attrs) "count of symbol elements does not fall within the expected range.",
-    literal_n = \(attrs) "count of literal elements does not fall within the expected range."
+    n_call = \(attrs) "count of call elements does not fall within the expected range.",
+    n_sym = \(attrs) "count of symbol elements does not fall within the expected range.",
+    n_literal = \(attrs) "count of literal elements does not fall within the expected range."
   )
 )
 
@@ -93,7 +95,7 @@ assert_expression <- fn_core_to_assert(
 #' its input, aborting if it fails the test.
 #'
 #' @param x `r ROXY$x()`
-#' @param char_n `r ROXY$x_n("char_n")`
+#' @param n_char `r ROXY$x_n("n_char")`
 #' @param valid \[`TRUE` | `FALSE` | `NULL`] Test if the symbol name is a valid
 #'   syntactic R name (i.e. unchanged when processed by [make.names()]).
 #'   Set to `NULL` to not test.
@@ -113,23 +115,41 @@ assert_expression <- fn_core_to_assert(
 #'
 #' @returns `r ROXY$test_returns("symbol")`
 #'
+#' @examples
+#' x <- quote(my_var)
+#'
+#' args <- list(
+#'   n_char = c(1, 10),      # Symbol string length must be between 1 and 10 (will pass)
+#'   valid = TRUE,           # Must be a valid syntactic R name (will pass)
+#'   empty = FALSE,          # Symbol must not be the empty symbol (will pass)
+#'   env_has = rlang::global_env(),
+#'   # Symbol must exist directly in global environment (will fail)
+#'   env_seen = NULL,        # Don't test environment inheritance
+#'   sentinels = c("null"),  # Allow NULL symbol (not the case of x)
+#'   custom = NULL           # No custom test predicate
+#' )
+#'
+#' rlang::exec(test_symbol, !!!c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(rlang::exec(assert_symbol, !!!c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test_symbol
 NULL
 
 core_symbol <- function(
   x,
-  char_n = NULL, valid = NULL, empty = NULL, env_has = NULL, env_seen = NULL,
+  n_char = NULL, valid = NULL, empty = NULL, env_has = NULL, env_seen = NULL,
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   sym_str <- if (is_symbol(x)) as_string(x) else NULL
 
   run_tests(
-    x, sentinels, char_n, valid, env_has, env_seen, custom,
+    x, sentinels, n_char, valid, env_has, env_seen, custom,
     tests_pars = list(sym_str = sym_str), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_symbol(x) %@@% c(type = typeof(x)),
-      char_n = \(x, arg, pars) {
+      n_char = \(x, arg, pars) {
         n_char <- nchar(pars$sym_str)
         test_in_range(n_char, arg, n_char) %@@% c(n = n_char)
       },
@@ -140,10 +160,10 @@ core_symbol <- function(
         (pars$sym_str == "") == arg
       },
       env_has = \(x, arg, pars) {
-        TESTS_MENU$test_env_has(arg, pars$sym_str, inherit = FALSE)
+        TESTS_MENU$env_has(arg, pars$sym_str) # Oposite order from test_env
       },
       env_seen = \(x, arg, pars) {
-        TESTS_MENU$test_env_has(arg, pars$sym_str, inherit = TRUE)
+        TESTS_MENU$env_seen(arg, pars$sym_str)
       }
     )
   )
@@ -159,7 +179,7 @@ assert_symbol <- fn_core_to_assert(
   core_symbol,
   msgs_add = list(
     type = \(attrs) "must be a symbol.",
-    char_n = \(attrs) "character count does not fall within the expected range.",
+    n_char = \(attrs) "character count does not fall within the expected range.",
     valid = \(attrs) "is not a valid syntactic R name."
   )
 )
@@ -180,7 +200,7 @@ assert_symbol <- fn_core_to_assert(
 #' @param name,ns \[`character(1)` | `NULL`] Expected function name and
 #'   namespace of the call, via [rlang::call_name()] and [rlang::call_ns()]. Set
 #'   to `NULL` to not test.
-#' @param args_n `r ROXY$x_n("args_n")`
+#' @param n_args `r ROXY$x_n("n_args")`
 #' @param arg_names \[`character()` | `NULL`] Expected exact names of the call
 #'   arguments. Set to `NULL` to not test.
 #' @param simple \[`TRUE` | `FALSE` | `NULL`] Test if the call is simple via
@@ -198,23 +218,41 @@ assert_symbol <- fn_core_to_assert(
 #'
 #' @returns `r ROXY$test_returns("language")`
 #'
+#' @examples
+#' x <- quote(rlang::env(a = 1, b = 2))
+#'
+#' args <- list(
+#'   name = "fn",             # Function name must be "fn" (will pass)
+#'   ns = "otherpkg",         # Namespace must be "otherpkg" (will fail)
+#'   n_args = c(1, 5),        # Number of arguments must be between 1 and 5 (will pass)
+#'   arg_names = c("a", "b"), # Argument names must match exact character vector (will pass)
+#'   simple = FALSE,          # Must not be a simple call without names/namespace (will pass)
+#'   valid = TRUE,            # Must be a parseable, valid call (will pass)
+#'   sentinels = c("null"),   # Allow NULL call (not the case of x)
+#'   custom = NULL            # No custom test predicate
+#' )
+#'
+#' rlang::exec(test_language, !!!c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(rlang::exec(assert_language, !!!c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test_language
 NULL
 
 core_language <- function(
   x,
-  name = NULL, ns = NULL, args_n = NULL, arg_names = NULL, simple = NULL, valid = NULL,
+  name = NULL, ns = NULL, n_args = NULL, arg_names = NULL, simple = NULL, valid = NULL,
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, name, ns, args_n, arg_names, simple, valid, custom,
+    x, sentinels, name, ns, n_args, arg_names, simple, valid, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
       type = \(x, arg, pars) is_language(x) %@@% c(type = typeof(x)),
       name = \(x, arg, pars) identical(call_name(x), arg),
       ns = \(x, arg, pars) identical(call_ns(x), arg),
-      args_n = \(x, arg, pars) {
+      n_args = \(x, arg, pars) {
         n_args <- length(x) - 1L
         test_in_range(n_args, arg, n_args) %@@% c(n = n_args)
       },
@@ -239,7 +277,7 @@ assert_language <- fn_core_to_assert(
     type = \(attrs) "must be a language object (call).",
     name = \(attrs) "function name does not match expected value.",
     ns = \(attrs) "namespace does not match expected value.",
-    args_n = \(attrs) "argument count does not fall within the expected range.",
+    n_args = \(attrs) "argument count does not fall within the expected range.",
     arg_names = \(attrs) "argument names do not match expected values.",
     simple = \(attrs) "simple call check failed.",
     valid = \(attrs) "call parseability check failed."
@@ -277,6 +315,23 @@ assert_language <- fn_core_to_assert(
 #'
 #' @returns `r ROXY$test_returns("code")`
 #'
+#' @examples
+#' x <- 42L
+#'
+#' args <- list(
+#'   sym = FALSE,            # Disallow symbols (will pass)
+#'   lang = FALSE,           # Disallow language objects/calls (will pass)
+#'   literal = TRUE,         # Allow syntactic literals (will pass)
+#'   valid = TRUE,           # Must be parseable code (will pass)
+#'   empty = FALSE,          # Disallow empty symbols (will pass)
+#'   sentinels = c("null"),  # Allow NULL code object (not the case of x)
+#'   custom = \(x) x > 100   # Literal value must be > 100 (will fail)
+#' )
+#'
+#' rlang::exec(test_code, !!!c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(rlang::exec(assert_code, !!!c(list(x), args, short_circuit = FALSE))) #> Error
+#'
 #' @name test_code
 NULL
 
@@ -296,7 +351,11 @@ core_code <- function(
         is_code(x, sym, lang, literal, valid = TRUE) == arg
       },
       empty = \(x, arg, pars) {
-        is_code(x, sym, lang, literal, empty = TRUE) == arg
+        if (is_symbol(x)) {
+          identical(x, expr()) == arg
+        } else {
+          TRUE
+        }
       }
     )
   )

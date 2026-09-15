@@ -93,3 +93,21 @@ an empty symbol.
 \code{test_code()} is the predicate test, while \code{assert_code()} validates
 its input, aborting if it fails the test.
 }
+\examples{
+x <- 42L
+
+args <- list(
+  sym = FALSE,            # Disallow symbols (will pass)
+  lang = FALSE,           # Disallow language objects/calls (will pass)
+  literal = TRUE,         # Allow syntactic literals (will pass)
+  valid = TRUE,           # Must be parseable code (will pass)
+  empty = FALSE,          # Disallow empty symbols (will pass)
+  sentinels = c("null"),  # Allow NULL code object (not the case of x)
+  custom = \(x) x > 100   # Literal value must be > 100 (will fail)
+)
+
+rlang::exec(test_code, !!!c(list(x), args)) #> FALSE (not all tests passed)
+
+try(rlang::exec(assert_code, !!!c(list(x), args, short_circuit = FALSE))) #> Error
+
+}

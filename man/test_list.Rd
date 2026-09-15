@@ -9,9 +9,9 @@ test_list(
   x,
   mode = "list",
   len = NULL,
-  null_n = NULL,
-  empty_n = NULL,
-  dup_n = NULL,
+  n_null = NULL,
+  n_empty = NULL,
+  n_dup = NULL,
   sentinels = NULL,
   custom = NULL,
   custom_map = NULL
@@ -21,9 +21,9 @@ assert_list(
   x,
   mode = "list",
   len = NULL,
-  null_n = NULL,
-  empty_n = NULL,
-  dup_n = NULL,
+  n_null = NULL,
+  n_empty = NULL,
+  n_dup = NULL,
   sentinels = NULL,
   custom = NULL,
   custom_map = NULL,
@@ -41,7 +41,7 @@ assert_list(
 \item{mode}{[\code{character()} | \code{NULL}] Expected vector type(s) out of \code{"list"} or
 \code{"pairlist"}. Set to \code{NULL} to not test.}
 
-\item{len, null_n, empty_n, dup_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NULL} elements, number of elements with zero length, number of duplicate elements. The   options of each argument 'arg' are:
+\item{len, n_null, n_empty, n_dup}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NULL} elements, number of elements with zero length, number of duplicate elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -100,4 +100,24 @@ Test if an object is a list.
 
 \code{test_list()} is the predicate test, while \code{assert_list()} validates
 its input, aborting if it fails the test.
+}
+\examples{
+x <- list(a = 1, b = NULL, c = integer(0), d = 1)
+
+args <- list(
+  mode = "list",               # Must be a standard list (will pass)
+  len = c(1, 10),              # Length must be between 1 and 10 (will pass)
+  n_null = 0,                  # No NULL elements allowed (will fail)
+  n_empty = c(0, 1),           # At most 1 empty element allowed (will pass)
+  n_dup = 0,                   # No duplicate elements allowed (will fail)
+  sentinels = c("null"),       # Allow NULL list (not the case of x)
+  custom = \(x) is.list(x),    # Must be a list (will pass)
+  custom_map = \(elt) !is.na(elt)
+  # All list elements must be non-NA (will pass)
+)
+
+do.call(test_list, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_list, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

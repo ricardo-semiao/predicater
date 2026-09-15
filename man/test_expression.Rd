@@ -8,11 +8,11 @@
 test_expression(
   x,
   len = NULL,
-  null_n = NULL,
-  call_n = NULL,
-  sym_n = NULL,
-  literal_n = NULL,
-  invalid_n = NULL,
+  n_null = NULL,
+  n_call = NULL,
+  n_sym = NULL,
+  n_literal = NULL,
+  n_invalid = NULL,
   sentinels = NULL,
   custom = NULL,
   custom_map = NULL
@@ -21,11 +21,11 @@ test_expression(
 assert_expression(
   x,
   len = NULL,
-  null_n = NULL,
-  call_n = NULL,
-  sym_n = NULL,
-  literal_n = NULL,
-  invalid_n = NULL,
+  n_null = NULL,
+  n_call = NULL,
+  n_sym = NULL,
+  n_literal = NULL,
+  n_invalid = NULL,
   sentinels = NULL,
   custom = NULL,
   custom_map = NULL,
@@ -40,7 +40,7 @@ assert_expression(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{len, null_n, call_n, sym_n, literal_n, invalid_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NULL} elements, number of 'language' elements, number of 'symbol' elements, number of syntactic literal elements, number of non-syntatic elements. The   options of each argument 'arg' are:
+\item{len, n_null, n_call, n_sym, n_literal, n_invalid}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NULL} elements, number of 'language' elements, number of 'symbol' elements, number of syntactic literal elements, number of non-syntatic elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.

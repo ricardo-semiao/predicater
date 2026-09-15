@@ -7,7 +7,7 @@
 \usage{
 test_matrix(
   x,
-  dims_n = NULL,
+  n_dims = NULL,
   dims_shape = NULL,
   names_apply = NULL,
   how = "dim",
@@ -18,7 +18,7 @@ test_matrix(
 
 assert_matrix(
   x,
-  dims_n = NULL,
+  n_dims = NULL,
   dims_shape = NULL,
   names_apply = NULL,
   how = "dim",
@@ -36,7 +36,7 @@ assert_matrix(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{dims_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the NA. The   options of each argument 'arg' are:
+\item{n_dims}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the NA. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -49,13 +49,13 @@ returns a single \code{TRUE} or \code{FALSE}.
 
 \item{dims_shape}{[\code{list()} | \code{integer()} | \code{NULL}] Expected size
 constraints for each dimension. Can be a vector of dimension sizes or a
-list of range specs (as for \code{dims_n}). Set to \code{NULL} to not test.}
+list of range specs (as for \code{n_dims}). Set to \code{NULL} to not test.}
 
 \item{names_apply}{[\code{list()} | \code{NULL}]
 A list of arguments passed to \code{\link[=test_names]{test_names()}} to test each dimension's
 names. For separate tests for each dimension, use a list of formulas, with
 the LHS being the dimension integer index, and the RHS being the list of
-arguments to \code{test_names()}.}
+arguments to \code{test_names()}. An emtpy list() test for the presence of names.}
 
 \item{how}{[\code{"dim"} | \code{"x"} | \code{"attr"}] How to extract dimensions from \code{x}:
 \code{"dim"} for \code{\link[=dim]{dim()}}; \code{"x"} ofr \code{x} directly \code{"attr"} for \code{attr(x, "dim")}.}
@@ -111,4 +111,32 @@ conditions. Add
 
 \code{test_matrix()} is a predicate test, while \code{assert_matrix()} validates their
 input, aborting if it fails the test.
+}
+\examples{
+x <- matrix(
+  1:6, nrow = 2, ncol = 3,
+  dimnames = list(c("r1", "r2"), c("c1", "c2", "c3"))
+)
+
+args <- list(
+  n_dims = 2, # Must be exactly 2-dimensional (will pass)
+  dims_shape = list(2, c(1, Inf)),
+  # 2 rows, and cols between 1 and Inf (will pass)
+  names_apply = list(
+    1 ~ list(n_na = 0, n_dup = 0),
+    # Row names must have no NAs or duplicates (will pass)
+    2 ~ list(set = list(no = c("c4")))
+    # Column names must not contain "c4" (will pass)
+  ),
+  how = "dim",                # Use `dim(x)` to extract dimensions (will pass)
+  sentinels = c("null"),      # Allow NULL x (not the case of x)
+  custom = \(x) is.matrix(x), # Must be a standard matrix (will pass)
+  custom_apply = list(1 ~ \(row) sum(row) > 10)
+  # Sum of elements across each row must exceed 10 (will fail)
+)
+
+do.call(test_matrix, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_matrix, c(list(x), args, short_circuit = FALSE))) #> Error
+
 }

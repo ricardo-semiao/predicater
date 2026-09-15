@@ -8,9 +8,9 @@
 test_character(
   x,
   len = NULL,
-  na_n = NULL,
-  dup_n = NULL,
-  char_n = NULL,
+  n_na = NULL,
+  n_dup = NULL,
+  n_char = NULL,
   set = NULL,
   match = NULL,
   sorted = NULL,
@@ -22,9 +22,9 @@ test_character(
 assert_character(
   x,
   len = NULL,
-  na_n = NULL,
-  dup_n = NULL,
-  char_n = NULL,
+  n_na = NULL,
+  n_dup = NULL,
+  n_char = NULL,
   set = NULL,
   match = NULL,
   sorted = NULL,
@@ -42,7 +42,7 @@ assert_character(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{len, na_n, dup_n, char_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of duplicate elements, number of characters (vectorized). The   options of each argument 'arg' are:
+\item{len, n_na, n_dup, n_char}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of duplicate elements, number of characters (vectorized). The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -60,7 +60,7 @@ Test if all elements of \code{x} match regular expression patterns. Pass a
 character vector of patterns (implicitly OR'd together), or a list with
 \code{yes} and \code{no} character vectors of patterns. Set to \code{NULL} to not test.}
 
-\item{sorted}{[\code{"asc"} | \code{"desc"} | \code{NULL}] Test if \code{x} is sorted in ascending (\code{"asc"})   or descending (\code{"desc"}) order. Set to \code{NULL} to not test. Pair with \code{dup_n}   to test for strictly sorted values.}
+\item{sorted}{[\code{"asc"} | \code{"desc"} | \code{NULL}] Test if \code{x} is sorted in ascending (\code{"asc"})   or descending (\code{"desc"}) order. Set to \code{NULL} to not test. Pair with \code{n_dup}   to test for strictly sorted values.}
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
@@ -111,4 +111,27 @@ Test if an object is a character vector.
 
 \code{test_character()} is the predicate test, while \code{assert_character()} validates
 its input, aborting if it fails the test.
+}
+\examples{
+x <- c("apple", "banana", "cherry", "banana")
+
+args <- list(
+  len = c(1, 10),              # Length must be between 1 and 10 (will pass)
+  n_na = 0,                    # No NA values allowed (will pass)
+  n_dup = 0,                   # No duplicate strings allowed (will fail)
+  n_char = c(1, 10),           # Character length of each string between 1 and 10 (will pass)
+  set = list(no = c("date")),  # Strings must not contain "date" (will pass)
+  match = list(
+    yes = "^[a-z]+$",          # All elements must be lowercase letters (will pass)
+    no = "x"                   # No element can contain "x" (will pass)
+  ),
+  sorted = FALSE,              # Don't require vector to be sorted in alphabetical order (will pass)
+  sentinels = c("null"),       # Allow NULL x (not the case of x)
+  custom = NULL                # No custom predicate
+)
+
+do.call(test_character, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_character, c(list(x), args))) #> Error
+
 }

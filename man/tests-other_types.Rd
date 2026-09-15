@@ -155,3 +155,7 @@ returns a single \code{TRUE} or \code{FALSE}.
 Test if an object is of various special base R types, including promises,
 dots (\code{...}), weak references, bytecode, or external pointers.
 }
+\examples{
+try(assert_null(integer(0))) #> Error
+
+}

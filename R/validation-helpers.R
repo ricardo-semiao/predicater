@@ -3,7 +3,10 @@
 
 run_tests <- function(x, ..., tests_pars, short, menu_add) {
   # Initialize tests:
-  tests_names <- c("type", vapply(ensyms(...), as_string, character(1)))
+  tests_names <- c(
+    "sentinels", "type", # WARN: assuming sentinels are always in 1st position
+    vapply(ensyms(...), as_string, character(1))[-1]
+  )
   args <- set_names(c(type = NA, list(...)), tests_names)
 
   tests_args <- tests <- list()
@@ -37,7 +40,7 @@ run_tests <- function(x, ..., tests_pars, short, menu_add) {
 
 
   # Run the rest:
-  tests_names <- setdiff(tests_names, c("type", "sentinels"))
+  tests_names <- setdiff(tests_names, c("sentinels", "type"))
 
   if (short) {
     for (nm in tests_names) {
@@ -108,7 +111,8 @@ fn_core_to_assert <- function(core, msgs_add) {
   body <- expr({
     # TODO: checks
     assert_name <- !!assert_name
-    x_name <- x_name %||% expr_name(enexpr(x))
+    x_expr <- enexpr(x)
+    x_name <- x_name %||% if (is_code(x_expr)) expr_name(x_expr) else "x"
 
     tests <- (!!core_sym)(!!!args_core_syms)
 
@@ -132,13 +136,13 @@ fn_core_to_assert <- function(core, msgs_add) {
 
     if (action == "abort") {
       do.call(cli_abort, c(
-        message = msgs, call = env, args_cnd,
+        message = list(msgs), call = env, args_cnd,
         rs_assert_error = list(args = list(!!!args_core_syms), tests = tests)
       ))
     } else if (action %in% c("warn", "inform")) {
       cnd_fun <- switch(action, warn = cli_warn, inform = cli_inform)
       do.call(cnd_fun, c(
-        message = msgs, call = env, args_cnd,
+        message = list(msgs), call = env, args_cnd,
         rs_assert_error = list(args = list(!!!args_core_syms), tests = tests)
       ))
     }
