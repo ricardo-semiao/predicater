@@ -20,12 +20,12 @@
 #' @param x `r ROXY$x()`
 #' @param cnd_match \[`character(1)`] String to match in the condition message.
 #'   If no match, the condition is re-thrown. Defaults to allow any message.
-#' @param warn \[`character(1)`] How to handle erros: `"f"` to return `FALSE`;
-#'   `"t" for `TRUE`, `"tw"` to return true but re-throw the warning; and ``"e"`
-#'   to throw the warning as an error.
+#' @param warn \[`"true"` | `"false"` | `"warn"` | `"error"`]
+#'   How to handle warnings: `"false"` to return `FALSE`; `"true"`` for `TRUE`;
+#'   `"warn"` to return `TRUE` but re-throw the warning; and `"error"` to throw
+#'   the warning as an error.
 #'
-#' @returns \[`TRUE` | `FALSE`] Whether attributes can be set on `x`, or
-#'   re-throws the catched condition.
+#' @returns `r ROXY$test_res()` Or, re-throws the catched condition.
 #'
 #' @examples
 #' is_attrs_allowed(mtcars) #> TRUE
@@ -55,19 +55,17 @@ is_attrs_allowed <- function(x, cnd_match = NULL, warn = "tw") {
       if (grepl(cnd_match, cnd$message)) FALSE else stop(cnd)
     },
     warning = \(cnd) {
-      if (warn == "f" && grepl(cnd_match, cnd$message)) {
+      if (warn %in% c("f", "false") && grepl(cnd_match, cnd$message)) {
         FALSE
-      } else if (warn == "e") {
+      } else if (warn == "error") {
         stop(cnd)
       } else {
-        if (warn == "tw") warning(cnd$message)
+        if (warn == "warn") warning(cnd$message)
         TRUE
       }
     }
   )
 }
-# TODO: pass arg to, by default, run static check (i.e. type not "primitive",
-# "symbol", "NULL")
 
 
 #' Attributes - Get attribute of object
@@ -120,7 +118,7 @@ attr2 <- function(x, which, exact = TRUE) {
 #'
 #' @param x \[`any`] Object to test for or remove attributes from.
 #' @param abbr \[`character(1)`] String of characters specifying attributes to
-#'   keep: `"n"` for 'names', `"d"` for 'dim', `"c"` for 'class', `"r"` for both
+#'   keep: `"n"` for 'names'; `"d"` for 'dim'; `"c"` for 'class'; `"r"` for both
 #'   rownames and dimnames.
 #' @param exact \[`character()`] Other attributes to keep, specified by name.
 #' @param match \[`character()`] Other attributes to keep, specified by regex
@@ -262,7 +260,7 @@ attrs_filter <- function(
     if ("r" %in% abbr) c("dimnames", "row.names"),
     exact,
     if (length(match) > 0) {
-      grep(paste0(match, collapse = "|"), names(attrs), value = TRUE, perl = perl)
+      grep(collapse_patterns(match), names(attrs), value = TRUE, perl = perl)
     }
   ))
 
@@ -282,17 +280,16 @@ attrs_filter <- function(
 #' Test if `x` has names with more flexiblility than [rlang::is_named()],
 #' handling NA, empty, duplicate, and invalid names, as well as empty vectors.
 #'
-#' @param x `r ROXY$x()`
-#' @param how \[`character(1)`] How to extract names: "names" for `names(x)`, or
-#'   "attr" for `attr(x, "names")`.
-#' @param na,empty,dups,invalid \[`character(1)`] How to handle NA, empty,
-#'   duplicate, or invalid names: `"f"` to return `FALSE`, or `"t"` return
-#'   `TRUE`.
-#' @param zero_len \[`character(1)`] How to handle an empty collection `x`:
-#'   `"f"` to return `FALSE`, or `"t"` return `TRUE`..
+#' @param x \[`collection()`, `any`] For `are_*()`, any collection to test; for
+#'   `is_*()`, any object to test.
+#' @param how \[`"names"` | `"x"` | `"attr"` | `"names2"`] How to extract names:
+#'   "names" for [names()]; `"x"` to use `x` itself; "attr" for `attr(x,
+#'   "names")`; or `"names2"` for [rlang::names2()].
+#' @param na,empty,dups,invalid \[`TRUE` | `FALSE`] What to return for NA,
+#'   empty, duplicate, or invalid names.
+#' @param zero_len \[`TRUE` | `FALSE`] What to return for an an empty `x`.
 #'
-#' @returns \[`TRUE` | `FALSE`] Whether `x` has names according to the specified
-#'   checks.
+#' @returns `r ROXY$test_res()`
 #'
 #' @details
 #' The default argument values guaratee that `x` can be safely iterated by its
@@ -304,23 +301,20 @@ attrs_filter <- function(
 #' The `how` methods differ only for environments, with "names" returning names
 #' and "attr" returning NULL.
 #'
-#' `invalid = "f"` checks if the names don't change after being passed to
+#' `invalid = FALSE` checks if the names don't change after being passed to
 #' `make.names()`.
-#'
-#' Setting `na = "na"` could make sense if any of `empty`, `dups`, or `invalid`
-#' is set to `"f"`, in which the true value of the NA name is relevant.
 #'
 #' @examples
 #' has_names(mtcars) #> TRUE
 #'
-#' has_names(set_names(1:3, c("a", "", "b")), empty = "t") #> TRUE
-#' has_names(set_names(1:3, c("a", "b", NA)), na = "t") #> TRUE
+#' has_names(set_names(1:3, c("a", "", "b")), empty = TRUE) #> TRUE
+#' has_names(set_names(1:3, c("a", "b", NA)), na = TRUE) #> TRUE
 #' has_names(set_names(1:3, c("a", "a", "a"))) #> FALSE
-#' has_names(set_names(1:3, c("_bad", "b", "c")), invalid = "f") #> FALSE
+#' has_names(set_names(1:3, c("_bad", "b", "c")), invalid = FALSE) #> FALSE
 #'
 #' @export
 has_names_valid <- function(
-  x, na = "f", empty = "f", dups = "f", invalid = "t", zero_len = "t",
+  x, na = FALSE, empty = FALSE, dups = FALSE, invalid = TRUE, zero_len = TRUE,
   how = "names"
 ) {
   # Main:
@@ -334,6 +328,12 @@ has_names_valid <- function(
 
   nms <- switch(how,
     names = names(x),
+    x = {
+      if (! is_character(x)) {
+        cli_abort("{.arg x} must be a character vector when {.arg how} is 'x'.")
+      }
+      x
+    },
     attr = attr(x, "names", TRUE),
     names2 = names2(x)
   )
@@ -343,21 +343,26 @@ has_names_valid <- function(
   }
 
   all(are_names_valid(
-    nms, na = na, empty = empty, dups = dups, invalid = invalid, how = how
+    nms, na = na, empty = empty, dups = dups, invalid = invalid, how = "x"
   ))
 }
 # NOTE: language and promise accept names<-; ... and environment have names();
 # S4 accepts attr(x, "names")<- but object doesnt
 # NOTE: we could fix na and empty to "f" to simplify the API
-# CHECK: change to TRUE/FALSE instead of "t"/"f"?
 
 
 are_names_valid <- function(
-  x, na = "f", empty = "f", dups = "f", invalid = "t",
+  x, na = FALSE, empty = FALSE, dups = FALSE, invalid = TRUE,
   how = "names"
 ) {
   nms <- switch(how,
     names = names(x),
+    x = {
+      if (! is_character(x)) {
+        cli_abort("{.arg x} must be a character vector when {.arg how} is 'x'.")
+      }
+      x
+    },
     attr = attr(x, "names", TRUE),
     names2 = names2(x)
   )
@@ -366,17 +371,18 @@ are_names_valid <- function(
     cli_abort("{.arg x} has no names.")
   }
 
-  falses <- rep_len(FALSE, length(nms))
-  mask_na <- switch(na, f = is.na(nms), t = falses)
-  mask_empty <- switch(empty, f = nms == "", t = falses)
-  mask_dups <- switch(dups,
-    f = duplicated(nms) | duplicated(nms, fromLast = TRUE),
-    t = falses
-  )
-  mask_invalid <- switch(invalid, f = make.names(nms) != nms, t = falses)
+  res <- rep_len(TRUE, length(nms))
 
-  ! (mask_na | mask_empty | mask_dups | mask_invalid)
+  if (!na) res <- res & !is.na(nms)
+  if (!empty) res <- res & nms != ""
+  if (!dups) res <- res & are_duplicated(x)
+  if (!invalid) res <- res & make.names(nms) == nms
+
+  res
 }
+# CHECK: add NA option to na?
+# Setting `na = NA` could make sense if any of `empty`, `dups`, or `invalid`
+# is set to F, in which the true value of the NA name is relevant.
 
 
 
@@ -392,23 +398,25 @@ are_names_valid <- function(
 #' - `has_dim()`, `has_dimnames()`, and `has_rownames()` return whether the
 #'   object has dimensions, dimension names, and rownames, respectively.
 #'
-#' @param x \[`any`] Object to check.
+#' @param x `r ROXY$x()`
 #' @param count_empty \[`TRUE` | `FALSE`] Whether to count empty dimensions and
 #'   dimension names.
 #' @param count_invalid \[`TRUE` | `FALSE`] Whether to dimension names that have
 #'   only non-NA or non-empty values.
-#' @param how \[`character(1)`] How to extract the attribute:
-#' - For dimensions: `"dim"` for [dim()] and `"attr"` for [attr()].
-#' - For dimension names: `"dimnames"` for [dimnames()] and `"attr"` for
-#'   [attr()].
-#' - For rownames: `"rownames"` for [rownames()], `"dimnames"` for the first
-#'   element of [dimnames()], and `"attr"` for [attr()].
+#' @param how \[`character(1)`]
+#'   How to extract the attribute:
+#'   - For dimensions: `"dim"` for [dim()] and `"attr"` for `attr(x, "dim")`.
+#'   - For dimension names: `"dimnames"` for [dimnames()] and `"attr"` for
+#'     `attr(x, "dimnames")`.
+#'   - For rownames: `"rownames"` for [rownames()], `"dimnames"` for the first
+#'     element of [dimnames()], and `"attr"` for `attr(x, "row.names")`.
 #' @param n \[`integer(1)`] Number of dimensions to check for. Set to `NULL` to
 #'   not test.
 #'
 #' @returns
 #' - \[integer(1)] For `n_dims()` and `n_dimnames()`.
-#' - \[`TRUE` | `FALSE`] For `has_dim()`, `has_dimnames()`, and `has_rownames()`.
+#' - \[`TRUE` | `FALSE`] For `has_dim()`, `has_dimnames()`, and
+#'   `has_rownames()`: the sacalar result of the test.
 #'
 #' @name attributes-dimensions
 NULL
@@ -498,21 +506,29 @@ has_dim <- function(x, n = NULL, how = "dim") {
 #' requiring a specific 'quality' of the values.
 #'
 #' @param x \[`any`] Object to get or set attribute from.
-#' @param value \[`character()`] Value to set the attribute to.
+#' @param value \[`any`] Value to set the attribute to.
 #' @inheritParams vctrs::vec_as_names
-#' @param how
-#' \[`character(1)`] How to get or set the attribute:
-#' - For `names3()`: `"names"` for [names()] and `"attr"` for [attr()].
-#' - For `dimnames2()`: `"dimnames"` for [dimnames()] and `"attr"` for `attr(x,
-#'   "dimnames")`.
-#' - For `rownames2()`: `"dimnames"` for the first element of [dimnames()],
-#'   `"attr"` for `attr(x, "dimnames")[[1]]`, and `"row.names"` for `attr(x,
-#'   "row.names")`.
-#' - For `class2()`: `"class"` for [class()] and `"attr"` for `attr(x,
-#'   "class")`.
+#' @param how \[`character(1)`]
+#'   How to get or set the attribute:
+#'   - For `names3()`: `"names"` for [names()] and `"attr"` for [attr()].
+#'   - For `dimnames2()`: `"dimnames"` for [dimnames()] and `"attr"` for `attr(x,
+#'     "dimnames")`.
+#'   - For `rownames2()`: `"dimnames"` for the first element of [dimnames()],
+#'     `"attr"` for `attr(x, "dimnames")[[1]]`, and `"row.names"` for `attr(x,
+#'     "row.names")`.
+#'   - For `class2()`: `"class"` for [class()] and `"attr"` for `attr(x,
+#'     "class")`.
+#'
+#' @returns
+#' - \[`character(length(x))` | `NULL`] For `names3()`.
+#' - \[`list(length(dim(x)))` | `NULL`] For `dimnames2()`.
+#' - \[`character(dim(x)[1])` | `NULL`] For `rownames2()`.
+#' - \[`character()`] For `class2()`.
+#' - \[`=value`] For the setters: The `value` passed, invisibly.
 #'
 #' @name attributes-getters-setters
 NULL
+
 
 
 #' @rdname attributes-getters-setters
@@ -573,7 +589,8 @@ dimnames2 <- function(x, repair = "unique", how = "dimnames") {
   # - x is a collection with dimensions
   # - repair is left to vec_as_names()
   # - how is "dimnames" or "attr"
-  # TODO: consider dim via attr, e.g. excluding data frames
+  # TODO: 
+  # consider dim via attr, e.g. excluding data frames
 
 
   # Main:
@@ -680,7 +697,7 @@ class2 <- function(x, how = "class") {
   )
 
   if (is_null(cls)) {
-    return(character(0)) # TODO: reconsider returning NULL vs character(0)
+    return(character(0)) # CHECK: reconsider returning NULL vs character(0)
   }
 
   cls[cls != "" & ! duplicated(cls)]

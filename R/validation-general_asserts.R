@@ -17,10 +17,11 @@ NULL
 #' allows the user to catch that message/error and generate a condition with
 #' higher flexibility than the original package.
 #'
-#' @param fun \[`\(){}`] For `assert_from_msg`: a function that checks an object
-#'   and returns `TRUE` if the check passes, or a message (`character(1)`) if it
-#'   fails; For `assert_from_error`: a function that checks an object and raises
-#'   an error if the check fails.
+#' @param fun \[`\(){}`]
+#'   - For `assert_from_msg()`: a function that checks an object and returns
+#'   `TRUE` if the check passes, or a message (`character(1)`) if it fails.
+#'   - For `assert_from_error()`: a function that checks an object and raises an
+#'   error if the check fails.
 #' @param ... \[`any` each] Objects to check.
 #' @param args_fun \[`list()`] Additional arguments to pass to `fun`.
 #' @param x_names \[`character()` | `NULL`] The names of `...` to print in
@@ -28,7 +29,7 @@ NULL
 #' @param env `r ROXY$env()`
 #' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
-#' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
+#' @returns \[`list(...)`] `invisible(list(...))`, or aborts if the check fails.
 #'
 #' @examples
 #' # Using checkmate::check_* functions:
@@ -167,7 +168,7 @@ assert_from_error <- function(
 #' @param env `r ROXY$env()`
 #' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
-#' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
+#' @returns \[`list(...)`] `invisible(list(...))`, or aborts if the check fails.
 #'
 #' @examples
 #' try({
@@ -239,9 +240,7 @@ assert_ptype <- function(
 #' @param env `r ROXY$env()`
 #' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
-#' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
-#'
-#' @returns \[`TRUE`] Invisibly `TRUE`, or aborts if the check fails.
+#' @returns \[`list(...)`] `invisible(list(...))`, or aborts if the check fails.
 #'
 #' @examples
 #' try({
@@ -332,7 +331,7 @@ assert_predicate <- function(
 #' [test_integer()]. Pass a list of arguments to the test function via `...`,
 #' with the same argument name as the type. E.g. `integer = list(len = 2)`.
 #'
-#' @param x \[`any`] An object to check.
+#' @param x `r ROXY$x()`
 #' @param types \[`character()`] A character vector of types to check against.
 #' @param ... \[`list()` each] Lists of arguments to pass to the test function
 #'   for each type. The list names

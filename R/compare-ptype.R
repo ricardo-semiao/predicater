@@ -14,25 +14,26 @@
 #' elements given a list prototype, useful when dealing with complex objects
 #' like `list(a = integer(), b = list(c = character(), d = double()))`.
 #'
-#' @param .x \[`any`] Any R object.
+#' @param .x `r ROXY$x()`
 #' @param .ptype \[`any`] A prototype object that defines metadata to check
 #'  against `.x`.
-#' @param .typeof,.length,.attrs \[`character(1)` | `\(vx, vp) {}`]
-#'  How to check the non-attribute metadata -- `typeof()`, `length()`, and
-#'  attributes names -- of `.x` against `ptype`. Can be either: a function that
-#'  takes the metadata's value of `.x` (`vx`) and `.ptype` (`vp`) as arguments
-#'  and returns a boolean; or a string that specifies a predefined function (see
+#' @param .length,.attrs \[`character(1)` | `\(vx, vp) {}`]
+#'  How to check the non-attribute metadata -- `length()`, and attributes names
+#'  -- of `.x` against `ptype`. Can be either: a function that takes the
+#'  metadata's value of `.x` (`vx`) and `.ptype` (`vp`) as arguments and returns
+#'  a boolean; or a string that specifies a predefined function (see
 #'  [Details](#details)).
 #' @param class,dim,names,row.names,dimnames,...
 #'   \[`character(1)` | `\(vx, vp) {}`]
-#'   How to check the attributes -- each
-#'   argument is an attribute name -- of `.x` against `.ptype`. With a function
-#'   or string (same as above).
+#'   How to check the attributes -- each argument is an attribute name -- of
+#'   `.x` against `.ptype`. With a function or string (same as above).
 #' @param .named \[`TRUE` | `FALSE`] For `is_ptype_list()`, whether to use the
 #'   names of `.x` and `.ptype` for matching them (`TRUE`), or the order
 #'   (`FALSE`).
 #' @param .depth \[`integer(1)`] For `is_ptype_list()`, how many levels of
 #'   recursion to check. `1` means check the first level elements only.
+#'
+#' @returns `r ROXY$test_res()`
 #'
 #' @details
 #' Predefined check functions:
@@ -71,22 +72,22 @@
 #' @export
 is_ptype <- function(
   .x, .ptype,
-  .typeof = "==", .length = "==_0n", .attrs = "no",
+  .length = "==_0n", .attrs = "no",
   class = "==_0n", dim = "==_0n",
   names = "==_0n", row.names = "==_0n", dimnames = "id_0n",
   ...
 ) {
   # Checks:
-  # - .typeof, .length, .attrs, class, dim, names, row.names, dimnames, ... must
+  # - .length, .attrs, class, dim, names, row.names, dimnames, ... must
   #   conform to docs
   ptype_check_ops(
-    .typeof, .length, .attrs,
+    .length, .attrs,
     class, dim, names, row.names, dimnames, ...
   )
 
 
   # Main:
-  checks_extra <- c(.typeof = .typeof, .length = .length, .attrs = .attrs)
+  checks_extra <- c(.length = .length, .attrs = .attrs)
 
   checks_available <- names(attributes(.ptype))
   checks_in_x <- names(attributes(.x))
@@ -127,8 +128,9 @@ is_ptype <- function(
   is
 }
 # TODO: "==|0" and "==|null"
-# CHECK: why do we allow control over typeof check? just remove it?
 # TODO: consider all headers of the c data (altrep, ...)
+# TODO: check if we need to require that specific signarure for op function in
+# the type hing
 
 
 #' @rdname is_ptype
@@ -163,8 +165,9 @@ is_ptype_list <- function(.x, .ptype, .named = TRUE, .depth = 1, ...) {
 
   # Main:
   if (!.named) {
-    .x <- set_names(.x, seq_along(.x)) # TODO: switch to names()<- ?
-    .ptype <- set_names(.ptype, seq_along(.ptype))
+    names(.x) <- seq_along(.x)
+    names(.ptype) <- seq_along(.ptype)
+    .x <- set_names(.x, seq_along(.x))
   }
 
   is <- TRUE
@@ -207,7 +210,7 @@ ptype_check_ops <- function(...) {
   for (q in ops_quos) {
     op <- eval_tidy(q)
     cond <- (is_function(op) && all(names(formals(args(op))) == c("vx", "vp"))) ||
-      (is_string(op) && op %in% names(CHECK_OPS)) # TODO: reconsider is_string
+      (is_character(op, 1) && !is.na(op) && op %in% names(CHECK_OPS))
     if (!cond) {
       cli_abort("{.arg {as_label(q)}} must be a function with signature \\
       ({.code vx, vp}) or one of {.val {names(CHECK_OPS)}}.")

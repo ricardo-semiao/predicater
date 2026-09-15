@@ -10,34 +10,35 @@
 \alias{is_inf}
 \title{Type checks - Inf and NaN}
 \usage{
-are_finite(x, na = "na")
+are_finite(x, na = NA)
 
-is_finite(x, n = NULL, na = "na")
+is_finite(x, na = NA)
 
-are_nan(x, na = "na")
+are_nan(x, na = NA)
 
-is_nan(x, n = NULL, na = "na")
+is_nan(x, na = NA)
 
-are_inf(x, na = "na", signs = "+-")
+are_inf(x, na = NA, signs = "+-")
 
-is_inf(x, n = NULL, na = "na", signs = "+-")
+is_inf(x, na = NA, signs = "+-")
 }
 \arguments{
-\item{x}{[\code{any}] An object to test.}
+\item{x}{[\code{numeric()}, \code{any}] For \verb{are_*()}, a numeric vector to tes; for
+\verb{is_*()}, any object to test.}
 
-\item{na}{[\code{character(1)}] How to treat \code{NA} values: \code{"f"}
-to return \code{FALSE}, \code{"t"} return \code{TRUE}, or \code{"na"} to return \code{NA}.}
-
-\item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
+\item{na}{[\code{TRUE} | \code{FALSE} | \code{NA}] What to return for \code{NA} values.}
 
 \item{signs}{[\code{character(1)}] For \code{are_inf()} and \code{is_inf()} -- which signs
 of infinity to allow: \code{"+"} for positive infinity, \code{"-"} for negative
 infinity, or \code{"+-"} for both.}
+
+\item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{
 \itemize{
 \item [\code{logical(length(x))}] For \verb{are_*}: the vectorized or result of the test.
-\item [\code{TRUE} | \code{FALSE}] For \verb{is_*}: the scalar result of the test.
+\item [\code{TRUE} | \code{FALSE} | \code{NA}] For \verb{is_*}: the scalar result of the test. If
+\code{na != NA}, then will always return \code{TRUE} or \code{FALSE}.
 }
 }
 \description{
@@ -50,7 +51,7 @@ The \verb{are_*()} functinos are vectorized, returning a vector of same length a
 corresponding \verb{are_*()} function, and \code{TRUE} otherwise.
 }
 \details{
-Currently, \code{NaN} values can never arise from operations with \code{NA} (\code{NA + NaN #> NA}), so treating \code{NaN} as \code{NA} via \code{nan = "na"} is not recommended.
+Currently, \code{NaN} values can never arise from operations with \code{NA} (\code{NA + NaN #> NA}), so treating \code{NaN} as \code{NA} via \code{nan = NA} is not recommended.
 }
 \examples{
 x <- c(1, Inf, -Inf, NaN, NA)
@@ -62,14 +63,14 @@ are_finite(x)
 are_inf(x)
 #> [1] FALSE  TRUE  TRUE  FALSE  NA
 
-are_nan(x, na = "na")
+are_nan(x, na = NA)
 #> [1] FALSE  FALSE  FALSE  TRUE  NA
 
 # For all, the NA value's result can be controlled:
-are_finite(x, na = "f")
+are_finite(x, na = FALSE)
 #> [1]  TRUE FALSE FALSE FALSE FALSE
 
-are_nan(x, na = "t")
+are_nan(x, na = TRUE)
 #> [1] FALSE FALSE FALSE  TRUE  TRUE
 
 

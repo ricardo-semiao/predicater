@@ -36,7 +36,7 @@
 #'   to use for comparison.
 #'
 #' @returns
-#' - \[`TRUE` | `FALSE`] for `identical2()`.
+#' - \[`TRUE` | `FALSE`] For `identical2()`: the scalar result of the test.
 #' - `identical_flag()` returns a object with the same structure as `x` and
 #'   logical elements.
 #'
@@ -128,8 +128,8 @@ identical2 <- function(
 # TODO: order data by names, values, or both (currently only by values)
 # TODO: allow ignore_data to accept vector of names or vector of indices. later
 # could even accept mixed, regex, etc.
-# NOTE: Less important but possible: make C header metadata matter
 # TODO: attrs_rmv or attrs_keep? or attrs_filt?
+# CHECK: Less important but possible: make C header metadata matter
 
 
 #' @rdname identical2
@@ -180,6 +180,7 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
   res
 }
 # TODO: allow attrib as set
+
 
 
 # identical2 Helpers ----------------------------------------------------------

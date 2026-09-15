@@ -10,30 +10,33 @@
 \alias{is_object}
 \title{Type checks - Objects}
 \usage{
-has_class(x, empty = "t", bad = "f")
+has_object_bit()
 
-has_object_bit(x)
+has_s4_bit()
 
-has_s4_bit(x)
+has_class(x, invalid = "warn", bad = "warn")
+
+is_object_like(x, bad = "warn")
 
 is_s4(x)
 
 is_object(x)
-
-is_object_like(x, bad = "warn")
 }
 \arguments{
-\item{x}{[\code{any}] Object to check.}
+\item{x}{[\code{any}] An object to test.}
 
-\item{empty}{[\code{"t"} | \code{"f"}] How to handle empty class attribute in
-\code{has_class()}: \code{"t"} to return \code{TRUE}, \code{"f"} to return \code{FALSE}.}
+\item{invalid}{[\code{"warn"} | \code{"false"}] How to handle \code{NA} or \code{""} values in
+the class attribute: \code{"warn"} to issue a warning and return \code{TRUE};
+\code{"false"} to return \code{FALSE}.}
 
-\item{bad}{[\code{character(1)}] How to handle inconsistencies in
-\code{is_object_like()}: \code{"warn"} to issue a warning, \code{"stop"} to throw an
-error, or \code{"f"} to return \code{FALSE}.}
+\item{bad}{[\code{"warn"} | \code{"false"}] How to handle inconsistencies in
+\code{is_object_like()}: \code{"warn"} to issue a warning and return if \code{x} has a
+class attribute; \code{"false"} to return \code{FALSE}.}
+
+\item{empty}{[\code{TRUE} | \code{FALSE}] What to return if there is an \code{""} class.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 Functions to test for 'object'-related properties:

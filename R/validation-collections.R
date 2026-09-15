@@ -14,7 +14,7 @@ NULL
 #' `test_list()` is the predicate test, while `assert_list()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param mode \[`character()` | `NULL`] Expected vector type(s) out of `"list"` or
 #'   `"pairlist"`. Set to `NULL` to not test.
 #' @param len,null_n,empty_n,dup_n `r ROXY$x_n("len,null_n,empty_n,dup_n")`
@@ -81,16 +81,16 @@ assert_list <- fn_core_to_assert(core_list, list(
 #' `test_environment()` is the predicate test, while `assert_environment()`
 #' validates its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param len `r ROXY$x_n("len")`
 #' @param env_has,env_sees \[`character()` | `NULL`] Symbol names that must exist
 #'   directly in `x`, or inherited from one of its parents, respectively (see
 #'   [rlang::env_has()]). Set to `NULL` to not test.
-#' @param parents \[`environment()` | `list()` | `NULL`] Environment or list of
-#'   environments to test as parents of `x`. If a single environment is
-#'   supplied, tests if `x` inherits from it. If a list is supplied, tests if
-#'   [rlang::env_parents()] matches the list identically. Set to `NULL` to not
-#'   test.
+#' @param parents \[`environment()` | `list()` | `NULL`]
+#'   Environment or list of environments to test as parents of `x`. If a single
+#'   environment is supplied, tests if `x` inherits from it. If a list is
+#'   supplied, tests if [rlang::env_parents()] matches the list identically. Set
+#'   to `NULL` to not test.
 #' @param namespace \[`TRUE` | `FALSE` | `NULL`] Test if `x` is a namespace
 #'   environment via [rlang::is_namespace()]. Set to `NULL` to not test.
 #' @param sentinels `r ROXY$sentinels()`
@@ -156,11 +156,11 @@ assert_environment <- fn_core_to_assert(
 #' `test_vector()` is the predicate test, while `assert_vector()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
-#' @param mode \[`"atomic"` | `"list"` | `"expression"` | `"pairlist"`] Allowed
-#'   vector types. They are additive: `"atomic"` allows atomic vectors, `list`
-#'   allows atomic and lists, `expression` allows atomic, lists, and expression
-#'   objects, and `pairlist` allows all.
+#' @param x `r ROXY$x()`
+#' @param mode \[`"atomic"` | `"list"` | `"expression"` | `"pairlist"`]
+#'   Allowed vector types. They are additive: `"atomic"` allows atomic vectors,
+#'   `list` allows atomic and lists, `expression` allows atomic, lists, and
+#'   expression objects, and `pairlist` allows all.
 #' @param len,na_n,null_n,empty_n,dup_n `r ROXY$x_n("len,na_n,null_n,empty_n,dup_n")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`

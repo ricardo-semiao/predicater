@@ -5,15 +5,14 @@
 \alias{are_na2}
 \title{Type checks - NA values}
 \usage{
-are_na2(x, nan = "f", types = NULL)
+are_na2(x, nan = FALSE)
 
-is_na2(x, n = NULL, nan = "f", types = NULL)
+is_na2(x, nan = FALSE, types = NULL)
 }
 \arguments{
-\item{x}{[\code{any}] Any R object.}
+\item{x}{[\code{any}] An object to test.}
 
-\item{nan}{[\code{character(1)}] How to treat \code{NaN} values: \code{"f"} to return
-\code{FALSE}, \code{"t"} to return \code{TRUE}, or \code{"na"} to return \code{NA}.}
+\item{nan}{[\code{TRUE} | \code{FALSE}] What to return for \code{NaN} values.}
 
 \item{types}{[\code{character()} | \code{NULL}] A character vector of allowed \code{NA}
 types (see \code{\link{NA}}). Set to \code{NULL} to allow all types.}
@@ -44,10 +43,10 @@ x <- c(1, Inf, -Inf, NaN, NA)
 are_na2(x)
 #> [1] FALSE FALSE FALSE FALSE  TRUE
 
-are_na2(x, nan = "t")
+are_na2(x, nan = TRUE)
 #> [1] FALSE FALSE FALSE  TRUE  TRUE
 
-are_na2(x, nan = "na")
+are_na2(x, nan = NA)
 #> [1] FALSE FALSE FALSE    NA  TRUE
 
 is_na2(x) #> FALSE # In all nan modes

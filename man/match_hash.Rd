@@ -34,8 +34,9 @@ order, and in the caller environment.}
 \item{nomatch}{[\code{any}] Value to return if no cases match. Use \code{stop()} or
 similar to err.}
 
-\item{htab, type, size}{[\code{hashtab()}, \code{character(1)}, \code{integer(1)}] For
-\code{match_hash}: an existing hash table, or the arguments passed to
+\item{htab, type, size}{[\code{hashtab()} | NULL, \code{character(1)} | \code{missing_arg()},
+\code{integer(1)} | \code{missing_arg()}]
+For \code{match_hash}: an existing hash table, or the arguments passed to
 \code{\link[utils:hashtab]{utils::hashtab()}} to create a new one.}
 
 \item{fun, args_id}{[\code{character(1)}, \code{list()}] For \code{match_id}: which

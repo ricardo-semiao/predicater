@@ -5,53 +5,46 @@
 \alias{are_integer_like}
 \title{Type checks - Integer-like values}
 \usage{
-are_integer_like(x, mode = "range", tol = sqrt(.Machine$double.eps), na = "t")
+are_integer_like(x, mode = "bounded", tol = 0, na = TRUE)
 
-is_integer_like(
-  x,
-  n = NULL,
-  mode = "range",
-  tol = sqrt(.Machine$double.eps),
-  na = "t"
-)
+is_integer_like(x, n = NULL, mode = "bounded", tol = 0, na = TRUE)
 }
 \arguments{
-\item{x}{[\code{any}] Any R object.}
+\item{x}{[\code{any}] An object to test.}
 
-\item{mode}{[\code{character(1)}] The mode of integer interpretation, one of
-\code{"trunc"}, \code{"trunc_tol"}, \code{"range"}, or \code{"range_tol"}.}
+\item{mode}{[\code{"bounded"} | \code{"unbounded"}] The mode of integer interpretation
+as described above.}
 
 \item{tol}{[\code{double(1)}] The tolerance for the \code{"trunc_tol"} and
-\code{"range_tol"} modes, ignored in other modes. Defaults to the square root of
-the machine epsilon.}
+\code{"range_tol"} modes, ignored in other modes. A useful value is
+\code{sqrt(.Machine$double.eps)}.}
 
-\item{na}{[\code{character(1)}] How to treat \code{NA} values: \code{"t"} to return \code{TRUE},
-\code{"na"} to return \code{NA}. Integer vectors always return \code{TRUE} for \code{NA}
-values.}
+\item{na}{[\code{TRUE} | \code{NA}] What to return for \code{NA} values. Integer vectors
+always return \code{TRUE} for \code{NA} values.}
 
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{
 \itemize{
-\item [\code{logical(length(x))}] For \verb{are_*}: the vectorized or result of the test.
-\item [\code{TRUE} | \code{FALSE}] For \verb{is_*}: the scalar result of the test.
+\item [\code{logical(length(x))}] For \code{are_integer_like()}: the vectorized or result
+of the test.
+\item [\code{TRUE} | \code{FALSE} | \code{NA}] For \code{is_integer_like()}: the scalar result of
+the test. If \code{na != NA}, then will always return \code{TRUE} or \code{FALSE}.
 }
 }
 \description{
-Check if an object can be considerd integer in 4 different interpretations
+Check if an object can be considerd integer in two different interpretations
 (\code{mode}s):
 \itemize{
-\item \code{"trunc"}: checks if \code{x} can be represented as a double-precision integer,
-i.e. has negligible decimal part. Allows \code{Inf} and \code{NaN} values. If so, it
-can be truncated without losing information.
-\item \code{"range"}: checks if \code{x} can be represented as an integer, i.e. has
-negligible decimal part and is within the integer range. Disallows \code{Inf}
-and \code{NaN}. If so, it can be coerced \code{\link[=as.integer]{as.integer()}} without losing
+\item \code{"unbounded"}: checks if \code{x} can be represented as a double-precision
+integer, i.e. \code{x - round(x)} falls within some tolerance value (\code{tol}).
+Allows \code{Inf} and \code{NaN} values. If so, it can be \code{\link[=round]{round()}}-ded without loss
+of information.
+\item \code{"range"}: checks if \code{x} can be represented as an integer, i.e. passes
+'unbounded' and is within R's allowed integer range. Disallows \code{Inf} and
+\code{NaN}. If so, it can be coerced \code{as.integer(round(x))} without losing
 information.
-\item Both have a \code{"*_tol"} variant that allows for a tolerance in the decimal
-part check, via \code{abs(x - round(x)) < tol}. In these modes, lossless
-coercion is only guaranteed for \code{round(x)}, not \code{x}. See the 'Details'
-section for more information.
+\item Note that \code{tol} can be set to zero, for a strict check of the decimal part.
 }
 
 \code{are_integer_like()} is vectorized, returning a vector of same length as \code{x},
@@ -72,7 +65,7 @@ Note that the mathematical \code{Inf} and \code{NaN} concepts exist for integers
 they cannot be coerced into \code{\link[=integer]{integer()}} in R, thats why they are allowed in
 the \code{"trunc"} modes and not in \code{"range"} modes.
 
-Philosofically, for \verb{NA`` values, consider: }na = "t"\verb{as "yes,}NA_real_\verb{can safely be coerced to}NA_integer_\verb{"; and }na = "na"\verb{as "this NA value might have a decimal part, so I don't know if I can consider it an integer". Note that with integer vectors, NA values are surely integers, so they always return}TRUE`.
+Philosofically, for \verb{NA`` values, consider: }na = TRUE\verb{as "yes,}NA_real_\verb{can safely be coerced to}NA_integer_\verb{"; and }na = NA\verb{as "this NA value might have a decimal part, so I don't know if I can consider it an integer". Note that with integer vectors, NA values are surely integers, so they always return}TRUE`.
 }
 \examples{
 x <- c(1.0, NA, 1.0 + 1e-6, 1.0 + .Machine$double.eps, NaN, -Inf, 1e200)
@@ -89,25 +82,26 @@ is_integer_like(x) #> FALSE
 suppressWarnings(as.integer(x)) #> [1]  1 NA NA NA NA 1 1
 
 # Changing NA interpretation:
-are_integer_like(x, na = "na")
+are_integer_like(x, na = NA)
 # [1]  TRUE    NA FALSE FALSE FALSE FALSE FALSE
 
 # Adding tolerance:
-are_integer_like(x, mode = "range_tol")
+are_integer_like(x, tol = sqrt(.Machine$double.eps))
 # [1]  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE
 
 # Decreasing tolerance:
-are_integer_like(x, mode = "range_tol", tol = 1e-5)
+are_integer_like(x, tol = 1e-5)
 # [1]  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
 
-# trunc mode allows Inf, NaN, and out-of-integer-range values:
-are_integer_like(x, mode = "trunc")
+# unbounded mode allows Inf, NaN, and out-of-integer-range values:
+are_integer_like(x, mode = "unbounded")
 # [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
 
 # Adding tolerance, all pass, and finally is_integer_like() retursn TRUE:
-are_integer_like(x, mode = "trunc_tol", tol = 1e-5)
+are_integer_like(x, mode = "unbounded", tol = 1e-5)
 # [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-is_integer_like(x, mode = "trunc_tol", tol = 1e-5) #> TRUE
+
+is_integer_like(x, mode = "unbounded", tol = 1e-5) #> TRUE
 
 
 # are_integer_like() fails for non-numeric objects, while is_integer_like()
@@ -121,6 +115,6 @@ is_integer_like(1:2, n = 1) #> FALSE
 
 
 # Integer vectors always return TRUE for NA values:
-are_integer_like(c(1L, NA_integer_), na = "na")
+are_integer_like(c(1L, NA_integer_), na = NA)
 
 }

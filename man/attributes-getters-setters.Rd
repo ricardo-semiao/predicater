@@ -55,7 +55,8 @@ user who calls this function indirectly, via another function which exposes
 specifying \verb{repair = "unique", quiet = TRUE}. When the \code{"*_quiet"} options
 are used, any setting of \code{quiet} is silently overridden.}
 
-\item{how}{[\code{character(1)}] How to get or set the attribute:
+\item{how}{[\code{character(1)}]
+How to get or set the attribute:
 \itemize{
 \item For \code{names3()}: \code{"names"} for \code{\link[=names]{names()}} and \code{"attr"} for \code{\link[=attr]{attr()}}.
 \item For \code{dimnames2()}: \code{"dimnames"} for \code{\link[=dimnames]{dimnames()}} and \code{"attr"} for \code{attr(x, "dimnames")}.
@@ -64,7 +65,16 @@ are used, any setting of \code{quiet} is silently overridden.}
 \item For \code{class2()}: \code{"class"} for \code{\link[=class]{class()}} and \code{"attr"} for \code{attr(x, "class")}.
 }}
 
-\item{value}{[\code{character()}] Value to set the attribute to.}
+\item{value}{[\code{any}] Value to set the attribute to.}
+}
+\value{
+\itemize{
+\item [\code{character(length(x))} | \code{NULL}] For \code{names3()}.
+\item [\code{list(length(dim(x)))} | \code{NULL}] For \code{dimnames2()}.
+\item [\code{character(dim(x)[1])} | \code{NULL}] For \code{rownames2()}.
+\item [\code{character()}] For \code{class2()}.
+\item [\verb{=value}] For the setters: The \code{value} passed, invisibly.
+}
 }
 \description{
 Functions to get and set names, dimnames, and class of an object, while

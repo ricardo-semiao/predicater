@@ -32,13 +32,13 @@
 #' is_numeric(x, n = NULL)
 #'
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #' @param finite \[`TRUE` | `FALSE` | `NULL`] Whether all values of the vector are
 #'   not `NA`, `NaN`, `Inf`, or `-Inf`. Set to `NULL` to not test. [is_finite()]
 #'   is designed to allow more flexibility to this test.
 #'
-#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns `r ROXY$test_res()`
 #'
 #' @aliases is_logical is_integer is_double is_complex is_character is_raw is_atomic
 #' @rawNamespace export(is_logical, is_integer, is_double, is_complex, is_character, is_raw, is_atomic)
@@ -54,7 +54,7 @@ is_numeric <- function(x, n = NULL) {
   # Checks: left to rlang
   is_integer(x, n) || is_double(x, n)
 }
-# TODO: Long vectors, and others? Allow generic implementations?
+# CHECK: Long vectors, and others? Allow generic implementations?
 
 
 
@@ -69,12 +69,12 @@ is_numeric <- function(x, n = NULL) {
 #'
 #' @param x \[`logical()`, `any`] For `are_*()`, a logical vector; for `is_*()`,
 #'   an object to test.
-#' @param na \[`character(1)`] How to treat `NA` values: `"f"` to return
-#'  `FALSE`, or `"na"` to return `NA`.
+#' @param na \[`FALSE` | `NA`] What to return for `NA` values.
 #'
 #' @returns
 #' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
-#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
+#' - \[`TRUE` | `FALSE` | `NA`] For `is_*`: the scalar result of the test. If
+#'   `na != NA`, the result is always `TRUE` or `FALSE`.
 #'
 #' @name predicates-true-false
 NULL
@@ -82,69 +82,79 @@ NULL
 
 #' @rdname predicates-true-false
 #' @export
-are_true <- function(x, na = "f") {
+are_true <- function(x, na = FALSE) {
   # Checks:
   # - x must be a logical vector
   # - na must be one of "f", "na"
 
 
   # Main:
-  switch(na,
-    f = !is.na(x) & x,
-    na = if_else2(is.na(x), NA, x)
-  )
+  if (is.na(na)) {
+    if_else2(is.na(x), NA, x)
+  } else {
+    !is.na(x) & x
+  }
 }
 
 
 #' @rdname predicates-true-false
 #' @export
-is_true2 <- function(x, na = "f") {
+is_true2 <- function(x, na = FALSE) {
   # Checks:
   # - na must be one of "f", "na"
 
 
   # Main:
-  if (na == "na" && is.na(x)) {
-    return(NA)
+  if (is_logical(x, 1)) {
+    if (is.na(x)) na else x
+  } else {
+    FALSE
   }
-
-  is_logical(x, 1) && !is.na(x) && x
 }
 
 
 #' @rdname predicates-true-false
 #' @export
-are_false <- function(x, na = "f") {
+are_false <- function(x, na = FALSE) {
   # Checks:
   # - x must be a logical vector
   # - na must be one of "f", "na"
 
 
   # Main:
-  switch(na,
-    f = !(is.na(x) | x),
-    na = if_else2(is.na(x), NA, x)
-  )
+  if (is.na(na)) {
+    if_else2(is.na(x), NA, x)
+  } else {
+    !(is.na(x) | x)
+  }
 }
 
 
 #' @rdname predicates-true-false
 #' @export
-is_false2 <- function(x, na = "f") {
+is_false2 <- function(x, na = FALSE) {
   # Checks:
   # - na must be one of "f", "na"
 
 
   # Main:
-  if (na == "na" && is.na(x)) {
-    return(NA)
+  if (is_logical(x, 1)) {
+    if (is.na(x)) na else x
+  } else {
+    FALSE
   }
-  is_logical(x, 1) && !is.na(x) && !x
 }
+
 
 #' @rdname predicates-true-false
 #' @export
-is_bool <- is_bool
+is_bool2 <- function(x, na = FALSE) {
+  if (is_logical(x, 1)) {
+    if (is.na(x)) na else TRUE
+  } else {
+    FALSE
+  }
+}
 
 
 
@@ -163,9 +173,8 @@ is_bool <- is_bool
 #' - `is_na2()` returns `FALSE` for non-atomic
 #' objects, or if not all elements pass `are_na2()`, and `TRUE` otherwise.
 #'
-#' @param x \[`any`] Any R object.
-#' @param nan \[`character(1)`] How to treat `NaN` values: `"f"` to return
-#'   `FALSE`, `"t"` to return `TRUE`, or `"na"` to return `NA`.
+#' @param x `r ROXY$x()`
+#' @param nan \[`TRUE` | `FALSE`] What to return for `NaN` values.
 #' @param types \[`character()` | `NULL`] A character vector of allowed `NA`
 #'   types (see [`NA`]). Set to `NULL` to allow all types.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
@@ -180,10 +189,10 @@ is_bool <- is_bool
 #' are_na2(x)
 #' #> [1] FALSE FALSE FALSE FALSE  TRUE
 #'
-#' are_na2(x, nan = "t")
+#' are_na2(x, nan = TRUE)
 #' #> [1] FALSE FALSE FALSE  TRUE  TRUE
 #'
-#' are_na2(x, nan = "na")
+#' are_na2(x, nan = NA)
 #' #> [1] FALSE FALSE FALSE    NA  TRUE
 #'
 #' is_na2(x) #> FALSE # In all nan modes
@@ -197,30 +206,35 @@ NULL
 
 #' @rdname is_na2
 #' @export
-are_na2 <- function(x, nan = "f", types = NULL) {
+are_na2 <- function(x, nan = FALSE) {
   # Checks:
   # - x must be atomic
   # - nan must be one of "f", "t", "na"
-  # - type must be one of NULL, "logical", "integer", "double", "complex", "character"
   # TODO:
 
 
   # Main:
-  if (!is_null(types)) {
-    return(typeof(x) %in% types)
+  if (is.na(nan)) {
+    if_else2(is.nan(x), NA, is.na(x))
+  } else if (nan) {
+    is.na(x)
+  } else {
+    is.na(x) & !is.nan(x)
   }
-
-  switch(sub("w", "", nan),
-    f = is.na(x) & !is.nan(x),
-    t = is.na(x),
-    na = if_else2(is.nan(x), NA, is.na(x))
-  )
 }
 
 
 #' @rdname is_na2
 #' @export
-is_na2 <- function(x, n = NULL, nan = "f", types = NULL) {
-  # Checks: left to rlang and are_na2
-  is_atomic(x, n = n) && all(are_na2(x, nan = nan, types = types))
+is_na2 <- function(x, nan = FALSE, types = NULL) {
+  if (is_atomic(x, 1)) {
+    res <- if (is.nan(x)) nan else is.na(x)
+    if (is_null(types)) {
+      res
+    } else {
+      res && (typeof(x) %in% types)
+    }
+  } else {
+    FALSE
+  }
 }

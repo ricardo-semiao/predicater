@@ -50,7 +50,7 @@ not test.}
 language objects, or syntactic literals.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+`r ROXY$test_res()``
 }
 \description{
 In R, there are three building blocks that compose the language itself:

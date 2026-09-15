@@ -97,8 +97,9 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 #'   order, and in the caller environment.
 #' @param nomatch \[`any`] Value to return if no cases match. Use `stop()` or
 #'   similar to err.
-#' @param htab,type,size \[`hashtab()`, `character(1)`, `integer(1)`] For
-#'   `match_hash`: an existing hash table, or the arguments passed to
+#' @param htab,type,size \[`hashtab()` | NULL, `character(1)` | `missing_arg()`,
+#'   `integer(1)` | `missing_arg()`]
+#'   For `match_hash`: an existing hash table, or the arguments passed to
 #'   [utils::hashtab()] to create a new one.
 #' @param fun,args_id \[`character(1)`, `list()`] For `match_id`: which
 #'   'identical' function to use, `"identical"` for [identical()] or
@@ -151,7 +152,6 @@ match_hash <- function(
 
   utils::gethash(htab, x, nomatch = nomatch)
 }
-# TODO: use maybe_missing, better, type = missing_arg()
 
 
 #' @rdname match_hash

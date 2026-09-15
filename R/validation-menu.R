@@ -18,7 +18,7 @@ TESTS_MENU$range <- function(x, arg, pars) {
 }
 
 TESTS_MENU$na_n <- function(x, arg, pars) {
-  test_in_range(n_na <- sum(are_na2(x, nan = "f")), arg, pars$l) %@@%
+  test_in_range(n_na <- sum(are_na2(x, nan = FALSE)), arg, pars$l) %@@%
     c(n = n_na)
 }
 
@@ -29,12 +29,12 @@ TESTS_MENU$dup_n <- function(x, arg, pars) {
 # TODO: deal with NA (incomparables)?
 
 TESTS_MENU$nan_n <- function(x, arg, pars) {
-  test_in_range(n_nan <- sum(are_nan(x, na = "f")), arg, pars$l) %@@%
+  test_in_range(n_nan <- sum(are_nan(x, na = FALSE)), arg, pars$l) %@@%
     c(n = n_nan)
 }
 
 TESTS_MENU$inf_n <- function(x, arg, pars) {
-  test_in_range(n_inf <- sum(are_inf(x, na = "f")), arg, pars$l) %@@%
+  test_in_range(n_inf <- sum(are_inf(x, na = FALSE)), arg, pars$l) %@@%
     c(n = n_inf)
 }
 
@@ -55,7 +55,6 @@ TESTS_MENU$empty_n <- function(x, arg, pars) {
 TESTS_MENU$sorted <- function(x, arg, pars) {
   is_sorted(x, arg, na.rm = TRUE) %@@% c(sorted = arg)
 }
-# TODO: what to do with na.rm = TRUE?
 
 TESTS_MENU$set <- function(x, arg, pars) {
   if (! is_list(arg)) {
@@ -94,22 +93,22 @@ TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
     length(x) == 0
 
   } else if ("nan" %in% arg) {
-    is_nan(x, na = "f")
+    is_nan(x, na = FALSE)
 
   } else if ("inf" %in% arg) {
-    is_inf(x, 1, na = "f")
+    is_inf(x, 1, na = FALSE)
   } else if ("+inf" %in% arg) {
-    is_inf(x, 1, na = "f", signs = "+")
+    is_inf(x, 1, na = FALSE, signs = "+")
   } else if ("-inf" %in% arg) {
-    is_inf(x, 1, na = "f", signs = "-")
+    is_inf(x, 1, na = FALSE, signs = "-")
 
-  } else if ("t" %in% arg) {
+  } else if (any(c("true", "t") %in% arg)) {
     is_true(x)
-  } else if ("f" %in% arg) {
+  } else if (any(c("false", "f") %in% arg)) {
     is_false(x)
 
   } else if ("nan" %in% arg) {
-    is_nan(x, na = "f")
+    is_nan(x, na = FALSE)
 
   } else if ("na_logical" %in% arg) {
     identical(x, NA)

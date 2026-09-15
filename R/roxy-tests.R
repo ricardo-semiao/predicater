@@ -25,7 +25,7 @@ ROXY$action <- function() {
 ROXY$env <- function() {
   glue(r"(
   \[`environment()` | `call()` | `NULL` | `missing_arg()`] The call to inform as \
-  the origin of the error, passed to [rlang::abort()]:
+    the origin of the error, passed to [rlang::abort()]:
     - An environment in the call stack or a hard-coded defused call.
     - `NULL` for no information.
     - `missing_arg()` to use the assert function itself.
@@ -76,7 +76,7 @@ ROXY$args_cnd <- function(action = TRUE) {
 ROXY$sentinels <- function() {
   glue(r"(
   \[`character()` | `NULL`] Each entry in this character vector allows `x` to \
-  also be some scalar sentinel below. Set to `NULL` to disconsider sentinels.
+    also be some scalar sentinel below. Set to `NULL` to disconsider sentinels.
     - `"null"` for `NULL`.
     - `"empty"` for any zero-length object.
     - `"na"` for any `NA` type, or `"na_logical"` for `NA`, `"na_integer"` for \
@@ -84,7 +84,7 @@ ROXY$sentinels <- function() {
       `NA_complex_`, and `"na_character"` for `NA_character_`.
     - `"nan"` for `NaN`.
     - `"+inf"` for `+Inf`, `"-inf"` for `-Inf`, and `"inf"` for both.
-    - `"t"` for `TRUE`, and `"f"` for `FALSE`.
+    - `"true"`/`"t"` for `TRUE`, and `"false"`/`"f"` for `FALSE`.
   )")
 }
 
@@ -113,7 +113,7 @@ ROXY$x_n <- function(args) {
 
   glue(r"(
   \[`numeric()` | `\(){{}}` | `NULL`] Possible values for the {args_text}. The \
-  options {if (length(args) > 0) "of each argument 'arg' "}are:
+    options {if (length(args) > 0) "of each argument 'arg' "}are:
     - `NULL` to not test.
     - A single non-negative number to test for `. == arg`. If `Inf`, \
       `. == length(x)`.

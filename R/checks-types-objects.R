@@ -14,66 +14,55 @@
 #' - `is_object_like()`: checks if object has the "object" bit, while testing
 #'   for inconsistencies with the other properties above.
 #'
-#' @usage
-#' has_class(x, empty = "t", bad = "f")
+#' @param x `r ROXY$x()`
+#' @param empty \[`TRUE` | `FALSE`] What to return if there is an `""` class.
+#' @param bad \[`"warn"` | `"false"`] How to handle inconsistencies in
+#'   `is_object_like()`: `"warn"` to issue a warning and return if `x` has a
+#'   class attribute; `"false"` to return `FALSE`.
+#' @param invalid \[`"warn"` | `"false"`] How to handle `NA` or `""` values in
+#'   the class attribute: `"warn"` to issue a warning and return `TRUE`;
+#'   `"false"` to return `FALSE`.
 #'
-#' has_object_bit(x)
-#'
-#' has_s4_bit(x)
-#'
-#' is_s4(x)
-#'
-#' is_object(x)
-#'
-#' is_object_like(x, bad = "warn")
-#'
-#' @param x \[`any`] Object to check.
-#' @param empty \[`"t"` | `"f"`] How to handle empty class attribute in
-#'   `has_class()`: `"t"` to return `TRUE`, `"f"` to return `FALSE`.
-#' @param bad \[`character(1)`] How to handle inconsistencies in
-#'   `is_object_like()`: `"warn"` to issue a warning, `"stop"` to throw an
-#'   error, or `"f"` to return `FALSE`.
-#'
-#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns `r ROXY$test_res()`
 #'
 #' @name predicates-objects
 NULL
 
 
 #' @rdname predicates-objects
-#' @usage NULL
 #' @export
 has_object_bit <- is.object
 
 
 #' @rdname predicates-objects
-#' @usage NULL
 #' @export
 has_s4_bit <- isS4
 
 
 #' @rdname predicates-objects
-#' @usage NULL
 #' @export
-has_class <- function(x, empty = "t", bad = "f") {
+has_class <- function(x, invalid = "warn", bad = "warn") {
   # Checks:
   # - bad must be one of t, f
   class <- attr(x, "class", TRUE)
 
-  if (is_null(class)) {
-    FALSE
-  } else if (!has_object_bit(x) || !is_character(class) || anyNA(class)) {
-    switch(bad, t = TRUE, f = FALSE)
-  } else if (any(class == "")) {
-    switch(empty, t = TRUE, f = FALSE)
-  } else {
-    TRUE
+  if (! is_object_like(x, bad = bad)) {
+    return(FALSE)
   }
+
+  if (anyNA(class) || any(class == "")) {
+    switch(invalid,
+      warn = cli_warn("Class of {.arg x} has {.val NA} or empty values."),
+      false = return(FALSE)
+    )
+  }
+
+  TRUE
 }
+# NOTE: i believe it is impossible to set a non-character class
 
 
 #' @rdname predicates-objects
-#' @usage NULL
 #' @export
 is_object_like <- function(x, bad = "warn") {
   # Checks:
@@ -82,35 +71,31 @@ is_object_like <- function(x, bad = "warn") {
 
 
   # Main:
-  has_class <- has_class(x)
+  has_class <- ! is_null(attr(x, "class", TRUE))
   has_object_bit <- has_object_bit(x)
   has_s4_bit <- has_s4_bit(x)
 
   is_bad <- has_class != has_object_bit ||
-    (has_s4_bit && !has_object_bit) ||
-    (typeof(x) %in% c("object", "S4") && !has_object_bit) ||
+    (has_s4_bit && !has_class) ||
+    (typeof(x) %in% c("object", "S4") && !has_class) ||
     (typeof(x) == "S4" && !has_s4_bit)
-  # TODO: adhere to full list of relations below
 
   if (is_bad) {
     switch(bad,
       warn = do.call(cli_warn, CNDS$is_object_like()),
-      f = return(FALSE)
+      false = return(FALSE)
     )
   }
 
-  has_object_bit
+  has_object_bit # Identical to has_class at this point
 }
-# CHECK: consider allowing user chosing the final test (has_bit or other)
 # List of relations betwee: class, object bit, s4 bit, s4 typeof, object typeof
-# - class -> object bit
-# - object bit -> class
-# - s4 bit -> class & -> object bit
-# - s4 typeof -> class & -> object bit, -> s4 bit
-# - object typeof -> class & -> object bit
+# - class <-> object bit
+# - s4 bit -> class/object bit (ideally)
+# - s4 typeof -> s4 bit, and -> class/object bit (ideally)
+# - object typeof -> class/object bit (ideally
 
 #' @rdname predicates-objects
-#' @usage NULL
 #' @export
 is_s4 <- function(x) {
   typeof(x) == "S4"
@@ -119,7 +104,6 @@ is_s4 <- function(x) {
 
 
 #' @rdname predicates-objects
-#' @usage NULL
 #' @export
 is_object <- function(x) {
   typeof(x) == "object"
@@ -142,13 +126,12 @@ is_object <- function(x) {
 #'
 #' `is_system()` tests if an object belongs to a specific system.
 #'
-#' @param x \[`any`] Object to check.
+#' @param x `r ROXY$x()`
 #' @param system \[`character(1)`] Object-oriented system to check for.
 #'
 #' @returns
 #' - \[`character(1)`] For `object_system()`: the object-oriented system of `x`.
-#' - \[`TRUE` | `FALSE`] For `is_system()`: `TRUE` if `x` belongs to `system`,
-#'   `FALSE` otherwise.
+#' - \[`TRUE` | `FALSE`] For `is_system()`: The scalar result of the test.
 #'
 #' @details
 #' The implemented check is as below:
@@ -216,7 +199,7 @@ object_system <- function(x) {
 # NOTE: this is challenging because there are many mixed elements: the class
 # attribute, the object bit, the s4 bit, the object and s4 typeofs, the
 # packages' table of defined classes, ...
-# TODO: include mutatr, what else?
+# CHECK: include mutatr, what else?
 
 
 #' @rdname object_system

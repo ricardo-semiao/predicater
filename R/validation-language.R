@@ -14,7 +14,7 @@ NULL
 #' `test_expression()` is the predicate test, while `assert_expression()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param len,null_n,call_n,sym_n,literal_n,invalid_n
 #'   `r ROXY$x_n("len,null_n,call_n,sym_n,literal_n,invalid_n")`
 #' @param sentinels `r ROXY$sentinels()`
@@ -34,7 +34,8 @@ NULL
 
 core_expression <- function(
   x,
-  len = NULL, null_n = NULL, call_n = NULL, sym_n = NULL, literal_n = NULL, invalid_n = NULL,
+  len = NULL, null_n = NULL, call_n = NULL, sym_n = NULL, literal_n = NULL,
+  invalid_n = NULL,
   sentinels = NULL, custom = NULL, custom_map = NULL,
   short_circuit
 ) {
@@ -62,7 +63,6 @@ core_expression <- function(
     )
   )
 }
-# TODO: invalid_n (unparseable)?
 
 #' @rdname test_expression
 #' @export
@@ -92,7 +92,7 @@ assert_expression <- fn_core_to_assert(
 #' `test_symbol()` is the predicate test, while `assert_symbol()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param char_n `r ROXY$x_n("char_n")`
 #' @param valid \[`TRUE` | `FALSE` | `NULL`] Test if the symbol name is a valid
 #'   syntactic R name (i.e. unchanged when processed by [make.names()]).
@@ -176,7 +176,7 @@ assert_symbol <- fn_core_to_assert(
 #' `test_language()` is the predicate test, while `assert_language()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param name,ns \[`character(1)` | `NULL`] Expected function name and
 #'   namespace of the call, via [rlang::call_name()] and [rlang::call_ns()]. Set
 #'   to `NULL` to not test.
@@ -260,8 +260,9 @@ assert_language <- fn_core_to_assert(
 #' `test_code()` is the predicate test, while `assert_code()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
-#' @param sym,lang,literal \[`TRUE` | `FALSE` | `NULL`] Whether to allow symbols, language objects (calls), or syntatic literals.
+#' @param x `r ROXY$x()`
+#' @param sym,lang,literal \[`TRUE` | `FALSE` | `NULL`] Whether to allow
+#' symbols, language objects (calls), or syntatic literals.
 #' @param valid \[`logical(1)` | `NULL`] Whether the code object must be
 #'   parseable code.
 #' @param empty \[`logical(1)` | `NULL`] Whether empty symbols are permitted.

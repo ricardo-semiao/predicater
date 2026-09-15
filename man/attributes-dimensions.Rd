@@ -20,18 +20,19 @@ has_rownames(x, how = "dimnames")
 has_dim(x, n = NULL, how = "dim")
 }
 \arguments{
-\item{x}{[\code{any}] Object to check.}
+\item{x}{[\code{any}] An object to test.}
 
 \item{count_empty}{[\code{TRUE} | \code{FALSE}] Whether to count empty dimensions and
 dimension names.}
 
-\item{how}{[\code{character(1)}] How to extract the attribute:
+\item{how}{[\code{character(1)}]
+How to extract the attribute:
 \itemize{
-\item For dimensions: \code{"dim"} for \code{\link[=dim]{dim()}} and \code{"attr"} for \code{\link[=attr]{attr()}}.
+\item For dimensions: \code{"dim"} for \code{\link[=dim]{dim()}} and \code{"attr"} for \code{attr(x, "dim")}.
 \item For dimension names: \code{"dimnames"} for \code{\link[=dimnames]{dimnames()}} and \code{"attr"} for
-\code{\link[=attr]{attr()}}.
+\code{attr(x, "dimnames")}.
 \item For rownames: \code{"rownames"} for \code{\link[=rownames]{rownames()}}, \code{"dimnames"} for the first
-element of \code{\link[=dimnames]{dimnames()}}, and \code{"attr"} for \code{\link[=attr]{attr()}}.
+element of \code{\link[=dimnames]{dimnames()}}, and \code{"attr"} for \code{attr(x, "row.names")}.
 }}
 
 \item{count_invalid}{[\code{TRUE} | \code{FALSE}] Whether to dimension names that have
@@ -43,7 +44,8 @@ not test.}
 \value{
 \itemize{
 \item [integer(1)] For \code{n_dims()} and \code{n_dimnames()}.
-\item [\code{TRUE} | \code{FALSE}] For \code{has_dim()}, \code{has_dimnames()}, and \code{has_rownames()}.
+\item [\code{TRUE} | \code{FALSE}] For \code{has_dim()}, \code{has_dimnames()}, and
+\code{has_rownames()}: the sacalar result of the test.
 }
 }
 \description{

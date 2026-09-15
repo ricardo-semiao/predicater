@@ -12,7 +12,7 @@ NULL
 #' Test if an object is of various special base R types, including promises,
 #' dots (`...`), weak references, bytecode, or external pointers.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param len `r ROXY$x_n("len")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
@@ -180,7 +180,7 @@ assert_externalptr <- fn_core_to_assert(core_externalptr, list(
 #' Test if an object is a function, with options to inspect function type, argument
 #' names, environments, S3 generics, and methods.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param mode \[`character()` | `NULL`] Expected function type(s) out of
 #'   `"closure"`, `"primitive"`, `"builtin"`, or `"special"`. Set to `NULL` to
 #'   not test.

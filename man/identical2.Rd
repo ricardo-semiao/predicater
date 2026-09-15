@@ -54,7 +54,7 @@ to use for comparison.}
 }
 \value{
 \itemize{
-\item [\code{TRUE} | \code{FALSE}] for \code{identical2()}.
+\item [\code{TRUE} | \code{FALSE}] For \code{identical2()}: the scalar result of the test.
 \item \code{identical_flag()} returns a object with the same structure as \code{x} and
 logical elements.
 }

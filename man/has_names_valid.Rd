@@ -6,30 +6,28 @@
 \usage{
 has_names_valid(
   x,
-  na = "f",
-  empty = "f",
-  dups = "f",
-  invalid = "t",
-  zero_len = "t",
+  na = FALSE,
+  empty = FALSE,
+  dups = FALSE,
+  invalid = TRUE,
+  zero_len = TRUE,
   how = "names"
 )
 }
 \arguments{
-\item{x}{[\code{any}] An object to test.}
+\item{x}{[\code{collection()}, \code{any}] For \verb{are_*()}, any collection to test; for
+\verb{is_*()}, any object to test.}
 
-\item{na, empty, dups, invalid}{[\code{character(1)}] How to handle NA, empty,
-duplicate, or invalid names: \code{"f"} to return \code{FALSE}, or \code{"t"} return
-\code{TRUE}.}
+\item{na, empty, dups, invalid}{[\code{TRUE} | \code{FALSE}] What to return for NA,
+empty, duplicate, or invalid names.}
 
-\item{zero_len}{[\code{character(1)}] How to handle an empty collection \code{x}:
-\code{"f"} to return \code{FALSE}, or \code{"t"} return \code{TRUE}..}
+\item{zero_len}{[\code{TRUE} | \code{FALSE}] What to return for an an empty \code{x}.}
 
-\item{how}{[\code{character(1)}] How to extract names: "names" for \code{names(x)}, or
-"attr" for \code{attr(x, "names")}.}
+\item{how}{[\code{"names"} | \code{"x"} | \code{"attr"} | \code{"names2"}] How to extract names:
+"names" for \code{\link[=names]{names()}}; \code{"x"} to use \code{x} itself; "attr" for \code{attr(x, "names")}; or \code{"names2"} for \code{\link[rlang:names2]{rlang::names2()}}.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] Whether \code{x} has names according to the specified
-checks.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 Test if \code{x} has names with more flexiblility than \code{\link[rlang:is_named]{rlang::is_named()}},
@@ -45,18 +43,15 @@ expression, or environment. I.e. returns \code{FALSE} for \code{\link[=is_collec
 The \code{how} methods differ only for environments, with "names" returning names
 and "attr" returning NULL.
 
-\code{invalid = "f"} checks if the names don't change after being passed to
+\code{invalid = FALSE} checks if the names don't change after being passed to
 \code{make.names()}.
-
-Setting \code{na = "na"} could make sense if any of \code{empty}, \code{dups}, or \code{invalid}
-is set to \code{"f"}, in which the true value of the NA name is relevant.
 }
 \examples{
 has_names(mtcars) #> TRUE
 
-has_names(set_names(1:3, c("a", "", "b")), empty = "t") #> TRUE
-has_names(set_names(1:3, c("a", "b", NA)), na = "t") #> TRUE
+has_names(set_names(1:3, c("a", "", "b")), empty = TRUE) #> TRUE
+has_names(set_names(1:3, c("a", "b", NA)), na = TRUE) #> TRUE
 has_names(set_names(1:3, c("a", "a", "a"))) #> FALSE
-has_names(set_names(1:3, c("_bad", "b", "c")), invalid = "f") #> FALSE
+has_names(set_names(1:3, c("_bad", "b", "c")), invalid = FALSE) #> FALSE
 
 }

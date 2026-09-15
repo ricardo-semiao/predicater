@@ -11,11 +11,11 @@
 #' Note that objects of type 'S4' and 'object' are not considered collections,
 #' even if they are 'filled' with slots/attributes.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param null \[`TRUE` | `FALSE`] Should `NULL` be considered a collection? If
 #' false will error for `NULL`, else, will return `TRUE`.
 #'
-#' @returns \[`TRUE` | `FALSE`] The scalar result of the test.
+#' @returns `r ROXY$test_res()`
 #'
 #' @export
 is_empty2 <- function(x, null = FALSE) {
@@ -32,12 +32,12 @@ is_empty2 <- function(x, null = FALSE) {
 
 # https://cran.r-project.org/doc/manuals/r-release/R-ints.html#Rest-of-header-1
 
-# TODO: other metadata:
+# Other metadata:
 # - altrep, scalar
 # - mark, debug, trace, spare
 # - named, gcgen, gccls
 
-# TODO: gp bits:
+# gp bits:
 # Character:
 # gp bits 6,3,2,1 (encoding, see Encoding)
 # gp bit 5 — Object resides in the global string pool (CHARSXP hash cache).

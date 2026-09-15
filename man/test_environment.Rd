@@ -38,7 +38,7 @@ assert_environment(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{len}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length. The options of each argument 'arg' are:
+\item{len}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -53,23 +53,23 @@ returns a single \code{TRUE} or \code{FALSE}.
 directly in \code{x}, or inherited from one of its parents, respectively (see
 \code{\link[rlang:env_has]{rlang::env_has()}}). Set to \code{NULL} to not test.}
 
-\item{parents}{[\code{environment()} | \code{list()} | \code{NULL}] Environment or list of
-environments to test as parents of \code{x}. If a single environment is
-supplied, tests if \code{x} inherits from it. If a list is supplied, tests if
-\code{\link[rlang:env_parent]{rlang::env_parents()}} matches the list identically. Set to \code{NULL} to not
-test.}
+\item{parents}{[\code{environment()} | \code{list()} | \code{NULL}]
+Environment or list of environments to test as parents of \code{x}. If a single
+environment is supplied, tests if \code{x} inherits from it. If a list is
+supplied, tests if \code{\link[rlang:env_parent]{rlang::env_parents()}} matches the list identically. Set
+to \code{NULL} to not test.}
 
 \item{namespace}{[\code{TRUE} | \code{FALSE} | \code{NULL}] Test if \code{x} is a namespace
 environment via \code{\link[rlang:is_namespace]{rlang::is_namespace()}}. Set to \code{NULL} to not test.}
 
-\item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
+\item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
 \item \code{"null"} for \code{NULL}.
 \item \code{"empty"} for any zero-length object.
 \item \code{"na"} for any \code{NA} type, or \code{"na_logical"} for \code{NA}, \code{"na_integer"} for     \code{NA_integer_}, \code{"na_real"} for \code{NA_real_}, \code{"na_complex"} for     \code{NA_complex_}, and \code{"na_character"} for \code{NA_character_}.
 \item \code{"nan"} for \code{NaN}.
 \item \code{"+inf"} for \code{+Inf}, \code{"-inf"} for \code{-Inf}, and \code{"inf"} for both.
-\item \code{"t"} for \code{TRUE}, and \code{"f"} for \code{FALSE}.
+\item \code{"true"}/\code{"t"} for \code{TRUE}, and \code{"false"}/\code{"f"} for \code{FALSE}.
 }}
 
 \item{custom}{[\verb{function(x)} | \code{NULL}] A custom function that takes \code{x} as first argument   and returns a single \code{TRUE} or \code{FALSE}. Set to \code{NULL} to not test.}
@@ -83,7 +83,7 @@ environment via \code{\link[rlang:is_namespace]{rlang::is_namespace()}}. Set to 
 \item \code{"message"} to issue a message and return \code{invisible(x)}.
 }}
 
-\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
+\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as   the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
 \itemize{
 \item An environment in the call stack or a hard-coded defused call.
 \item \code{NULL} for no information.

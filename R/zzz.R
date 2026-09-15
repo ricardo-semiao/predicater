@@ -21,4 +21,3 @@ TABLE_TEST_TYPE <- list(
   "bytecode" = core_bytecode,
   "externalptr" = core_externalptr
 )
-# TODO: document

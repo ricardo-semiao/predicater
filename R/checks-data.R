@@ -13,16 +13,18 @@
 #' @param strictly \[`TRUE` | `FALSE`] If `TRUE`, the function checks for strict
 #'   order, meaning that no two elements can be equal.
 #'
-#' @returns \[`TRUE` | `FALSE` | `NA`] The scalar result of the test.
+#' @returns `r ROXY$test_res(na = TRUE)`. If `na.rm = TRUE`, the result is
+#'   always `TRUE` or `FALSE`.
 #'
 #' @export
 is_sorted <- function(x, order = "asc", na.rm = FALSE, strictly = FALSE) {
+  # Checks:
+  # TODO:
   switch(order,
     asc = !is.unsorted(x, na.rm = na.rm, strictly = strictly),
     desc = !is.unsorted(rev(x), na.rm = na.rm, strictly = strictly)
   )
 }
-# TODO: checks
 
 
 #' Data checks - Check if object is in (and/or not in) a set
@@ -39,10 +41,12 @@ is_sorted <- function(x, order = "asc", na.rm = FALSE, strictly = FALSE) {
 #'   `x` must be in `yes`, and `"only"` for all values in `x` must be in `yes`
 #'   and all values in `yes` must be in `x`.
 #'
-#' @returns \[`TRUE` | `FALSE`] The scalar result of the test.
+#' @returns `r ROXY$test_res()`
 #'
 #' @export
 is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
+  # Checks:
+  # TODO
   if (! is_empty(no) && any(x %in% no)) {
     return(FALSE)
   }
@@ -58,7 +62,7 @@ is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
     only = all(x_in_yes) && all(yes %in% x)
   )
 }
-# TODO: checks, deal with NA, cite in ROXY$set
+# TODO: deal with NA, cite in ROXY$set
 
 
 #' Data checks - Check for duplicate values
@@ -71,7 +75,7 @@ is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
 #'   duplicated elsewhere. Unlike duplicated(), it reports all duplicated
 #'   values, not just the second and subsequent repetitions.
 #'
-#' @inheritParams vctrs::vec_duplicate_any
+#' @param x \[`atomic()` | `list()`] An object to test.
 #'
 #' @returns
 #' - \[`TRUE` | `FALSE`] For `any_duplicated()`: the scalar result of the test.

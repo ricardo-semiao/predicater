@@ -8,7 +8,6 @@
 is_ptype(
   .x,
   .ptype,
-  .typeof = "==",
   .length = "==_0n",
   .attrs = "no",
   class = "==_0n",
@@ -22,22 +21,21 @@ is_ptype(
 is_ptype_list(.x, .ptype, .named = TRUE, .depth = 1, ...)
 }
 \arguments{
-\item{.x}{[\code{any}] Any R object.}
+\item{.x}{[\code{any}] An object to test.}
 
 \item{.ptype}{[\code{any}] A prototype object that defines metadata to check
 against \code{.x}.}
 
-\item{.typeof, .length, .attrs}{[\code{character(1)} | \verb{\\(vx, vp) \{\}}]
-How to check the non-attribute metadata -- \code{typeof()}, \code{length()}, and
-attributes names -- of \code{.x} against \code{ptype}. Can be either: a function that
-takes the metadata's value of \code{.x} (\code{vx}) and \code{.ptype} (\code{vp}) as arguments
-and returns a boolean; or a string that specifies a predefined function (see
+\item{.length, .attrs}{[\code{character(1)} | \verb{\\(vx, vp) \{\}}]
+How to check the non-attribute metadata -- \code{length()}, and attributes names
+-- of \code{.x} against \code{ptype}. Can be either: a function that takes the
+metadata's value of \code{.x} (\code{vx}) and \code{.ptype} (\code{vp}) as arguments and returns
+a boolean; or a string that specifies a predefined function (see
 \href{#details}{Details}).}
 
 \item{class, dim, names, row.names, dimnames, ...}{[\code{character(1)} | \verb{\\(vx, vp) \{\}}]
-How to check the attributes -- each
-argument is an attribute name -- of \code{.x} against \code{.ptype}. With a function
-or string (same as above).}
+How to check the attributes -- each argument is an attribute name -- of
+\code{.x} against \code{.ptype}. With a function or string (same as above).}
 
 \item{.named}{[\code{TRUE} | \code{FALSE}] For \code{is_ptype_list()}, whether to use the
 names of \code{.x} and \code{.ptype} for matching them (\code{TRUE}), or the order
@@ -45,6 +43,9 @@ names of \code{.x} and \code{.ptype} for matching them (\code{TRUE}), or the ord
 
 \item{.depth}{[\code{integer(1)}] For \code{is_ptype_list()}, how many levels of
 recursion to check. \code{1} means check the first level elements only.}
+}
+\value{
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 Check if \code{.x} has the same attributes as \code{.ptype}, with more flexibility than

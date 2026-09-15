@@ -38,7 +38,7 @@ not \code{NA}, \code{NaN}, \code{Inf}, or \code{-Inf}. Set to \code{NULL} to not
 is designed to allow more flexibility to this test.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 Check if an object is of a specific atomic type (\code{\link[=typeof]{typeof()}}). The test is

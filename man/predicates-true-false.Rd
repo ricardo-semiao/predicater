@@ -6,30 +6,30 @@
 \alias{is_true2}
 \alias{are_false}
 \alias{is_false2}
-\alias{is_bool}
+\alias{is_bool2}
 \title{Type checks - TRUE and FALSE values}
 \usage{
-are_true(x, na = "f")
+are_true(x, na = FALSE)
 
-is_true2(x, na = "f")
+is_true2(x, na = FALSE)
 
-are_false(x, na = "f")
+are_false(x, na = FALSE)
 
-is_false2(x, na = "f")
+is_false2(x, na = FALSE)
 
-is_bool(x)
+is_bool2(x, na = FALSE)
 }
 \arguments{
 \item{x}{[\code{logical()}, \code{any}] For \verb{are_*()}, a logical vector; for \verb{is_*()},
 an object to test.}
 
-\item{na}{[\code{character(1)}] How to treat \code{NA} values: \code{"f"} to return
-\code{FALSE}, or \code{"na"} to return \code{NA}.}
+\item{na}{[\code{FALSE} | \code{NA}] What to return for \code{NA} values.}
 }
 \value{
 \itemize{
 \item [\code{logical(length(x))}] For \verb{are_*}: the vectorized or result of the test.
-\item [\code{TRUE} | \code{FALSE}] For \verb{is_*}: the scalar result of the test.
+\item [\code{TRUE} | \code{FALSE} | \code{NA}] For \verb{is_*}: the scalar result of the test. If
+\code{na != NA}, the result is always \code{TRUE} or \code{FALSE}.
 }
 }
 \description{

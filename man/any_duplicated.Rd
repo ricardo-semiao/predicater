@@ -10,7 +10,7 @@ any_duplicated(x)
 are_duplicated(x)
 }
 \arguments{
-\item{x}{A vector (including a data frame).}
+\item{x}{[\code{atomic()} | \code{list()}] An object to test.}
 }
 \value{
 \itemize{

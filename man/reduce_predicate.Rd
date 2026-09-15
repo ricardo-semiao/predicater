@@ -22,7 +22,8 @@ for any or any or all ordered pairs within \code{.l}.}
 }
 \value{
 \itemize{
-\item [\code{logical(1)}] For \code{reduce_predicate()}: the scalar result of the test.
+\item [\code{TRUE} | \code{FALSE} | \code{NA}] For \code{reduce_predicate()}: the scalar reduced
+result.
 \item [\code{logical(length(.l) - 1)}] For \code{accumulate_predicate()}: the accumulated
 results.
 }

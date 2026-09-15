@@ -29,7 +29,7 @@ has_attrs_only(x, abbr = "", exact = character())
 \item{x}{[\code{any}] Object to test for or remove attributes from.}
 
 \item{abbr}{[\code{character(1)}] String of characters specifying attributes to
-keep: \code{"n"} for 'names', \code{"d"} for 'dim', \code{"c"} for 'class', \code{"r"} for both
+keep: \code{"n"} for 'names'; \code{"d"} for 'dim'; \code{"c"} for 'class'; \code{"r"} for both
 rownames and dimnames.}
 
 \item{exact}{[\code{character()}] Other attributes to keep, specified by name.}

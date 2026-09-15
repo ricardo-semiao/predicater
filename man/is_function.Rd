@@ -22,7 +22,7 @@ is_primitive_lazy(x)
 \item{x}{[\code{any}] An object to test.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 There are three types (\code{\link[=typeof]{typeof()}}) of functions in R: \code{"closure"} (standard

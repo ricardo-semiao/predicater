@@ -22,7 +22,7 @@
 #'   tested with `is_expression2()`.
 #' - Any of the above: `is_code()`.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param name \[`character(1)` | `NULL`] An optional name or vector of names
 #'   that the symbol or call should match. Set to `NULL` to not test.
 #' @param valid \[`TRUE` | `FALSE`] Whether to test if the code is 'valid', i.e.
@@ -35,7 +35,7 @@
 #' @param sym,lang,literal \[`TRUE` | `FALSE`] Whether to allow symbols,
 #'   language objects, or syntactic literals.
 #'
-#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns `r ROXY$test_res()``
 #'
 #' @name predicates-language
 NULL

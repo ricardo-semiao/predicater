@@ -12,13 +12,12 @@ is_attrs_allowed(x, cnd_match = NULL, warn = "tw")
 \item{cnd_match}{[\code{character(1)}] String to match in the condition message.
 If no match, the condition is re-thrown. Defaults to allow any message.}
 
-\item{warn}{[\code{character(1)}] How to handle erros: \code{"f"} to return \code{FALSE};
-\verb{"t" for }TRUE\verb{, }"tw"\verb{ to return true but re-throw the warning; and ``"e"}
-to throw the warning as an error.}
+\item{warn}{[\code{"true"} | \code{"false"} | \code{"warn"} | \code{"error"}]
+How to handle warnings: \code{"false"} to return \code{FALSE}; \verb{"true"`` for }TRUE\verb{; }"warn"\verb{to return}TRUE\verb{but re-throw the warning; and}"error"` to throw
+the warning as an error.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] Whether attributes can be set on \code{x}, or
-re-throws the catched condition.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test. Or, re-throws the catched condition.
 }
 \description{
 In R, some objects do not allow attributes to be set on them. This function

@@ -10,15 +10,14 @@ object_system(x)
 is_system(x, system)
 }
 \arguments{
-\item{x}{[\code{any}] Object to check.}
+\item{x}{[\code{any}] An object to test.}
 
 \item{system}{[\code{character(1)}] Object-oriented system to check for.}
 }
 \value{
 \itemize{
 \item [\code{character(1)}] For \code{object_system()}: the object-oriented system of \code{x}.
-\item [\code{TRUE} | \code{FALSE}] For \code{is_system()}: \code{TRUE} if \code{x} belongs to \code{system},
-\code{FALSE} otherwise.
+\item [\code{TRUE} | \code{FALSE}] For \code{is_system()}: The scalar result of the test.
 }
 }
 \description{

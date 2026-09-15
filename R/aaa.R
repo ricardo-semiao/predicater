@@ -3,7 +3,6 @@
 
 CNDS <- list()
 ROXY <- list()
-# TODO: document
 
 
 
@@ -20,7 +19,6 @@ vapply_lgl <- function(.x, .f = as.logical, ..., .n = 1L) {
   }
   x
 }
-# TODO: export in rstools?
 
 
 atomic_from_list_of_scalars <- function(x, type = NULL) {
@@ -34,7 +32,12 @@ atomic_from_list_of_scalars <- function(x, type = NULL) {
   }
   res
 }
-# same
+
+
+collapse_patterns <- function(p) {
+  if (is_null(p) || length(p) == 0) return(NULL)
+  paste0("(?:", paste(p, collapse = ")|(?:"), ")")
+}
 
 
 

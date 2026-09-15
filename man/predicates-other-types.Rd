@@ -39,7 +39,7 @@ is_any(x)
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 Test if object is of a specific type (\code{\link[=typeof]{typeof()}}). The test is invariant to

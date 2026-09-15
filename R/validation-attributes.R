@@ -24,10 +24,11 @@ NULL
 #' @param set `r ROXY$set("character")`
 #' @param char_tests \[`list`] A list of additional arguments passed to
 #'   [test_character()].
-#' @param how \[`"x"` | `"names"` | `"attr"` | `"colnames"` | `"row.names"` |
-#'   `integer(1)`] How to extract names from `x`: `"x"` for `x` directly,
-#'   `"names"` for `names(x)`, `"attr"` for `attr(x, "names")`, `"colnames"` for
-#'   `colnames(x)`, `"row.names"` for `attr(x, "row.names")`, or a positive
+#' @param how \[`"names"` | `"x"` | `"attr"` | `"colnames"` | `"row.names"` |
+#'   `integer(1)`]
+#'   How to extract names from `x`: `"x"` for `x` directly; `"names"` for
+#'   `names(x)`; `"attr"` for `attr(x, "names")`; `"colnames"` for
+#'   `colnames(x)`; `"row.names"` for `attr(x, "row.names")`; or a positive
 #'   integer for `dimnames(x)[[how]]`.
 #' @param empty \[`TRUE` | `FALSE` | `NULL`] Whether to early pass or fail the
 #'   test if the underlying vector `x` is empty. Set to `NULL` to not test.
@@ -114,17 +115,18 @@ assert_names <- fn_core_to_assert(
 #' `test_matrix()` is a predicate test, while `assert_matrix()` validates their
 #' input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param dims_n `r ROXY$x_n("dims_n")`
 #' @param dims_shape \[`list()` | `integer()` | `NULL`] Expected size
 #'   constraints for each dimension. Can be a vector of dimension sizes or a
 #'   list of range specs (as for `dims_n`). Set to `NULL` to not test.
-#' @param names_apply \[`list()` | `NULL`] A list of arguments passed to
-#'   [test_names()] to test each dimension's names. For separate tests for each
-#'   dimension, use a list of formulas, with the LHS being the dimension integer
-#'   index, and the RHS being the list of arguments to `test_names()`.
-#' @param how \[`"dim"` | `"attr"`] How to extract dimensions from `x`: `"dim"`
-#'   for [dim()], `"attr"` for `attr(x, "dim")`.
+#' @param names_apply \[`list()` | `NULL`]
+#'   A list of arguments passed to [test_names()] to test each dimension's
+#'   names. For separate tests for each dimension, use a list of formulas, with
+#'   the LHS being the dimension integer index, and the RHS being the list of
+#'   arguments to `test_names()`.
+#' @param how \[`"dim"` | `"x"` | `"attr"`] How to extract dimensions from `x`:
+#'   `"dim"` for [dim()]; `"x"` ofr `x` directly `"attr"` for `attr(x, "dim")`.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param custom_apply \[`list()` | `NULL`] A list of formulas. For each margin
@@ -198,7 +200,6 @@ core_matrix <- function(
     )
   )
 }
-# TODO: consider adding some of this functionality to n_dims and friends
 
 
 #' @rdname test_matrix
@@ -234,18 +235,18 @@ assert_matrix <- fn_core_to_assert(
 #' `test_class()` is the predicate test, while `assert_class()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
-#' @param classes \[`list()` | `character()` | `NULL`] A named list specifying
-#'   possible class inheritance criterias. The elements are the classes to test
-#'   against, and the names are which test to do: `"any"` for
-#'   [rlang::inherits_any()], `"all"` for [rlang::inherits_all()], `"only"` for
-#'   [rlang::inherits_only()], and `"none"` for `!inherits_any()`. If any of the
-#'   test passes, the overall test passes. If a single character, it is tested
-#'   with `inherits_any()`. Set to `NULL` to not test.
+#' @param x `r ROXY$x()`
+#' @param classes \[`list()` | `character()` | `NULL`]
+#'   A named list specifying possible class inheritance criterias. The elements
+#'   are the classes to test against, and the names are which test to do:
+#'   `"any"` for [rlang::inherits_any()], `"all"` for [rlang::inherits_all()],
+#'   `"only"` for [rlang::inherits_only()], and `"none"` for `!inherits_any()`.
+#'   If any of the test passes, the overall test passes. If a single character,
+#'   it is tested with `inherits_any()`. Set to `NULL` to not test.
 #' @param tests_char \[`list`] A list of additional character tests passed to
 #'   [test_character()].
 #' @param how \[`"class"` | `"x"` | `"attr"`] How to extract class names for
-#'   `tests_char`: `"x"` for `x` directly, `"class"` for [class()], and `"attr"`
+#'   `tests_char`: `"x"` for `x` directly; `"class"` for [class()]; and `"attr"`
 #'   for `attr(x, "class")`.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
@@ -331,7 +332,7 @@ assert_class <- fn_core_to_assert(
 #' `test_object()` is the predicate test, while `assert_object()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param oo_system \[`character(1)` | `NULL`] Expected Object-Oriented system
 #'   name, passed to [object_system()]. Set to `NULL` to not test.
 #' @param s4_bit \[`TRUE` | `FALSE` | `NULL`] Whether the underlying S4 object
@@ -362,7 +363,7 @@ core_object <- function(
     x, sentinels, oo_system, s4_bit, tests_class, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_object_like(x, bad = "f"),
+      type = \(x, arg, pars) is_object_like(x, bad = "false"),
       oo_system = \(x, arg, pars) is_system(x, arg),
       s4_bit = \(x, arg, pars) has_s4_bit(x) == arg,
       tests_class = \(x, arg, pars) exec(test_class, x = x, !!!arg)

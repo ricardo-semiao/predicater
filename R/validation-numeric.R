@@ -12,7 +12,7 @@ NULL
 #' Test if an object is a numeric vector:
 #' - `test_integer(x, mode = "strict")` tests for integer vectors.
 #' - `test_integer_like(x, mode = *)` tests for integer-like vectors via
-#'   [is_integer_like()], with its multiple modes.
+#'   [is_integer_like()], with "bounded" or "unbounded" mode.
 #' - `test_double(x, mode = "double")` tests for double vectors.
 #' - `test_double(x, mode = "numeric")` tests for double or integer vectors.
 #' - `test_complex()` tests for complex vectors, delegating tests on its real,
@@ -21,10 +21,9 @@ NULL
 #' They all are predicate tests, while the `assert_*()` functions validate their
 #' input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
-#' @param mode,mode_tol \[`"strict"` | `"range"` | `"range_tol"` | `"trunc"` |
-#'   `"trunc_tol"`, `double(1)`] For `*_integer()`: the `mode` and `tol`
-#'   arguments to pass to [is_integer_like()].
+#' @param x `r ROXY$x()`
+#' @param mode,mode_tol \[`"strict"` | `"bounded"` | `"unbounded"`, `double(1)`]
+#'   For `*_integer()`: the `mode` and `tol` arguments to pass to [is_integer_like()].
 #' @param len,na_n,dup_n,nan_n,inf_n `r ROXY$x_n("len,na_n,dup_n,nan_n,inf_n")`
 #' @param range \[`integer()` | `NULL`] A vector with the upper and lower bound
 #'   for `x` values (`Inf` is allowed). Or a vector with three or more values to
@@ -55,7 +54,7 @@ core_integer <- function(
   len = NULL, na_n = NULL, dup_n = NULL, nan_n = NULL, inf_n = NULL,
   range = NULL, set = NULL, sorted = NULL,
   custom = NULL, custom_map = NULL, sentinels = NULL,
-  mode_tol = NULL,
+  mode_tol = 0,
   short_circuit
 ) {
   run_tests(
@@ -69,11 +68,7 @@ core_integer <- function(
         if (mode == "strict") {
           is_integer(x)
         } else {
-          if (is_null(tol)) { # To respect the default tol
-            is_integer_like(x, mode = mode)
-          } else {
-            is_integer_like(x, mode = mode, tol = tol)
-          }
+          is_integer_like(x, mode = mode, tol = tol)
         } %@@%
           c(mode = mode, type = typeof(x), tol = tol)
       }

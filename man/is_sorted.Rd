@@ -20,7 +20,8 @@ result.}
 order, meaning that no two elements can be equal.}
 }
 \value{
-[\code{TRUE} | \code{FALSE} | \code{NA}] The scalar result of the test.
+[\code{TRUE} | \code{FALSE} | \code{NA}] The scalar result of the test.. If \code{na.rm = TRUE}, the result is
+always \code{TRUE} or \code{FALSE}.
 }
 \description{
 This function is a wrapper around \code{\link[=is.unsorted]{is.unsorted()}} to check if a vector is

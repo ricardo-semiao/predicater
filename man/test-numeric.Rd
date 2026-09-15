@@ -24,7 +24,7 @@ test_integer(
   custom = NULL,
   custom_map = NULL,
   sentinels = NULL,
-  mode_tol = NULL
+  mode_tol = 0
 )
 
 test_double(
@@ -68,7 +68,7 @@ assert_integer(
   custom = NULL,
   custom_map = NULL,
   sentinels = NULL,
-  mode_tol = NULL,
+  mode_tol = 0,
   action = "abort",
   env = caller_env(),
   x_name = NULL,
@@ -119,11 +119,10 @@ assert_complex(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{mode, mode_tol}{[\code{"strict"} | \code{"range"} | \code{"range_tol"} | \code{"trunc"} |
-\code{"trunc_tol"}, \code{double(1)}] For \verb{*_integer()}: the \code{mode} and \code{tol}
-arguments to pass to \code{\link[=is_integer_like]{is_integer_like()}}.}
+\item{mode, mode_tol}{[\code{"strict"} | \code{"bounded"} | \code{"unbounded"}, \code{double(1)}]
+For \verb{*_integer()}: the \code{mode} and \code{tol} arguments to pass to \code{\link[=is_integer_like]{is_integer_like()}}.}
 
-\item{len, na_n, dup_n, nan_n, inf_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of duplicate elements, number of \code{NaN} elements, number of \code{Inf} elements. The options of each argument 'arg' are:
+\item{len, na_n, dup_n, nan_n, inf_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of duplicate elements, number of \code{NaN} elements, number of \code{Inf} elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -146,14 +145,14 @@ test for \code{. \%in\% range}. Set to \code{NULL} to not test.}
 
 \item{custom_map}{[\verb{function(x)} | \code{NULL}] A custom function that is applied to each element   of \code{x}. Must return a single \code{TRUE} or \code{FALSE} for each element. Set to   \code{NULL} to not test.}
 
-\item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
+\item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
 \item \code{"null"} for \code{NULL}.
 \item \code{"empty"} for any zero-length object.
 \item \code{"na"} for any \code{NA} type, or \code{"na_logical"} for \code{NA}, \code{"na_integer"} for     \code{NA_integer_}, \code{"na_real"} for \code{NA_real_}, \code{"na_complex"} for     \code{NA_complex_}, and \code{"na_character"} for \code{NA_character_}.
 \item \code{"nan"} for \code{NaN}.
 \item \code{"+inf"} for \code{+Inf}, \code{"-inf"} for \code{-Inf}, and \code{"inf"} for both.
-\item \code{"t"} for \code{TRUE}, and \code{"f"} for \code{FALSE}.
+\item \code{"true"}/\code{"t"} for \code{TRUE}, and \code{"false"}/\code{"f"} for \code{FALSE}.
 }}
 
 \item{re_tests, im_tests, mod_tests, arg_tests}{[\code{list()} | \code{NULL}] For
@@ -167,7 +166,7 @@ test the real, imaginary, modulus and argument values of \code{x}.}
 \item \code{"message"} to issue a message and return \code{invisible(x)}.
 }}
 
-\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
+\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as   the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
 \itemize{
 \item An environment in the call stack or a hard-coded defused call.
 \item \code{NULL} for no information.
@@ -194,7 +193,7 @@ Test if an object is a numeric vector:
 \itemize{
 \item \code{test_integer(x, mode = "strict")} tests for integer vectors.
 \item \verb{test_integer_like(x, mode = *)} tests for integer-like vectors via
-\code{\link[=is_integer_like]{is_integer_like()}}, with its multiple modes.
+\code{\link[=is_integer_like]{is_integer_like()}}, with "bounded" or "unbounded" mode.
 \item \code{test_double(x, mode = "double")} tests for double vectors.
 \item \code{test_double(x, mode = "numeric")} tests for double or integer vectors.
 \item \code{test_complex()} tests for complex vectors, delegating tests on its real,

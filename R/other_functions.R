@@ -32,38 +32,33 @@ c2 <- function(..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal") 
 #' parallel.
 #'
 #' @param ... \[`logical()` each] Logical vectors with the same size.
-#' @param na \[`"na"` | `"t"` | `"f"`] What to return when encountering `NA`
-#'   values: `"na"` for `NA`, `"t"` for `TRUE`, and `"f"` for `FALSE`.
-#' @param nan \[`"t"` | `"f"`] For `*_na()` functions: wether to consider `NaN`
-#'   values as `NA` or not.
+#' @param .na `r ROXY$na()`
+#' @param .nan \[`TRUE` | `FALSE`] Should `NaN` values be treated as `NA`?
 #'
 #' @returns \[`logical()`] A logical vector of the same size as the inputs.
 #'
 #' @export
-pany <- function(..., na = "na") {
-  missing <- switch(na, na = NA, t = TRUE, f = FALSE)
-  vctrs::vec_pany(..., .missing = missing)
+pany <- function(..., .na = NA) {
+  vctrs::vec_pany(..., .missing = .na)
 }
 
 #' @rdname pany
 #' @export
-pall <- function(..., na = "na") {
-  missing <- switch(na, na = NA, t = TRUE, f = FALSE)
-  vctrs::vec_pall(..., .missing = missing)
+pall <- function(..., .na = NA) {
+  vctrs::vec_pall(..., .missing = .na)
 }
 
 #' @rdname pany
 #' @export
-pany_na <- function(..., nan = "f") {
-  vctrs::vec_pany(!!!lapply(list2(...), are_na2, nan = nan))
+pany_na <- function(..., .nan = FALSE) {
+  vctrs::vec_pany(!!!lapply(list2(...), are_na2, nan = .nan))
 }
 
 #' @rdname pany
 #' @export
-pall_na <- function(..., nan = "f") {
-  vctrs::vec_pall(!!!lapply(list2(...), are_na2, nan = nan))
+pall_na <- function(..., .nan = FALSE) {
+  vctrs::vec_pall(!!!lapply(list2(...), are_na2, nan = .nan))
 }
-# TODO: use .na/.nan instead of na/nan
 
 # any_na <- function(x) {
 #   any(are_na2(x))
@@ -94,7 +89,8 @@ pall_na <- function(..., nan = "f") {
 #'   for any or any or all ordered pairs within `.l`.
 #'
 #' @returns
-#' - \[`logical(1)`] For `reduce_predicate()`: the scalar result of the test.
+#' - \[`TRUE` | `FALSE` | `NA`] For `reduce_predicate()`: the scalar reduced
+#'   result.
 #' - \[`logical(length(.l) - 1)`] For `accumulate_predicate()`: the accumulated
 #'   results.
 #'

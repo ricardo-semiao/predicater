@@ -32,11 +32,12 @@ is_collection(
 
 \item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 
-\item{expr, pairlist, env, null, dots}{[\code{flag}] Whether to include expression,
-pairlist, environment, \code{NILL}, or the \code{...} objects as collections.}
+\item{expr, pairlist, env, null, dots}{[\code{TRUE} | \code{FALSE}] Whether to include
+expression, pairlist, environment, \code{NILL}, or the \code{...} objects as
+collections.}
 }
 \value{
-[\code{TRUE} | \code{FALSE}] \code{TRUE} if \code{x} passes the test, \code{FALSE} otherwise.
+[\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
 In R, there are several types (\code{\link[=typeof]{typeof()}}) that can "store elements":

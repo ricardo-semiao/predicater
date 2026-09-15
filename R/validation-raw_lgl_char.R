@@ -14,7 +14,7 @@ NULL
 #' They all are predicate tests, while the `assert_*()` functions validate their
 #' input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param len,na_n,true_n `r ROXY$x_n("len,na_n,true_n")`
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
@@ -113,13 +113,13 @@ assert_raw <- fn_core_to_assert(
 #' `test_character()` is the predicate test, while `assert_character()` validates
 #' its input, aborting if it fails the test.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param len,na_n,dup_n,char_n `r ROXY$x_n("len,na_n,dup_n,char_n")`
 #' @param set `r ROXY$set("character")`
-#' @param match \[`character()` | `list(yes = , no = )` | `NULL`] Test if all
-#'   elements of `x` match regular expression patterns. Pass a character vector of
-#'   patterns (implicitly OR'd together), or a list with `yes` and `no`
-#'   character vectors of patterns. Set to `NULL` to not test.
+#' @param match \[`character()` | `list(yes = , no = )` | `NULL`]
+#'   Test if all elements of `x` match regular expression patterns. Pass a
+#'   character vector of patterns (implicitly OR'd together), or a list with
+#'   `yes` and `no` character vectors of patterns. Set to `NULL` to not test.
 #' @param perl \[`TRUE` | `FALSE`] Should Perl-compatible regexps be used in
 #'   `match`?
 #' @param sorted `r ROXY$sorted()`
@@ -183,12 +183,6 @@ test_in_pattern <- function(x, match, perl = FALSE) {
   if (is_null(match)) {
     return(NULL)
   }
-
-  collapse_patterns <- function(p) {
-    if (is_null(p) || length(p) == 0) return(NULL)
-    paste0("(?:", paste(p, collapse = ")|(?:"), ")")
-  }
-  # TODO: turn into helper function, use elswhere instead of simple paste0("|")
 
   if (is_character(match)) {
     pat <- collapse_patterns(match)

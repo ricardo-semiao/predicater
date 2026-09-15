@@ -12,11 +12,11 @@
 #'
 #' Functions from rlang: [rlang::is_null()], [rlang::is_weakref()].
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param type \[`character(1)`] A type to test for, as returned by [typeof()].
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
-#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns `r ROXY$test_res()`
 #'
 #' @details
 #' The full list of R object types ([typeof()]) can be seen in ["R Internals"
@@ -135,9 +135,9 @@ is_any <- function(x) {
 #'
 #' is_primitive_lazy(x)
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #'
-#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns `r ROXY$test_res()`
 #'
 #' @aliases is_function is_closure is_primitive is_primitive_eager is_primitive_lazy
 #' @rawNamespace export(is_function, is_closure, is_primitive, is_primitive_eager, is_primitive_lazy)
@@ -171,12 +171,13 @@ NULL
 #' - `is_collection()` tests for any of the above collection types, with options
 #'   to exclude any of them.
 #'
-#' @param x \[`any`] An object to test.
+#' @param x `r ROXY$x()`
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
-#' @param expr,pairlist,env,null,dots \[`flag`] Whether to include expression,
-#'   pairlist, environment, `NILL`, or the `...` objects as collections.
+#' @param expr,pairlist,env,null,dots \[`TRUE` | `FALSE`] Whether to include
+#'   expression, pairlist, environment, `NILL`, or the `...` objects as
+#'   collections.
 #'
-#' @returns \[`TRUE` | `FALSE`] `TRUE` if `x` passes the test, `FALSE` otherwise.
+#' @returns `r ROXY$test_res()`
 #'
 #' @details
 #' All collection types:

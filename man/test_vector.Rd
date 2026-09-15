@@ -40,12 +40,12 @@ assert_vector(
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{mode}{[\code{"atomic"} | \code{"list"} | \code{"expression"} | \code{"pairlist"}] Allowed
-vector types. They are additive: \code{"atomic"} allows atomic vectors, \code{list}
-allows atomic and lists, \code{expression} allows atomic, lists, and expression
-objects, and \code{pairlist} allows all.}
+\item{mode}{[\code{"atomic"} | \code{"list"} | \code{"expression"} | \code{"pairlist"}]
+Allowed vector types. They are additive: \code{"atomic"} allows atomic vectors,
+\code{list} allows atomic and lists, \code{expression} allows atomic, lists, and
+expression objects, and \code{pairlist} allows all.}
 
-\item{len, na_n, null_n, empty_n, dup_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of \code{NULL} elements, number of elements with zero length, number of duplicate elements. The options of each argument 'arg' are:
+\item{len, na_n, null_n, empty_n, dup_n}{[\code{numeric()} | \verb{\\()\{\}} | \code{NULL}] Possible values for the length, number of \code{NA} elements, number of \code{NULL} elements, number of elements with zero length, number of duplicate elements. The   options of each argument 'arg' are:
 \itemize{
 \item \code{NULL} to not test.
 \item A single non-negative number to test for \code{. == arg}. If \code{Inf},     \code{. == length(x)}.
@@ -56,14 +56,14 @@ objects, and \code{pairlist} allows all.}
 returns a single \code{TRUE} or \code{FALSE}.
 }}
 
-\item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
+\item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
 \item \code{"null"} for \code{NULL}.
 \item \code{"empty"} for any zero-length object.
 \item \code{"na"} for any \code{NA} type, or \code{"na_logical"} for \code{NA}, \code{"na_integer"} for     \code{NA_integer_}, \code{"na_real"} for \code{NA_real_}, \code{"na_complex"} for     \code{NA_complex_}, and \code{"na_character"} for \code{NA_character_}.
 \item \code{"nan"} for \code{NaN}.
 \item \code{"+inf"} for \code{+Inf}, \code{"-inf"} for \code{-Inf}, and \code{"inf"} for both.
-\item \code{"t"} for \code{TRUE}, and \code{"f"} for \code{FALSE}.
+\item \code{"true"}/\code{"t"} for \code{TRUE}, and \code{"false"}/\code{"f"} for \code{FALSE}.
 }}
 
 \item{custom}{[\verb{function(x)} | \code{NULL}] A custom function that takes \code{x} as first argument   and returns a single \code{TRUE} or \code{FALSE}. Set to \code{NULL} to not test.}
@@ -77,7 +77,7 @@ returns a single \code{TRUE} or \code{FALSE}.
 \item \code{"message"} to issue a message and return \code{invisible(x)}.
 }}
 
-\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
+\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as   the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
 \itemize{
 \item An environment in the call stack or a hard-coded defused call.
 \item \code{NULL} for no information.

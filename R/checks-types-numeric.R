@@ -12,9 +12,9 @@
 #' `FALSE` for non-numeric objects, or if not all elements pass the
 #' corresponding `are_*()` function, and `TRUE` otherwise.
 #'
-#' @param x \[`any`] An object to test.
-#' @param na \[`character(1)`] How to treat `NA` values: `"f"`
-#'   to return `FALSE`, `"t"` return `TRUE`, or `"na"` to return `NA`.
+#' @param x \[`numeric()`, `any`] For `are_*()`, a numeric vector to tes; for
+#'   `is_*()`, any object to test.
+#' @param na \[`TRUE` | `FALSE` | `NA`] What to return for `NA` values.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #' @param signs \[`character(1)`] For `are_inf()` and `is_inf()` -- which signs
 #'   of infinity to allow: `"+"` for positive infinity, `"-"` for negative
@@ -22,11 +22,12 @@
 #'
 #' @returns
 #' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
-#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
+#' - \[`TRUE` | `FALSE` | `NA`] For `is_*`: the scalar result of the test. If
+#'   `na != NA`, then will always return `TRUE` or `FALSE`.
 #'
 #' @details
 #' Currently, `NaN` values can never arise from operations with `NA` (`NA + NaN
-#' #> NA`), so treating `NaN` as `NA` via `nan = "na"` is not recommended.
+#' #> NA`), so treating `NaN` as `NA` via `nan = NA` is not recommended.
 #'
 #' @examples
 #' x <- c(1, Inf, -Inf, NaN, NA)
@@ -38,14 +39,14 @@
 #' are_inf(x)
 #' #> [1] FALSE  TRUE  TRUE  FALSE  NA
 #'
-#' are_nan(x, na = "na")
+#' are_nan(x, na = NA)
 #' #> [1] FALSE  FALSE  FALSE  TRUE  NA
 #'
 #' # For all, the NA value's result can be controlled:
-#' are_finite(x, na = "f")
+#' are_finite(x, na = FALSE)
 #' #> [1]  TRUE FALSE FALSE FALSE FALSE
 #'
-#' are_nan(x, na = "t")
+#' are_nan(x, na = TRUE)
 #' #> [1] FALSE FALSE FALSE  TRUE  TRUE
 #'
 #'
@@ -67,7 +68,7 @@
 
 #' @rdname predicates-infinite
 #' @export
-are_finite <- function(x, na = "na") {
+are_finite <- function(x, na = NA) {
   # Checks:
   # - x must be numeric
   # - na must be one of "f", "t", "na", or "abort"
@@ -75,51 +76,60 @@ are_finite <- function(x, na = "na") {
 
 
   # Main:
-  switch(na,
-    f = is.finite(x),
-    t = is.finite(x) | are_na2(x),
-    na = if_else2(are_na2(x), NA, is.finite(x))
-  )
-}
-# NOTE: could be defined as 'not all other options'
-
-
-#' @rdname predicates-infinite
-#' @export
-is_finite <- function(x, n = NULL, na = "na") {
-  # Checks: left to rlang and are_finite
-  is_numeric(x, n = n) && all(are_finite(x, na))
+  if (is.na(na)) {
+    if_else2(are_na2(x), NA, is.finite(x))
+  } else if (na) {
+    is.finite(x)
+  } else {
+    is.finite(x) & !are_na2(x)
+  }
 }
 
 
 #' @rdname predicates-infinite
 #' @export
-are_nan <- function(x, na = "na") {
+is_finite <- function(x, na = NA) {
+  if (is_numeric(x, n = 1)) {
+    if (is.na(x)) na else is.finite(x)
+  } else {
+    FALSE
+  }
+}
+
+
+#' @rdname predicates-infinite
+#' @export
+are_nan <- function(x, na = NA) {
   # Checks:
   # - x must be numeric
   # - na must be one of "f", "t", "na"
   # TODO:
 
   # Main:
-  switch(na,
-    f = is.nan(x),
-    t = is.nan(x) | are_na2(x),
-    na = if_else2(are_na2(x), NA, is.nan(x))
-  )
+  if (is.na(na)) {
+    if_else2(are_na2(x), NA, is.nan(x))
+  } else if (na) {
+    is.nan(x)
+  } else {
+    is.nan(x) & !are_na2(x)
+  }
 }
 
 
 #' @rdname predicates-infinite
 #' @export
-is_nan <- function(x, n = NULL, na = "na") {
-  # Checks: left to rlang and are_nan
-  is_numeric(x, n = n) && all(are_nan(x, na))
+is_nan <- function(x, na = NA) {
+  if (is_numeric(x, n = 1)) {
+    if (is.na(x)) na else is.nan(x)
+  } else {
+    FALSE
+  }
 }
 
 
 #' @rdname predicates-infinite
 #' @export
-are_inf <- function(x, na = "na", signs = "+-") {
+are_inf <- function(x, na = NA, signs = "+-") {
   # Checks:
   # - x must be numeric
   # - na must be one of "f", "t", "na"
@@ -129,18 +139,25 @@ are_inf <- function(x, na = "na", signs = "+-") {
 
   # Main:
   signs_allowed <- switch(signs, both = c(-1, 1), "+" = 1, "-" = -1)
-  switch(na,
-    f = is.infinite(x) & sign(x) %in% signs_allowed,
-    t = is.infinite(x) | are_na2(x) & sign(x) %in% signs_allowed,
-    na = if_else2(are_na2(x), NA, is.infinite(x) & sign(x) %in% signs_allowed)
-  )
+  if (is.na(na)) {
+    if_else2(are_na2(x), NA, is.infinite(x) & sign(x) %in% signs_allowed)
+  } else if (na) {
+    is.infinite(x) & sign(x) %in% signs_allowed | are_na2(x)
+  } else {
+    is.infinite(x) & sign(x) %in% signs_allowed
+  }
 }
 
 
 #' @rdname predicates-infinite
 #' @export
-is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
-  is_numeric(x, n = n) && all(are_inf(x, na, signs = "+-"))
+is_inf <- function(x, na = NA, signs = "+-") {
+  signs_allowed <- switch(signs, both = c(-1, 1), "+" = 1, "-" = -1)
+  if (is_numeric(x, n = 1)) {
+    if (is.na(x)) na else is.infinite(x) & sign(x) %in% signs_allowed
+  } else {
+    FALSE
+  }
 }
 
 
@@ -150,39 +167,38 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 #' Type checks - Integer-like values
 #'
 #' @description
-#' Check if an object can be considerd integer in 4 different interpretations
+#' Check if an object can be considerd integer in two different interpretations
 #' (`mode`s):
-#' - `"trunc"`: checks if `x` can be represented as a double-precision integer,
-#'   i.e. has negligible decimal part. Allows `Inf` and `NaN` values. If so, it
-#'   can be truncated without losing information.
-#' - `"range"`: checks if `x` can be represented as an integer, i.e. has
-#'   negligible decimal part and is within the integer range. Disallows `Inf`
-#'   and `NaN`. If so, it can be coerced [as.integer()] without losing
+#' - `"unbounded"`: checks if `x` can be represented as a double-precision
+#'   integer, i.e. `x - round(x)` falls within some tolerance value (`tol`).
+#'   Allows `Inf` and `NaN` values. If so, it can be [round()]-ded without loss
+#'   of information.
+#' - `"range"`: checks if `x` can be represented as an integer, i.e. passes
+#'   'unbounded' and is within R's allowed integer range. Disallows `Inf` and
+#'   `NaN`. If so, it can be coerced `as.integer(round(x))` without losing
 #'   information.
-#' - Both have a `"*_tol"` variant that allows for a tolerance in the decimal
-#'   part check, via `abs(x - round(x)) < tol`. In these modes, lossless
-#'   coercion is only guaranteed for `round(x)`, not `x`. See the 'Details'
-#'   section for more information.
+#' - Note that `tol` can be set to zero, for a strict check of the decimal part.
 #'
 #' `are_integer_like()` is vectorized, returning a vector of same length as `x`,
 #' and errors for non-numeric objects. `is_integer_like()` returns `FALSE` for
 #' non-numeric objects, or if not all elements pass `are_integer_like()`, and
 #' `TRUE` otherwise.
 #'
-#' @param x \[`any`] Any R object.
-#' @param mode \[`character(1)`] The mode of integer interpretation, one of
-#'   `"trunc"`, `"trunc_tol"`, `"range"`, or `"range_tol"`.
+#' @param x `r ROXY$x()`
+#' @param mode \[`"bounded"` | `"unbounded"`] The mode of integer interpretation
+#'   as described above.
 #' @param tol \[`double(1)`] The tolerance for the `"trunc_tol"` and
-#'   `"range_tol"` modes, ignored in other modes. Defaults to the square root of
-#'   the machine epsilon.
-#' @param na \[`character(1)`] How to treat `NA` values: `"t"` to return `TRUE`,
-#'   `"na"` to return `NA`. Integer vectors always return `TRUE` for `NA`
-#'   values.
+#'   `"range_tol"` modes, ignored in other modes. A useful value is
+#'   `sqrt(.Machine$double.eps)`.
+#' @param na \[`TRUE` | `NA`] What to return for `NA` values. Integer vectors
+#'   always return `TRUE` for `NA` values.
 #' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
 #' @returns
-#' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
-#' - \[`TRUE` | `FALSE`] For `is_*`: the scalar result of the test.
+#' - \[`logical(length(x))`] For `are_integer_like()`: the vectorized or result
+#'   of the test.
+#' - \[`TRUE` | `FALSE` | `NA`] For `is_integer_like()`: the scalar result of
+#'   the test. If `na != NA`, then will always return `TRUE` or `FALSE`.
 #'
 #' @details
 #' R stores integers with 32 bits, allowing to represent values between about
@@ -197,8 +213,8 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 #' they cannot be coerced into [integer()] in R, thats why they are allowed in
 #' the `"trunc"` modes and not in `"range"` modes.
 #'
-#' Philosofically, for `NA`` values, consider: `na = "t"` as "yes, `NA_real_`
-#' can safely be coerced to `NA_integer_`"; and `na = "na"` as "this NA value
+#' Philosofically, for `NA`` values, consider: `na = TRUE` as "yes, `NA_real_`
+#' can safely be coerced to `NA_integer_`"; and `na = NA` as "this NA value
 #' might have a decimal part, so I don't know if I can consider it an integer".
 #' Note that with integer vectors, NA values are surely integers, so they always
 #' return `TRUE`.
@@ -218,25 +234,26 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 #' suppressWarnings(as.integer(x)) #> [1]  1 NA NA NA NA 1 1
 #'
 #' # Changing NA interpretation:
-#' are_integer_like(x, na = "na")
+#' are_integer_like(x, na = NA)
 #' # [1]  TRUE    NA FALSE FALSE FALSE FALSE FALSE
 #'
 #' # Adding tolerance:
-#' are_integer_like(x, mode = "range_tol")
+#' are_integer_like(x, tol = sqrt(.Machine$double.eps))
 #' # [1]  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE
 #'
 #' # Decreasing tolerance:
-#' are_integer_like(x, mode = "range_tol", tol = 1e-5)
+#' are_integer_like(x, tol = 1e-5)
 #' # [1]  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
 #'
-#' # trunc mode allows Inf, NaN, and out-of-integer-range values:
-#' are_integer_like(x, mode = "trunc")
+#' # unbounded mode allows Inf, NaN, and out-of-integer-range values:
+#' are_integer_like(x, mode = "unbounded")
 #' # [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
 #'
 #' # Adding tolerance, all pass, and finally is_integer_like() retursn TRUE:
-#' are_integer_like(x, mode = "trunc_tol", tol = 1e-5)
+#' are_integer_like(x, mode = "unbounded", tol = 1e-5)
 #' # [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE
-#' is_integer_like(x, mode = "trunc_tol", tol = 1e-5) #> TRUE
+#'
+#' is_integer_like(x, mode = "unbounded", tol = 1e-5) #> TRUE
 #'
 #'
 #' # are_integer_like() fails for non-numeric objects, while is_integer_like()
@@ -250,7 +267,7 @@ is_inf <- function(x, n = NULL, na = "na", signs = "+-") {
 #'
 #'
 #' # Integer vectors always return TRUE for NA values:
-#' are_integer_like(c(1L, NA_integer_), na = "na")
+#' are_integer_like(c(1L, NA_integer_), na = NA)
 # [1] TRUE TRUE
 #'
 #' @name is_integer_like
@@ -260,7 +277,7 @@ NULL
 #' @rdname is_integer_like
 #' @export
 are_integer_like <- function(
-  x, mode = "range", tol = sqrt(.Machine$double.eps), na = "t"
+  x, mode = "bounded", tol = 0, na = TRUE
 ) {
   # Checks:
   # - x must be numeric
@@ -274,47 +291,28 @@ are_integer_like <- function(
   if (is_integer(x)) {
     return(rep(TRUE, length(x)))
   }
-  na_value <- switch(na, t = TRUE, na = NA)
 
-  if (mode == "trunc") {
+  if (mode == "unbounded") {
     case_when2(
-      are_na2(x) ~ na_value,
-      is_nan(x, na = "f") ~ TRUE,
-      is_inf(x, na = "f") ~ TRUE,
-      TRUE ~ x == round(x)
-    )
-  } else if (mode == "trunc_tol") {
-    case_when2(
-      are_na2(x) ~ na_value,
-      is_nan(x, na = "f") ~ TRUE,
-      is_inf(x, na = "f") ~ TRUE,
+      are_na2(x) ~ na,
+      is_nan(x, na = FALSE) ~ TRUE,
+      is_inf(x, na = FALSE) ~ TRUE,
       TRUE ~ abs(x - round(x)) < tol
     )
-  } else if (mode == "range") {
+  } else {
     case_when2(
-      are_na2(x) ~ na_value,
-      is_nan(x, na = "f") ~ FALSE,
-      is_inf(x, na = "f") ~ FALSE,
-      TRUE ~ abs(x) <= .Machine$integer.max & x == round(x)
-    )
-  } else if (mode == "range_tol") {
-    case_when2(
-      are_na2(x) ~ na_value,
-      is_nan(x, na = "f") ~ FALSE,
-      is_inf(x, na = "f") ~ FALSE,
+      are_na2(x) ~ na,
+      is_nan(x, na = FALSE) ~ FALSE,
+      is_inf(x, na = FALSE) ~ FALSE,
       TRUE ~ abs(x) <= .Machine$integer.max & abs(x - round(x)) < tol
     )
   }
 }
-# TODO: rethink modes names
 
 
 #' @rdname is_integer_like
 #' @export
-is_integer_like <- function(
-  x, n = NULL, mode = "range", tol = sqrt(.Machine$double.eps), na = "t"
-) {
+is_integer_like <- function(x, n = NULL, mode = "bounded", tol = 0, na = TRUE) {
   # Checks: left to rlang and are_integer_like
   is_integer(x, n) || (is_double(x, n) && all(are_integer_like(x, mode, tol)))
 }
-# Note: faster and more readable than a TryCatch

@@ -7,22 +7,20 @@
 \alias{pall_na}
 \title{Parallel any and all}
 \usage{
-pany(..., na = "na")
+pany(..., .na = NA)
 
-pall(..., na = "na")
+pall(..., .na = NA)
 
-pany_na(..., nan = "f")
+pany_na(..., .nan = FALSE)
 
-pall_na(..., nan = "f")
+pall_na(..., .nan = FALSE)
 }
 \arguments{
 \item{...}{[\code{logical()} each] Logical vectors with the same size.}
 
-\item{na}{[\code{"na"} | \code{"t"} | \code{"f"}] What to return when encountering \code{NA}
-values: \code{"na"} for \code{NA}, \code{"t"} for \code{TRUE}, and \code{"f"} for \code{FALSE}.}
+\item{.na}{[\code{TRUE} | \code{FALSE} | \code{NA}] What to return for \code{NA} values.}
 
-\item{nan}{[\code{"t"} | \code{"f"}] For \verb{*_na()} functions: wether to consider \code{NaN}
-values as \code{NA} or not.}
+\item{.nan}{[\code{TRUE} | \code{FALSE}] Should \code{NaN} values be treated as \code{NA}?}
 }
 \value{
 [\code{logical()}] A logical vector of the same size as the inputs.
