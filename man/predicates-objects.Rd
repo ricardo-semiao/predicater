@@ -32,8 +32,6 @@ the class attribute: \code{"warn"} to issue a warning and return \code{TRUE};
 \item{bad}{[\code{"warn"} | \code{"false"}] How to handle inconsistencies in
 \code{is_object_like()}: \code{"warn"} to issue a warning and return if \code{x} has a
 class attribute; \code{"false"} to return \code{FALSE}.}
-
-\item{empty}{[\code{TRUE} | \code{FALSE}] What to return if there is an \code{""} class.}
 }
 \value{
 [\code{TRUE} | \code{FALSE}] The scalar result of the test.
@@ -48,6 +46,60 @@ Functions to test for 'object'-related properties:
 \item \code{is_s4()}: checks if \code{x} is of type "S4".
 \item \code{is_object()}: checks if \code{x} is of type "object".
 \item \code{is_object_like()}: checks if object has the "object" bit, while testing
-for inconsistencies with the other properties above.
+for inconsistencies with the other properties above (see 'Details' below).
 }
+}
+\details{
+The relationship between the object-related properties is as follows:
+\itemize{
+\item \emph{class} ⇔ \emph{object bit}
+\item \emph{s4 bit} ⇒ \emph{class}/\emph{object bit} (ideally)
+\item \emph{s4 typeof} ⇒ \emph{s4 bit}, and ⇒ \emph{class/object bit} (ideally)
+\item \emph{object typeof} ⇒ \emph{class}/\emph{object bit} (ideally)
+}
+
+\code{is_object_like()} tests if any of the above are violated.
+}
+\examples{
+xbase <- 1:10
+xs3 <- structure(1:10, class = "my_s3")
+xs4_int <- methods::setClass("my_s4_int", contains = "integer")(1:10)
+xs4_s4 <- methods::setClass("my_s4_s4", slots = c(x = "integer"))(x = 1:10)
+
+# If has class, should have the object bit set, and vice versa:
+has_class(xbase) #> FALSE
+has_class(xs3) #> TRUE
+has_object_bit(xs3) #> TRUE
+has_class(xs4_int) #> TRUE
+
+# S4 objects have the S4 bit set:
+has_s4_bit(xs4_int) #> FALSE
+has_s4_bit(xs4) #> TRUE
+
+# is_s4 test for the typeof() "S4":
+typeof(xs4_int) #> "integer"
+is_s4(xs4_int) #> FALSE
+typeof(xs4_s4) #> "S4"
+is_s4(xs4_s4) #> TRUE
+
+# is_object() test for the typeof() "object", which some OOP systems use,
+# and also when an S4 object has its class modified:
+suppressWarnings(class(xs4_s4) <- c("new_class", class(xs4_s4)))
+typeof(xs4_s4) #> "object"
+is_object(xs4_s4) #> TRUE
+
+# is_object_like() is similar to checking the object bit/existance of a class
+# attribute, while cheking for inconsistencies with the other properties:
+is_object_like(xbase) #> FALSE
+is_object_like(xs4_int) #> TRUE
+
+attr(xs4_int, "class") <- NULL
+has_s4_bit(xs4_int) #> TRUE (S4 bit is still set)
+is_object_like(xs4_int, bad = FALSE) #> FALSE
+
+# has_class() is similar, but also checks for NA, "", or duplicate values in
+# the class attribute:
+class(xs3) <- c("a", "b", "a")
+has_class(xs3, invalid = "false") #> FALSE
+
 }

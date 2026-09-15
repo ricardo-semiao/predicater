@@ -16,8 +16,6 @@ is_na2(x, nan = FALSE, types = NULL)
 
 \item{types}{[\code{character()} | \code{NULL}] A character vector of allowed \code{NA}
 types (see \code{\link{NA}}). Set to \code{NULL} to allow all types.}
-
-\item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{
 \itemize{
@@ -40,17 +38,29 @@ objects, or if not all elements pass \code{are_na2()}, and \code{TRUE} otherwise
 \examples{
 x <- c(1, Inf, -Inf, NaN, NA)
 
+# are_na() is vectorized:
 are_na2(x)
-#> [1] FALSE FALSE FALSE FALSE  TRUE
+#> c(FALSE, FALSE, FALSE, FALSE, TRUE)
 
 are_na2(x, nan = TRUE)
-#> [1] FALSE FALSE FALSE  TRUE  TRUE
+#> c(FALSE, FALSE, FALSE, TRUE, TRUE)
 
 are_na2(x, nan = NA)
-#> [1] FALSE FALSE FALSE    NA  TRUE
+#> c(FALSE, FALSE, FALSE, NA, TRUE)
 
-is_na2(x) #> FALSE # In all nan modes
-is_na2(c(NA, NA)) #> TRUE
+# Errors for non-atomic objects:
+try(are_na2(list(NA, NA))) #> Error
+
+# is_na() test for a scalar NA value:
+is_na2(c(NA, NA)) #> FALSE
+is_na2(NA) #> TRUE
+is_na2(NaN, nan = TRUE) #> TRUE
+
+# Use all(are_na2(x)) to test if all elements are NA:
+all(are_na2(c(NA, NA))) #> TRUE
+
+# Accept only NAs of specific types:
+is_na2(NA_integer_, types = c("logical", "character")) #> FALSE 
 
 # To test for a single NA value, use the n argument:
 is_na2(NA, n = 1) #> TRUE

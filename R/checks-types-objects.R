@@ -12,10 +12,9 @@
 #' - `is_s4()`: checks if `x` is of type "S4".
 #' - `is_object()`: checks if `x` is of type "object".
 #' - `is_object_like()`: checks if object has the "object" bit, while testing
-#'   for inconsistencies with the other properties above.
+#'   for inconsistencies with the other properties above (see 'Details' below).
 #'
 #' @param x `r ROXY$x()`
-#' @param empty \[`TRUE` | `FALSE`] What to return if there is an `""` class.
 #' @param bad \[`"warn"` | `"false"`] How to handle inconsistencies in
 #'   `is_object_like()`: `"warn"` to issue a warning and return if `x` has a
 #'   class attribute; `"false"` to return `FALSE`.
@@ -24,6 +23,57 @@
 #'   `"false"` to return `FALSE`.
 #'
 #' @returns `r ROXY$test_res()`
+#'
+#' @details
+#' The relationship between the object-related properties is as follows:
+#'- _class_ ⇔ _object bit_
+#' - _s4 bit_ ⇒ _class_/_object bit_ (ideally)
+#' - _s4 typeof_ ⇒ _s4 bit_, and ⇒ _class/object bit_ (ideally)
+#' - _object typeof_ ⇒ _class_/_object bit_ (ideally)
+#'
+#' `is_object_like()` tests if any of the above are violated.
+#'
+#' @examples
+#' xbase <- 1:10
+#' xs3 <- structure(1:10, class = "my_s3")
+#' xs4_int <- methods::setClass("my_s4_int", contains = "integer")(1:10)
+#' xs4_s4 <- methods::setClass("my_s4_s4", slots = c(x = "integer"))(x = 1:10)
+#'
+#' # If has class, should have the object bit set, and vice versa:
+#' has_class(xbase) #> FALSE
+#' has_class(xs3) #> TRUE
+#' has_object_bit(xs3) #> TRUE
+#' has_class(xs4_int) #> TRUE
+#'
+#' # S4 objects have the S4 bit set:
+#' has_s4_bit(xs4_int) #> FALSE
+#' has_s4_bit(xs4) #> TRUE
+#'
+#' # is_s4 test for the typeof() "S4":
+#' typeof(xs4_int) #> "integer"
+#' is_s4(xs4_int) #> FALSE
+#' typeof(xs4_s4) #> "S4"
+#' is_s4(xs4_s4) #> TRUE
+#'
+#' # is_object() test for the typeof() "object", which some OOP systems use,
+#' # and also when an S4 object has its class modified:
+#' suppressWarnings(class(xs4_s4) <- c("new_class", class(xs4_s4)))
+#' typeof(xs4_s4) #> "object"
+#' is_object(xs4_s4) #> TRUE
+#'
+#' # is_object_like() is similar to checking the object bit/existance of a class
+#' # attribute, while cheking for inconsistencies with the other properties:
+#' is_object_like(xbase) #> FALSE
+#' is_object_like(xs4_int) #> TRUE
+#'
+#' attr(xs4_int, "class") <- NULL
+#' has_s4_bit(xs4_int) #> TRUE (S4 bit is still set)
+#' is_object_like(xs4_int, bad = FALSE) #> FALSE
+#'
+#' # has_class() is similar, but also checks for NA, "", or duplicate values in
+#' # the class attribute:
+#' class(xs3) <- c("a", "b", "a")
+#' has_class(xs3, invalid = "false") #> FALSE
 #'
 #' @name predicates-objects
 NULL
@@ -89,18 +139,13 @@ is_object_like <- function(x, bad = "warn") {
 
   has_object_bit # Identical to has_class at this point
 }
-# List of relations betwee: class, object bit, s4 bit, s4 typeof, object typeof
-# - class <-> object bit
-# - s4 bit -> class/object bit (ideally)
-# - s4 typeof -> s4 bit, and -> class/object bit (ideally)
-# - object typeof -> class/object bit (ideally
+
 
 #' @rdname predicates-objects
 #' @export
 is_s4 <- function(x) {
   typeof(x) == "S4"
 }
-# Note the difference with s4 bit, and cite object_system
 
 
 #' @rdname predicates-objects
@@ -156,9 +201,10 @@ is_object <- function(x) {
 #'
 #' object_system(factor(letters)) #> "S3"
 #'
-#' track <- setClass("track", slots = c(x = "numeric", y = "numeric"))
-#' xs4 <- track(x = 1:10, y = 1:10 + rnorm(10))
+#' xs4 <- methods::setClass("my_s4_int", contains = "integer")(1:10)
 #' object_system(xs4) #> "S4"
+#'
+#' is_system(xs4, "S4") #> TRUE
 #'
 #' @export
 object_system <- function(x) {

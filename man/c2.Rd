@@ -54,26 +54,22 @@ Combine all arguments into a new vector of common type. This function is a
 renaming of \code{\link[vctrs:vec_c]{vctrs::vec_c()}}.
 }
 \examples{
-vec_c(FALSE, 1L, 1.5)
+c2(FALSE, 1L, 1.5) #> c(0, 1.0, 1.5)
 
-# Date/times --------------------------
-c(Sys.Date(), Sys.time())
-c(Sys.time(), Sys.Date())
+# Date/times:
+c(Sys.Date(), Sys.time()) # Two Date-s
+c(Sys.time(), Sys.Date()) # Two POSIXct-s
+c2(Sys.Date(), Sys.time()) # Two POSIXct-s
 
-vec_c(Sys.Date(), Sys.time())
-vec_c(Sys.time(), Sys.Date())
-
-# Factors -----------------------------
-c(factor("a"), factor("b"))
-vec_c(factor("a"), factor("b"))
-
+# Factors:
+c(factor("a"), factor("b")) # Factor with levels "a" and "b"
+c2(factor("a"), factor("b")) # Factor with levels "a" and "b"
 
 # By default, named inputs must be length 1:
-vec_c(name = 1)
-try(vec_c(name = 1:3))
+c2(name = 1) #> c(name = 1)
+try(c2(name = 1:3)) #> Error
 
 # Pass a name specification to work around this:
-vec_c(name = 1:3, .name_spec = "{outer}_{inner}")
+c2(name = 1:3, .name_spec = "{outer}_{inner}")
 
-# See `?name_spec` for more examples of name specifications.
 }

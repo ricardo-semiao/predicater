@@ -11,9 +11,32 @@
 #'
 #' @inherit vctrs::vec_c return
 #'
-#' @inherit vctrs::vec_c examples
-c2 <- function(..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal") {
-  vctrs::vec_c(..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal")
+#' @examples
+#' c2(FALSE, 1L, 1.5) #> c(0, 1.0, 1.5)
+#'
+#' # Date/times:
+#' c(Sys.Date(), Sys.time()) # Two Date-s
+#' c(Sys.time(), Sys.Date()) # Two POSIXct-s
+#' c2(Sys.Date(), Sys.time()) # Two POSIXct-s
+#'
+#' # Factors:
+#' c(factor("a"), factor("b")) # Factor with levels "a" and "b"
+#' c2(factor("a"), factor("b")) # Factor with levels "a" and "b"
+#'
+#' # By default, named inputs must be length 1:
+#' c2(name = 1) #> c(name = 1)
+#' try(c2(name = 1:3)) #> Error
+#'
+#' # Pass a name specification to work around this:
+#' c2(name = 1:3, .name_spec = "{outer}_{inner}")
+#'
+#' @export
+c2 <- function(
+  ..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal"
+) {
+  vctrs::vec_c(
+    ..., .ptype = .ptype, .name_spec = .name_spec, .name_repair = "minimal"
+  )
 }
 
 
@@ -36,6 +59,29 @@ c2 <- function(..., .ptype = NULL, .name_spec = NULL, .name_repair = "minimal") 
 #' @param .nan \[`TRUE` | `FALSE`] Should `NaN` values be treated as `NA`?
 #'
 #' @returns \[`logical()`] A logical vector of the same size as the inputs.
+#'
+#' @examples
+#' a <- c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, NA, NA, NA)
+#' b <- c(TRUE, FALSE, NA, TRUE, FALSE, NA, TRUE, FALSE, NA)
+#'
+#' # Default behavior treats missings like `|` does:
+#' pany(a, b)
+#' a | b
+#'
+#' # Default behavior treats missings like `&` does:
+#' pall(a, b)
+#' a & b
+#'
+#' # Remove missings from the computation, like `na_rm = TRUE`:
+#' pany(a, b, .na = FALSE)
+#' (a & !is.na(a)) | (b & !is.na(b))
+#'
+#' pall(a, b, .na = TRUE)
+#' (a | is.na(a)) & (b | is.na(b))
+#'
+#' # Check for missings in parallel:
+#' pany_na(a, b) #> c(FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE)
+#' pall_na(a, b) #> c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE)
 #'
 #' @export
 pany <- function(..., .na = NA) {
@@ -94,6 +140,13 @@ pall_na <- function(..., .nan = FALSE) {
 #' - \[`logical(length(.l) - 1)`] For `accumulate_predicate()`: the accumulated
 #'   results.
 #'
+#' @examples
+#' reduce_predicate(list(1L, 1.0, 3), `==`, .op = "or") #> TRUE
+#' reduce_predicate(list(1L, 1.0, 3), `==`, .op = "and") #> FALSE
+#'
+#' accumulate_predicate(list(1L, 1.0, 3), `==`, .op = "and") #> c(TRUE, FALSE)
+#' accumulate_predicate(list(1L, 1.0, 3), identical, .op = "and") #> c(FALSE, FALSE)
+#'
 #' @export
 reduce_predicate <- function(.l, .f, ..., .op = "or") {
   i <- 1
@@ -120,7 +173,7 @@ reduce_predicate <- function(.l, .f, ..., .op = "or") {
 #' @export
 accumulate_predicate <- function(.l, .f, ..., .op = "or") {
   n <- length(.l)
-  res <- vector("list", n - 1)
+  res <- logical(n - 1)
 
   if (.op == "or") {
     res[[1]] <- .f(.l[[1]], .l[[2]], ...)

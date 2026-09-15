@@ -31,8 +31,6 @@ is_inf(x, na = NA, signs = "+-")
 \item{signs}{[\code{character(1)}] For \code{are_inf()} and \code{is_inf()} -- which signs
 of infinity to allow: \code{"+"} for positive infinity, \code{"-"} for negative
 infinity, or \code{"+-"} for both.}
-
-\item{n}{[\code{integer(1)} | \code{NULL}] Length of \code{x}, set to \code{NULL} to not test.}
 }
 \value{
 \itemize{
@@ -58,33 +56,37 @@ x <- c(1, Inf, -Inf, NaN, NA)
 
 # The default tests:
 are_finite(x)
-#> [1] TRUE  FALSE  FALSE  FALSE  NA
+#> c(TRUE, FALSE, FALSE, FALSE, NA)
 
 are_inf(x)
-#> [1] FALSE  TRUE  TRUE  FALSE  NA
+#> c(FALSE, TRUE, TRUE, FALSE, NA)
 
-are_nan(x, na = NA)
-#> [1] FALSE  FALSE  FALSE  TRUE  NA
+are_nan(x)
+#> c(FALSE, FALSE, FALSE, TRUE, NA)
+
 
 # For all, the NA value's result can be controlled:
 are_finite(x, na = FALSE)
-#> [1]  TRUE FALSE FALSE FALSE FALSE
+#> c(TRUE, FALSE, FALSE, FALSE, FALSE)
 
 are_nan(x, na = TRUE)
-#> [1] FALSE FALSE FALSE  TRUE  TRUE
+#> c(FALSE, FALSE, FALSE, TRUE, TRUE)
 
 
 # We can consider only +Inf or -Inf:
 are_inf(x, signs = "+")
-#> [1] FALSE  TRUE FALSE FALSE  NA
+#> c(FALSE, TRUE, FALSE, FALSE, NA)
 
 
-# The is_* predicates return TRUE only if all elements pass the test:
-is_finite(1:10) #> TRUE
-is_inf(c(-Inf, Inf, Inf, -Inf)) #> TRUE
+# Errors for non-numeric objects:
+try(are_finite(list(1, 2))) #> Error
 
-# To test for a single value, use the n argument:
-is_nan(NaN, n = 1) #> FALSE
-is_nan(c(NaN, NaN), n = 1) #> FALSE
+
+# The is_* predicates test scalars:
+is_finite(1) #> TRUE
+is_finite(1:10) #> FALSE
+
+# To get a single TRUE/FALSE result, use all(are_*(...)):
+all(are_finite(1:10)) #> TRUE
 
 }

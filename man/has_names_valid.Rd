@@ -2,6 +2,7 @@
 % Please edit documentation in R/attributes.R
 \name{has_names_valid}
 \alias{has_names_valid}
+\alias{are_names_valid}
 \title{Attributes - Names}
 \usage{
 has_names_valid(
@@ -11,6 +12,15 @@ has_names_valid(
   dups = FALSE,
   invalid = TRUE,
   zero_len = TRUE,
+  how = "names"
+)
+
+are_names_valid(
+  x,
+  na = FALSE,
+  empty = FALSE,
+  dups = FALSE,
+  invalid = TRUE,
   how = "names"
 )
 }
@@ -47,11 +57,26 @@ and "attr" returning NULL.
 \code{make.names()}.
 }
 \examples{
-has_names(mtcars) #> TRUE
+has_names_valid(mtcars) #> TRUE
 
-has_names(set_names(1:3, c("a", "", "b")), empty = TRUE) #> TRUE
-has_names(set_names(1:3, c("a", "b", NA)), na = TRUE) #> TRUE
-has_names(set_names(1:3, c("a", "a", "a"))) #> FALSE
-has_names(set_names(1:3, c("_bad", "b", "c")), invalid = FALSE) #> FALSE
+# NA, empty, and duplicate names return FALSE by default:
+has_names_valid(rlang::set_names(1:3, c("a", "b", NA))) #> FALSE
+has_names_valid(rlang::set_names(1:3, c("a", "b", NA)), na = TRUE) #> TRUE
+
+has_names_valid(rlang::set_names(1:3, c("a", "", "b"))) #> FALSE
+has_names_valid(rlang::set_names(1:3, c("a", "a", "a"))) #> FALSE
+
+# Invalid names and zero-length x's return TRUE by default:
+has_names_valid(rlang::set_names(1:3, c("_bad", "b", "c"))) #> TRUE
+has_names_valid(integer(0)) #> TRUE
+
+# Use `how` to control how names are extracted:
+has_names_valid(rlang::global_env(), how = "attr") #> FALSE
+# (envs have no names attribute)
+has_names_valid(c("a", "b", "c"), how = "x") #> TRUE (x itself was tested)
+
+# Vectorized test:
+are_names_valid(c("a", "b", "b", NA, ""), how = "x")
+#> c(TRUE, FALSE, FALSE, FALSE, FALSE)
 
 }

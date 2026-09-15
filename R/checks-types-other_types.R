@@ -39,6 +39,10 @@
 #' - Weak reference: _"weakref"/WEAKREFSXP_.
 #' - Internal-only: _"char"/CHARSXP_, _"any"/ANYSXP_.
 #'
+#' @examples
+#' is_type(1:10, "integer") #> TRUE
+#' is_type(NULL, "NULL") #> TRUE
+#'
 #' @name predicates-other-types
 
 
@@ -205,6 +209,18 @@ NULL
 #' - All the other types have lenght 1, and cannot have names.
 #'
 #' See [rlang::is_namespace()] for another environment-related test.
+#'
+#' @examples
+#' is_collection(list(1, 2, 3)) #> TRUE
+#' is_collection(rlang::env(a = 1, b = 2), n = 2) #> TRUE
+#'
+#' # NULL is not considered a collection:
+#' is_collection(NULL) #> FALSE
+#' is_collection(NULL, null = TRUE) #> TRUE
+#'
+#' # This is the difference between rlang::is_empty() and predicater::is_empty2():
+#' rlang::is_empty(NULL) #> TRUE
+#' try(is_empty2(NULL)) #> Error
 #'
 #' @name predicates-collections
 NULL

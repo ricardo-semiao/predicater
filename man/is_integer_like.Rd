@@ -72,34 +72,34 @@ x <- c(1.0, NA, 1.0 + 1e-6, 1.0 + .Machine$double.eps, NaN, -Inf, 1e200)
 
 # Default test:
 are_integer_like(x)
-# [1]  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE
+#> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
 
 # is_integer_like only returns TRUE if are_integer_like() is all TRUE:
 is_integer_like(x) #> FALSE
 
 # Objects that dont pass is_integer_like() will generate NAs or loss of
 # precision when coerced:
-suppressWarnings(as.integer(x)) #> [1]  1 NA NA NA NA 1 1
+suppressWarnings(as.integer(round(x))) #> c(1L, NA, 1L, 1L, NA, NA, NA)
 
 # Changing NA interpretation:
 are_integer_like(x, na = NA)
-# [1]  TRUE    NA FALSE FALSE FALSE FALSE FALSE
+#> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
 
 # Adding tolerance:
 are_integer_like(x, tol = sqrt(.Machine$double.eps))
-# [1]  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE
+#> c(TRUE, NA, TRUE, TRUE, FALSE, FALSE, FALSE)
 
 # Decreasing tolerance:
 are_integer_like(x, tol = 1e-5)
-# [1]  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
+#> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
 
 # unbounded mode allows Inf, NaN, and out-of-integer-range values:
 are_integer_like(x, mode = "unbounded")
-# [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+#> c(TRUE, NA, FALSE, FALSE, TRUE, TRUE, TRUE)
 
 # Adding tolerance, all pass, and finally is_integer_like() retursn TRUE:
 are_integer_like(x, mode = "unbounded", tol = 1e-5)
-# [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+#> c(TRUE, NA, TRUE, TRUE, TRUE, TRUE, TRUE)
 
 is_integer_like(x, mode = "unbounded", tol = 1e-5) #> TRUE
 
@@ -115,6 +115,6 @@ is_integer_like(1:2, n = 1) #> FALSE
 
 
 # Integer vectors always return TRUE for NA values:
-are_integer_like(c(1L, NA_integer_), na = NA)
+are_integer_like(c(1L, NA_integer_), na = NA) #> c(TRUE, TRUE)
 
 }

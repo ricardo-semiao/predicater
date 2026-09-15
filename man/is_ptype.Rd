@@ -8,13 +8,13 @@
 is_ptype(
   .x,
   .ptype,
-  .length = "==_0n",
+  .length = "0|==",
   .attrs = "no",
-  class = "==_0n",
-  dim = "==_0n",
-  names = "==_0n",
-  row.names = "==_0n",
-  dimnames = "id_0n",
+  class = "0|==",
+  dim = "0|==",
+  names = "0|==",
+  row.names = "0|==",
+  dimnames = "0|id",
   ...
 )
 
@@ -62,36 +62,39 @@ like \code{list(a = integer(), b = list(c = character(), d = double()))}.
 Predefined check functions:
 \itemize{
 \item \code{"no"}: don't check, always return \code{TRUE}.
-\item \code{"id"}: check if \code{identical()}.
-\item \code{"=="}: check if \code{all(equal())}.
-\item \code{"id_0n"} and \code{"==_0n"}: same as above, but return \code{TRUE} if \code{vp} is \code{NULL}
-or \code{0}.
+\item \code{"id"}: check if \code{identical(vp, vx)}.
+\item \code{"=="}: check if \code{all(vp == vx)}.
+\item \code{"0|id"} and \code{"0|=="} ('zero or equal'): same as above, but return \code{TRUE}
+if \code{vp} has zero
+lenght or is \code{0}.
 \item \code{"id_ord"} and \code{"==_ord"}: same as above, but ignore the order of values.
 \item \code{"id_sub"} and \code{"==_sub"}: same as above, but allow \code{vx} to be a subset of
 \code{vp}.
 }
+
+Attributes of attributes of \code{.x} or \code{.ptype} are ignored.
 }
 \examples{
 # By default, length is checked when the prototype's is not 0:
-is_ptype(1:10, integer()) #> TRUE
+is_ptype(1:10, integer())  #> TRUE
 is_ptype(1:10, integer(9)) #> FALSE
 
-# You can change the default check for common attributes:
-is_ptype(matrix(1:9, 3, 3), integer()) #> FALSE
-is_ptype(matrix(1:9, 3, 3), integer(), dim = "no") #> TRUE
+# Same is true for class, dim, names, row.names, and dimnames attributes:
+is_ptype(matrix(1:9, 3, 3), integer()) #> TRUE
+is_ptype(matrix(1:9, 3, 3), integer(), dim = "==") #> FALSE
 
-# Less common attributes' checks need to be specified in `...`:
+# For less common attributes, checks need to be specified in `...`:
+is_ptype(
+  factor(c("a", "b")), factor(levels = c("a", "b", "c"))
+) #> TRUE
 is_ptype(
   factor(c("a", "b")), factor(levels = c("a", "b", "c")),
   levels = "=="
-)
-#> FALSE
+) #> FALSE
 
 # Complex objects can be checked with `is_ptype_list()`:
-is_ptype_list(
-  list(a = 1L, b = mtcars, c = rnorm(sample(1:10))),
-  list(a = integer(1), b = data.frame(), c = double())
-)
+schema <- list(a = integer(1), b = data.frame(), c = double())
+is_ptype_list(list(a = 1L, b = mtcars, c = rnorm(sample(1:10))), schema)
 #> TRUE
 
 }

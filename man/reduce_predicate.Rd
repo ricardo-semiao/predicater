@@ -35,3 +35,11 @@ checking if the result is \code{TRUE} for any or all ordered pairs within \code{
 \code{accumulate_predicate()} is similar, but returns a logical vector of the
 accumulated results of the tests.
 }
+\examples{
+reduce_predicate(list(1L, 1.0, 3), `==`, .op = "or") #> TRUE
+reduce_predicate(list(1L, 1.0, 3), `==`, .op = "and") #> FALSE
+
+accumulate_predicate(list(1L, 1.0, 3), `==`, .op = "and") #> c(TRUE, FALSE)
+accumulate_predicate(list(1L, 1.0, 3), identical, .op = "and") #> c(FALSE, FALSE)
+
+}

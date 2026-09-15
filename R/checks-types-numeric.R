@@ -15,7 +15,6 @@
 #' @param x \[`numeric()`, `any`] For `are_*()`, a numeric vector to tes; for
 #'   `is_*()`, any object to test.
 #' @param na \[`TRUE` | `FALSE` | `NA`] What to return for `NA` values.
-#' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #' @param signs \[`character(1)`] For `are_inf()` and `is_inf()` -- which signs
 #'   of infinity to allow: `"+"` for positive infinity, `"-"` for negative
 #'   infinity, or `"+-"` for both.
@@ -34,34 +33,38 @@
 #'
 #' # The default tests:
 #' are_finite(x)
-#' #> [1] TRUE  FALSE  FALSE  FALSE  NA
+#' #> c(TRUE, FALSE, FALSE, FALSE, NA)
 #'
 #' are_inf(x)
-#' #> [1] FALSE  TRUE  TRUE  FALSE  NA
+#' #> c(FALSE, TRUE, TRUE, FALSE, NA)
 #'
-#' are_nan(x, na = NA)
-#' #> [1] FALSE  FALSE  FALSE  TRUE  NA
+#' are_nan(x)
+#' #> c(FALSE, FALSE, FALSE, TRUE, NA)
+#'
 #'
 #' # For all, the NA value's result can be controlled:
 #' are_finite(x, na = FALSE)
-#' #> [1]  TRUE FALSE FALSE FALSE FALSE
+#' #> c(TRUE, FALSE, FALSE, FALSE, FALSE)
 #'
 #' are_nan(x, na = TRUE)
-#' #> [1] FALSE FALSE FALSE  TRUE  TRUE
+#' #> c(FALSE, FALSE, FALSE, TRUE, TRUE)
 #'
 #'
 #' # We can consider only +Inf or -Inf:
 #' are_inf(x, signs = "+")
-#' #> [1] FALSE  TRUE FALSE FALSE  NA
+#' #> c(FALSE, TRUE, FALSE, FALSE, NA)
 #'
 #'
-#' # The is_* predicates return TRUE only if all elements pass the test:
-#' is_finite(1:10) #> TRUE
-#' is_inf(c(-Inf, Inf, Inf, -Inf)) #> TRUE
+#' # Errors for non-numeric objects:
+#' try(are_finite(list(1, 2))) #> Error
 #'
-#' # To test for a single value, use the n argument:
-#' is_nan(NaN, n = 1) #> FALSE
-#' is_nan(c(NaN, NaN), n = 1) #> FALSE
+#'
+#' # The is_* predicates test scalars:
+#' is_finite(1) #> TRUE
+#' is_finite(1:10) #> FALSE
+#'
+#' # To get a single TRUE/FALSE result, use all(are_*(...)):
+#' all(are_finite(1:10)) #> TRUE
 #'
 #' @name predicates-infinite
 
@@ -224,34 +227,34 @@ is_inf <- function(x, na = NA, signs = "+-") {
 #'
 #' # Default test:
 #' are_integer_like(x)
-#' # [1]  TRUE  TRUE FALSE FALSE FALSE FALSE FALSE
+#' #> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
 #'
 #' # is_integer_like only returns TRUE if are_integer_like() is all TRUE:
 #' is_integer_like(x) #> FALSE
 #'
 #' # Objects that dont pass is_integer_like() will generate NAs or loss of
 #' # precision when coerced:
-#' suppressWarnings(as.integer(x)) #> [1]  1 NA NA NA NA 1 1
+#' suppressWarnings(as.integer(round(x))) #> c(1L, NA, 1L, 1L, NA, NA, NA)
 #'
 #' # Changing NA interpretation:
 #' are_integer_like(x, na = NA)
-#' # [1]  TRUE    NA FALSE FALSE FALSE FALSE FALSE
+#' #> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
 #'
 #' # Adding tolerance:
 #' are_integer_like(x, tol = sqrt(.Machine$double.eps))
-#' # [1]  TRUE  TRUE FALSE  TRUE FALSE FALSE FALSE
+#' #> c(TRUE, NA, TRUE, TRUE, FALSE, FALSE, FALSE)
 #'
 #' # Decreasing tolerance:
 #' are_integer_like(x, tol = 1e-5)
-#' # [1]  TRUE  TRUE  TRUE  TRUE FALSE FALSE FALSE
+#' #> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
 #'
 #' # unbounded mode allows Inf, NaN, and out-of-integer-range values:
 #' are_integer_like(x, mode = "unbounded")
-#' # [1]  TRUE  TRUE FALSE FALSE  TRUE  TRUE  TRUE
+#' #> c(TRUE, NA, FALSE, FALSE, TRUE, TRUE, TRUE)
 #'
 #' # Adding tolerance, all pass, and finally is_integer_like() retursn TRUE:
 #' are_integer_like(x, mode = "unbounded", tol = 1e-5)
-#' # [1] TRUE TRUE TRUE TRUE TRUE TRUE TRUE
+#' #> c(TRUE, NA, TRUE, TRUE, TRUE, TRUE, TRUE)
 #'
 #' is_integer_like(x, mode = "unbounded", tol = 1e-5) #> TRUE
 #'
@@ -267,8 +270,7 @@ is_inf <- function(x, na = NA, signs = "+-") {
 #'
 #'
 #' # Integer vectors always return TRUE for NA values:
-#' are_integer_like(c(1L, NA_integer_), na = NA)
-# [1] TRUE TRUE
+#' are_integer_like(c(1L, NA_integer_), na = NA) #> c(TRUE, TRUE)
 #'
 #' @name is_integer_like
 NULL
@@ -294,17 +296,17 @@ are_integer_like <- function(
 
   if (mode == "unbounded") {
     case_when2(
+      abs(x - round(x)) < tol,
       are_na2(x) ~ na,
       is_nan(x, na = FALSE) ~ TRUE,
-      is_inf(x, na = FALSE) ~ TRUE,
-      TRUE ~ abs(x - round(x)) < tol
+      is_inf(x, na = FALSE) ~ TRUE
     )
   } else {
     case_when2(
+      abs(x) <= .Machine$integer.max & abs(x - round(x)) < tol,
       are_na2(x) ~ na,
       is_nan(x, na = FALSE) ~ FALSE,
-      is_inf(x, na = FALSE) ~ FALSE,
-      TRUE ~ abs(x) <= .Machine$integer.max & abs(x - round(x)) < tol
+      is_inf(x, na = FALSE) ~ FALSE
     )
   }
 }

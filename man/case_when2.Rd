@@ -57,100 +57,16 @@ the \code{.default} is used as a final "else" statment.
 \code{case_when()} is an R equivalent of the SQL "searched" \verb{CASE WHEN} statement.
 }
 \examples{
-x <- 1:70
-case_when(
-  x \%\% 35 == 0 ~ "fizz buzz",
-  x \%\% 5 == 0 ~ "fizz",
-  x \%\% 7 == 0 ~ "buzz",
+x <- 1:10
+case_when2(
+  x \%\% 3 == 0 ~ "buzz",
+  x \%\% 2 == 0 ~ "fizz",
   .default = as.character(x)
 )
+#> c("1", "fizz", "buzz", "fizz", "5", "buzz", "7", "fizz", "buzz", "10")
 
-# Like an if statement, the arguments are evaluated in order, so you must
-# proceed from the most specific to the most general. This won't work:
-case_when(
-  x \%\%  5 == 0 ~ "fizz",
-  x \%\%  7 == 0 ~ "buzz",
-  x \%\% 35 == 0 ~ "fizz buzz",
-  .default = as.character(x)
-)
+# See ?dplyr::case_when for more examples
 
-# If none of the cases match and no `.default` is supplied, NA is used:
-case_when(
-  x \%\% 35 == 0 ~ "fizz buzz",
-  x \%\% 5 == 0 ~ "fizz",
-  x \%\% 7 == 0 ~ "buzz",
-)
-
-# Note that `NA` values on the LHS are treated like `FALSE` and will be
-# assigned the `.default` value. You must handle them explicitly if you
-# want to use a different value. The exact way to handle missing values is
-# dependent on the set of LHS conditions you use.
-x[2:4] <- NA_real_
-case_when(
-  x \%\% 35 == 0 ~ "fizz buzz",
-  x \%\% 5 == 0 ~ "fizz",
-  x \%\% 7 == 0 ~ "buzz",
-  is.na(x) ~ "nope",
-  .default = as.character(x)
-)
-
-# `case_when()` evaluates all RHS expressions, and then constructs its
-# result by extracting the selected (via the LHS expressions) parts.
-# In particular `NaN`s are produced in this case:
-y <- seq(-2, 2, by = .5)
-case_when(
-  y >= 0 ~ sqrt(y),
-  .default = y
-)
-
-# `case_when()` is particularly useful inside `mutate()` when you want to
-# create a new variable that relies on a complex combination of existing
-# variables
-starwars \%>\%
-  select(name:mass, gender, species) \%>\%
-  mutate(
-    type = case_when(
-      height > 200 | mass > 200 ~ "large",
-      species == "Droid" ~ "robot",
-      .default = "other"
-    )
-  )
-
-
-# `case_when()` is not a tidy eval function. If you'd like to reuse
-# the same patterns, extract the `case_when()` call in a normal
-# function:
-case_character_type <- function(height, mass, species) {
-  case_when(
-    height > 200 | mass > 200 ~ "large",
-    species == "Droid" ~ "robot",
-    .default = "other"
-  )
-}
-
-case_character_type(150, 250, "Droid")
-case_character_type(150, 150, "Droid")
-
-# Such functions can be used inside `mutate()` as well:
-starwars \%>\%
-  mutate(type = case_character_type(height, mass, species)) \%>\%
-  pull(type)
-
-# `case_when()` ignores `NULL` inputs. This is useful when you'd
-# like to use a pattern only under certain conditions. Here we'll
-# take advantage of the fact that `if` returns `NULL` when there is
-# no `else` clause:
-case_character_type <- function(height, mass, species, robots = TRUE) {
-  case_when(
-    height > 200 | mass > 200 ~ "large",
-    if (robots) species == "Droid" ~ "robot",
-    .default = "other"
-  )
-}
-
-starwars \%>\%
-  mutate(type = case_character_type(height, mass, species, robots = FALSE)) \%>\%
-  pull(type)
 }
 \seealso{
 \code{\link[dplyr:case_match]{case_match()}}

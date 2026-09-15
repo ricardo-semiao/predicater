@@ -7,14 +7,7 @@
 \alias{match_when}
 \title{Compare - Pattern matching}
 \usage{
-match_hash(
-  x,
-  ...,
-  nomatch = NULL,
-  htab = NULL,
-  type = missing_arg(),
-  size = missing_arg()
-)
+match_hash(x, ..., nomatch = NULL, htab = NULL, type = NULL, size = NULL)
 
 match_id(x, ..., nomatch = NULL, fun = "identical", args_id = list())
 
@@ -34,8 +27,8 @@ order, and in the caller environment.}
 \item{nomatch}{[\code{any}] Value to return if no cases match. Use \code{stop()} or
 similar to err.}
 
-\item{htab, type, size}{[\code{hashtab()} | NULL, \code{character(1)} | \code{missing_arg()},
-\code{integer(1)} | \code{missing_arg()}]
+\item{htab, type, size}{[\code{hashtab()} | NULL, \code{character(1)} | \code{NULL},
+\code{integer(1)} | \code{NULL}]
 For \code{match_hash}: an existing hash table, or the arguments passed to
 \code{\link[utils:hashtab]{utils::hashtab()}} to create a new one.}
 
@@ -69,6 +62,9 @@ The return value is evaluated dynamically and can refer to \code{x}, except for
 table.
 }
 \examples{
+match_hash(1.42, 1.42 ~ base::sum, "oi" ~ -Inf) #> base::sum
+
+# The htab can be reused to speed up repeated calls to match_hash():
 htab <- utils::hashtab(size = 2)
 utils::sethash(htab, 1.42, base::sum)
 utils::sethash(htab, "oi", -Inf)

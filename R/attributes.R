@@ -140,10 +140,23 @@ attr2 <- function(x, which, exact = TRUE) {
 #'   levels = c("aa", "bb", "cc")
 #' )
 #'
-#' attrs_rmv(x) # Removes all attributes
-#' attrs_rmv(x, abbr = "ncd") # Keeps names, dim, and class
-#' attrs_rmv(x, abbr = "c", exact = c("levels", "b")) # Keeps class, levels, b
-#' attrs_rmv(x, match = c("^[a-z]$")) # Keeps a, b, c
+#' # Default removal:
+#' attrs_keep(x) # Removes all attributes
+#' attrs_rmv(x) # Removes no attributes
+#'
+#' # Abbreviation, exatc, and regex filtering:
+#' attrs_keep(x, abbr = "ncd") # Keeps names, dim, and class
+#' attrs_rmv(x, exact = c("levels", "b")) # Removes levels and b
+#' attrs_keep(x, match = "^[a-c]$") # Keeps only a, b, and c
+#'
+#' # Testing for attributes:
+#' has_attrs_any(x, "c", exact = "levels") #> TRUE (has class and levels)
+#' has_attrs_any(x, "c", exact = "levels", disallow = "dim") #> FALSE (has dim)
+#
+#' has_attrs_all(x, exact = c("a", "b", "c")) #> TRUE
+#' has_attrs_all(x, exact = c("a", "b", "c", "d")) #> FALSE (missing d)
+#'
+#' has_attrs_only(x, exact = c("a", "b", "c")) #> FALSE (has other attributes)
 #'
 #' @name attributes-filter
 NULL
@@ -166,8 +179,8 @@ attrs_rmv <- function(
         attr(x, attr_name) <- NULL
       }
     }
-  )
-  # WARN: both might fail for special attributes
+  ) # WARN: both might fail for special attributes
+  x
 }
 
 
@@ -188,20 +201,24 @@ attrs_keep <- function(
         attr(x, attr_name) <- NULL
       }
     }
-  )
-  # WARN: both might fail for special attributes
+  ) # WARN: both might fail for special attributes
+  x
 }
 
 
 #' @rdname attributes-filter
 #' @export
-has_attrs_any <- function(x, abbr = "", exact = character(), disallow = character()) {
+has_attrs_any <- function(
+  x, abbr = "", exact = character(), match = character(), disallow = character()
+) {
   # Main:
-  attrs_filt <- attrs_filter(x, abbr = abbr, exact = exact, keep = TRUE)
-
-  if (any(names(attrs_filt) %in% disallow)) {
+  if (any(names(attributes(x)) %in% disallow)) {
     return(FALSE)
   }
+
+  attrs_filt <- attrs_filter(
+    x, abbr = abbr, exact = exact, match = match, keep = TRUE
+  )
 
   length(attrs_filt) > 0
 }
@@ -209,15 +226,24 @@ has_attrs_any <- function(x, abbr = "", exact = character(), disallow = characte
 
 #' @rdname attributes-filter
 #' @export
-has_attrs_all <- function(x, abbr = "", exact = character(), disallow = character()) {
+has_attrs_all <- function(
+  x, abbr = "", exact = character(), disallow = character()
+) {
   # Main:
-  attrs_filt <- attrs_filter(x, abbr = abbr, exact = exact, keep = TRUE)
-
-  if (any(names(attrs_filt) %in% disallow)) {
+  attrs_x <- names(attributes(x))
+  if (any(attrs_x %in% disallow)) {
     return(FALSE)
   }
 
-  all(names(attrs_filt) %in% names(attributes(x)))
+  attrs_goal <- c(
+    if ("n" %in% abbr) "names",
+    if ("d" %in% abbr) "dim",
+    if ("c" %in% abbr) "class",
+    if ("r" %in% abbr) c("dimnames", "row.names"),
+    exact
+  )
+
+  all(attrs_goal %in% attrs_x)
 }
 
 
@@ -225,9 +251,17 @@ has_attrs_all <- function(x, abbr = "", exact = character(), disallow = characte
 #' @export
 has_attrs_only <- function(x, abbr = "", exact = character()) {
   # Main:
-  attrs_filt <- attrs_filter(x, abbr = abbr, exact = exact, keep = TRUE)
+  attrs_x <- names(attributes(x))
 
-  setequal(names(attrs_filt), names(attributes(x)))
+  attrs_goal <- c(
+    if ("n" %in% abbr) "names",
+    if ("d" %in% abbr) "dim",
+    if ("c" %in% abbr) "class",
+    if ("r" %in% abbr) c("dimnames", "row.names"),
+    exact
+  )
+
+  all(attrs_x %in% attrs_goal) && all(attrs_goal %in% attrs_x)
 }
 
 
@@ -305,12 +339,27 @@ attrs_filter <- function(
 #' `make.names()`.
 #'
 #' @examples
-#' has_names(mtcars) #> TRUE
+#' has_names_valid(mtcars) #> TRUE
 #'
-#' has_names(set_names(1:3, c("a", "", "b")), empty = TRUE) #> TRUE
-#' has_names(set_names(1:3, c("a", "b", NA)), na = TRUE) #> TRUE
-#' has_names(set_names(1:3, c("a", "a", "a"))) #> FALSE
-#' has_names(set_names(1:3, c("_bad", "b", "c")), invalid = FALSE) #> FALSE
+#' # NA, empty, and duplicate names return FALSE by default:
+#' has_names_valid(rlang::set_names(1:3, c("a", "b", NA))) #> FALSE
+#' has_names_valid(rlang::set_names(1:3, c("a", "b", NA)), na = TRUE) #> TRUE
+#'
+#' has_names_valid(rlang::set_names(1:3, c("a", "", "b"))) #> FALSE
+#' has_names_valid(rlang::set_names(1:3, c("a", "a", "a"))) #> FALSE
+#'
+#' # Invalid names and zero-length x's return TRUE by default:
+#' has_names_valid(rlang::set_names(1:3, c("_bad", "b", "c"))) #> TRUE
+#' has_names_valid(integer(0)) #> TRUE
+#'
+#' # Use `how` to control how names are extracted:
+#' has_names_valid(rlang::global_env(), how = "attr") #> FALSE
+#' # (envs have no names attribute)
+#' has_names_valid(c("a", "b", "c"), how = "x") #> TRUE (x itself was tested)
+#'
+#' # Vectorized test:
+#' are_names_valid(c("a", "b", "b", NA, ""), how = "x")
+#' #> c(TRUE, FALSE, FALSE, FALSE, FALSE)
 #'
 #' @export
 has_names_valid <- function(
@@ -322,8 +371,8 @@ has_names_valid <- function(
     return(FALSE)
   }
 
-  if (length(x) == 0) {
-    return(switch(zero_len, f = FALSE, t = TRUE))
+  if (length(x) == 0 && zero_len) {
+    return(TRUE)
   }
 
   nms <- switch(how,
@@ -350,7 +399,8 @@ has_names_valid <- function(
 # S4 accepts attr(x, "names")<- but object doesnt
 # NOTE: we could fix na and empty to "f" to simplify the API
 
-
+#' @rdname has_names_valid
+#' @export
 are_names_valid <- function(
   x, na = FALSE, empty = FALSE, dups = FALSE, invalid = TRUE,
   how = "names"
@@ -375,7 +425,7 @@ are_names_valid <- function(
 
   if (!na) res <- res & !is.na(nms)
   if (!empty) res <- res & nms != ""
-  if (!dups) res <- res & are_duplicated(x)
+  if (!dups) res <- res & !are_duplicated(x)
   if (!invalid) res <- res & make.names(nms) == nms
 
   res
@@ -399,10 +449,10 @@ are_names_valid <- function(
 #'   object has dimensions, dimension names, and rownames, respectively.
 #'
 #' @param x `r ROXY$x()`
-#' @param count_empty \[`TRUE` | `FALSE`] Whether to count empty dimensions and
+#' @param empty \[`TRUE` | `FALSE`] Whether to count empty dimensions and
 #'   dimension names.
-#' @param count_invalid \[`TRUE` | `FALSE`] Whether to dimension names that have
-#'   only non-NA or non-empty values.
+#' @param invalid \[`TRUE` | `FALSE`] Whether to cound dimensions with NA,
+#'   empty, or duplicate names.
 #' @param how \[`character(1)`]
 #'   How to extract the attribute:
 #'   - For dimensions: `"dim"` for [dim()] and `"attr"` for `attr(x, "dim")`.
@@ -418,21 +468,44 @@ are_names_valid <- function(
 #' - \[`TRUE` | `FALSE`] For `has_dim()`, `has_dimnames()`, and
 #'   `has_rownames()`: the sacalar result of the test.
 #'
+#' @examples
+#' x <- structure(
+#'   1:6, dim = c(2, 3, 1),
+#'   dimnames = list(c("a", "a"), c("x", "y", "z"), NULL)
+#' )
+#'
+#' # Counting dimensions and dimension names:
+#' n_dims(x) #> 3
+#' n_dims(x, empty = FALSE) #> 2
+#'
+#' n_dimnames(x) #> 2
+#' n_dimnames(x, invalid = FALSE) #> 1 (rownames have duplicates)
+#'
+#' # Testing for dimensions and dimension names:
+#' has_dimnames(x) #> TRUE
+#' has_rownames(mtcars) #> TRUE
+#' has_dim(mtcars) #> TRUE
+#'
+#' # Data frames often have not actual dimension attribues:
+#' has_dim(mtcars, how = "attr") #> FALSE
+#' has_dimnames(mtcars, how = "attr") #> FALSE
+#' has_rownames(mtcars, how = "row.names") #> TRUE (but have row.names one)
+#'
 #' @name attributes-dimensions
 NULL
 
 
 #' @rdname attributes-dimensions
 #' @export
-n_dims <- function(x, count_empty = TRUE, how = "dim") {
+n_dims <- function(x, empty = TRUE, how = "dim") {
   dim <- switch(how, dim = dim(x), attr = attr(x, "dim", TRUE))
 
   if (is_null(dim)) {
     0L
-  } else if (count_empty) {
+  } else if (empty) {
     length(dim)
   } else {
-    sum(dim > 0)
+    sum(dim > 1)
   }
 }
 
@@ -440,7 +513,7 @@ n_dims <- function(x, count_empty = TRUE, how = "dim") {
 #' @rdname attributes-dimensions
 #' @export
 n_dimnames <- function(
-  x, count_empty = TRUE, count_invalid = TRUE, how = "dimnames"
+  x, invalid = TRUE, how = "dimnames"
 ) {
   dimnames <- switch(how, dimnames = dimnames(x), attr = attr(x, "dimnames", TRUE))
 
@@ -449,11 +522,11 @@ n_dimnames <- function(
   }
 
   n <- length(dimnames)
-  if (! count_empty) {
-    n <- n - sum(vapply(dimnames, length, integer(1)) == 0)
-  }
-  if (! count_invalid) {
-    n <- n - sum(vapply(dimnames, \(x) all(is.na(x) | x == ""), logical(1)))
+  n <- n - sum(vapply(dimnames, length, integer(1)) == 0)
+  if (! invalid) {
+    n <- n - sum(vapply_lgl(dimnames, \(x) {
+      all(is.na(x) | x == "" | are_duplicated(x))
+    }))
   }
 
   n
@@ -526,6 +599,32 @@ has_dim <- function(x, n = NULL, how = "dim") {
 #' - \[`character()`] For `class2()`.
 #' - \[`=value`] For the setters: The `value` passed, invisibly.
 #'
+#' @examples
+#' x <- structure(
+#'   1:6, dim = c(2, 3, 1), names = paste0("i", 1:6),
+#'   dimnames = list(c("a", "a"), c("x", "y", "z"), "_bad"),
+#'   class = c("classA", "", NA, "classB", "classA")
+#' )
+#'
+#' # Getting repaired names and valid classes:
+#' names3(x) #> c("i1", "i2", "i3", "i4", "i5", "i6") (no repair)
+#'
+#' dimnames2(x)
+#' #> list(c("a...1", "a...2"), c("x", "y", "z"), "_bad")
+#' dimnames2(x, repair = "universal")
+#' #> list(c("a...1", "a...2"), c("x", "y", "z"), "._bad")
+#'
+#' rownames2(x) #> c("a...1", "a...2")
+#'
+#' class2(x) #> c("classA", "classB")
+#'
+#' # Setting repaired names and valid classes:
+#' class2(x) <- c("again", "duplicates", "again")
+#' class2(x) #> c("again", "duplicates")
+#'
+#' rownames2(x) <- NULL # Names are created automatically 
+#' rownames(x) #> c("...1", "...2")
+#'
 #' @name attributes-getters-setters
 NULL
 
@@ -579,6 +678,8 @@ names3 <- function(x, repair = "unique", how = "names") {
     names = names(x) <- value,
     attr = attr(x, "names") <- value
   )
+
+  invisible(x)
 }
 
 
@@ -631,6 +732,8 @@ dimnames2 <- function(x, repair = "unique", how = "dimnames") {
     dimnames = dimnames(x) <- value,
     attr = attr(x, "dimnames") <- value
   )
+
+  invisible(x)
 }
 
 
@@ -674,12 +777,19 @@ rownames2 <- function(x, repair = "unique", how = "dimnames") {
 
   # Main:
   dims_nms <- dimnames(x) %||% vector("list", length(dim(x)))
+
+  if (length(value) == 0) {
+    value <- character(dim(x)[1L])
+  }
   dims_nms[[1L]] <- vctrs::vec_as_names(value, repair = repair)
 
   switch(how,
     dimnames = dimnames(x) <- dims_nms,
-    attr = attr(x, "dimnames") <- dims_nms
+    attr = attr(x, "dimnames") <- dims_nms,
+    row.names = attr(x, "row.names") <- dims_nms[[1L]]
   )
+
+  invisible(x)
 }
 
 
@@ -700,7 +810,7 @@ class2 <- function(x, how = "class") {
     return(character(0)) # CHECK: reconsider returning NULL vs character(0)
   }
 
-  cls[cls != "" & ! duplicated(cls)]
+  cls[cls != "" & !duplicated(cls) & !is.na(cls)]
 }
 
 
@@ -714,8 +824,11 @@ class2 <- function(x, how = "class") {
 
 
   # Main:
+  value <- value[value != "" & !duplicated(value) & !is.na(value)]
   switch(how,
     class = class(x) <- value,
     attr = attr(x, "class") <- value
   )
+
+  invisible(x)
 }

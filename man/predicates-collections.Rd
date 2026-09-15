@@ -93,3 +93,16 @@ but in face of \code{integer(0)} and \code{list()}, such thought is not the best
 
 See \code{\link[rlang:is_namespace]{rlang::is_namespace()}} for another environment-related test.
 }
+\examples{
+is_collection(list(1, 2, 3)) #> TRUE
+is_collection(rlang::env(a = 1, b = 2), n = 2) #> TRUE
+
+# NULL is not considered a collection:
+is_collection(NULL) #> FALSE
+is_collection(NULL, null = TRUE) #> TRUE
+
+# This is the difference between rlang::is_empty() and predicater::is_empty2():
+rlang::is_empty(NULL) #> TRUE
+try(is_empty2(NULL)) #> Error
+
+}

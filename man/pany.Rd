@@ -34,3 +34,27 @@ are parallel variants of \code{\link[=min]{min()}} and \code{\link[=max]{max()}}
 \code{pany_na()} and \code{pall_na()} are variants that check for \code{NA} values in
 parallel.
 }
+\examples{
+a <- c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, NA, NA, NA)
+b <- c(TRUE, FALSE, NA, TRUE, FALSE, NA, TRUE, FALSE, NA)
+
+# Default behavior treats missings like `|` does:
+pany(a, b)
+a | b
+
+# Default behavior treats missings like `&` does:
+pall(a, b)
+a & b
+
+# Remove missings from the computation, like `na_rm = TRUE`:
+pany(a, b, .na = FALSE)
+(a & !is.na(a)) | (b & !is.na(b))
+
+pall(a, b, .na = TRUE)
+(a | is.na(a)) & (b | is.na(b))
+
+# Check for missings in parallel:
+pany_na(a, b) #> c(FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE)
+pall_na(a, b) #> c(FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE)
+
+}

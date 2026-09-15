@@ -39,3 +39,13 @@ all \code{NaN} are also considered to be equal.)
 
 }
 
+\examples{
+any_duplicated(1:10)       #> FALSE
+any_duplicated(c(1, 1:10)) #> TRUE
+
+x <- c(10, 10, 20, 30, 30, 40)
+are_duplicated(x) #> c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE)
+duplicated(x) #> c(FALSE, TRUE, FALSE, FALSE, TRUE, FALSE)
+# Note that `duplicated()` ignores the first instance of a duplicated value
+
+}

@@ -18,7 +18,7 @@ identical2(
   ignore_attrs = list()
 )
 
-identical_flag(x, y, ..., fun = "identical2")
+identical_flag(x, y, ..., fun = "identical2", .is_attrs = FALSE)
 }
 \arguments{
 \item{x, y}{[\code{any}] Any R object.}
@@ -51,6 +51,8 @@ attributes from \code{x} and \code{y}}
 
 \item{fun}{[\code{"identical"} | \code{"identical2"}] For \code{identical_flag()}: function
 to use for comparison.}
+
+\item{.is_attrs}{[\code{TRUE} | \code{FALSE}] For internal use only.}
 }
 \value{
 \itemize{
@@ -81,31 +83,38 @@ y <- structure(c(3, 2, 1), b = "b", a = "a", c = "d")
 identical2(x, y) #> FALSE
 
 # Pre-sort data and ignore "c" attribute:
-identical2(x, y, ord_data = FALSE, ignore_attrs = "c") #> TRUE
+identical2(
+  x, y, ord_data = FALSE,
+  ignore_attrs = list(exact = c("c"))
+) #> TRUE
 
 # Consider attribute order:
-identical2(x, y, ord_data = FALSE, ignore_attrs = "c", ord_attrs = TRUE) #> FALSE
+identical2(
+  x, y, ord_data = FALSE,
+  ignore_attrs = list(exact = c("c")), ord_attrs = TRUE
+) #> FALSE
 
 # No sorting but accept up to 2.1 numerical absolute tolerance:
-identical2(x, y, tol_type = "abs", tol = 2.1, ignore_attrs = "c") #> TRUE
+identical2(
+  x, y, tol_type = "abs", tol = 2.1,
+  ignore_attrs = list(exact = c("c"))
+) #> TRUE
 
 # Understading where the differences are:
-identical_flag(x, y)
 #> $.data
-#> [1] FALSE  TRUE FALSE  # First (3 & 1) and third (1 & 3) elements are different
+#> c(FALSE, TRUE, FALSE) # First (3 & 1) and third (1 & 3) elements are different
 #>
 #> $.attrs
-#> $.attrs$.data
-#> $.attrs$.data$a
-#> $.attrs$.data$a$.data
-#> [1] TRUE
+#> $.attrs$a
+#> $.attrs$a$.data
+#> TRUE
 #>
-#> $.attrs$.data$b
-#> $.attrs$.data$b$.data
-#> [1] TRUE
+#> $.attrs$b
+#> $.attrs$b$.data
+#> TRUE
 #>
-#> $.attrs$.data$c
-#> $.attrs$.data$c$.data
-#> [1] FALSE  # Attribute "c" ("c" & "d") is different
+#> $.attrs$c
+#> $.attrs$c$.data
+#> FALSE # Attribute "c" ("c" & "d") is different
 
 }

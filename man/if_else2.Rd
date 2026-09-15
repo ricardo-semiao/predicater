@@ -25,10 +25,11 @@ is a type- and size-stable version of \code{\link[=ifelse]{ifelse()}}.
 }
 \examples{
 x <- c(NA, 1:4)
-if_else(x > 2, 1, 2)
-if_else(x > 2, "small", "big")
-if_else(x > 2, factor("small"), factor("big"))
+if_else2(x > 2, 1, 2) #> c(NA, 2, 1, 1, 1)
+if_else2(x > 2, "small", "big") #> c(NA, "big", "big", "small", "small")
+if_else2(x > 2, factor("small"), factor("big")) # As above but as a factor
 
 y <- as.Date("2020-01-01")
-if_else(x > 2, NA, y + x)
+if_else2(x > 2, NA, y + x) #> c(NA, "2020-01-02", "2020-01-03", NA, NA)
+
 }

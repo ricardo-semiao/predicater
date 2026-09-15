@@ -38,43 +38,46 @@
 #' @details
 #' Predefined check functions:
 #' - `"no"`: don't check, always return `TRUE`.
-#' - `"id"`: check if `identical()`.
-#' - `"=="`: check if `all(equal())`.
-#' - `"id_0n"` and `"==_0n"`: same as above, but return `TRUE` if `vp` is `NULL`
-#'  or `0`.
+#' - `"id"`: check if `identical(vp, vx)`.
+#' - `"=="`: check if `all(vp == vx)`.
+#' - `"0|id"` and `"0|=="` ('zero or equal'): same as above, but return `TRUE`
+#'   if `vp` has zero
+#'   lenght or is `0`.
 #' - `"id_ord"` and `"==_ord"`: same as above, but ignore the order of values.
 #' - `"id_sub"` and `"==_sub"`: same as above, but allow `vx` to be a subset of
 #'  `vp`.
 #'
+#' Attributes of attributes of `.x` or `.ptype` are ignored.
+#'
 #' @examples
 #' # By default, length is checked when the prototype's is not 0:
-#' is_ptype(1:10, integer()) #> TRUE
+#' is_ptype(1:10, integer())  #> TRUE
 #' is_ptype(1:10, integer(9)) #> FALSE
 #'
-#' # You can change the default check for common attributes:
-#' is_ptype(matrix(1:9, 3, 3), integer()) #> FALSE
-#' is_ptype(matrix(1:9, 3, 3), integer(), dim = "no") #> TRUE
+#' # Same is true for class, dim, names, row.names, and dimnames attributes:
+#' is_ptype(matrix(1:9, 3, 3), integer()) #> TRUE
+#' is_ptype(matrix(1:9, 3, 3), integer(), dim = "==") #> FALSE
 #'
-#' # Less common attributes' checks need to be specified in `...`:
+#' # For less common attributes, checks need to be specified in `...`:
+#' is_ptype(
+#'   factor(c("a", "b")), factor(levels = c("a", "b", "c"))
+#' ) #> TRUE
 #' is_ptype(
 #'   factor(c("a", "b")), factor(levels = c("a", "b", "c")),
 #'   levels = "=="
-#' )
-#' #> FALSE
+#' ) #> FALSE
 #'
 #' # Complex objects can be checked with `is_ptype_list()`:
-#' is_ptype_list(
-#'   list(a = 1L, b = mtcars, c = rnorm(sample(1:10))),
-#'   list(a = integer(1), b = data.frame(), c = double())
-#' )
+#' schema <- list(a = integer(1), b = data.frame(), c = double())
+#' is_ptype_list(list(a = 1L, b = mtcars, c = rnorm(sample(1:10))), schema)
 #' #> TRUE
 #'
 #' @export
 is_ptype <- function(
   .x, .ptype,
-  .length = "==_0n", .attrs = "no",
-  class = "==_0n", dim = "==_0n",
-  names = "==_0n", row.names = "==_0n", dimnames = "id_0n",
+  .length = "0|==", .attrs = "no",
+  class = "0|==", dim = "0|==",
+  names = "0|==", row.names = "0|==", dimnames = "0|id",
   ...
 ) {
   # Checks:
@@ -87,39 +90,36 @@ is_ptype <- function(
 
 
   # Main:
-  checks_extra <- c(.length = .length, .attrs = .attrs)
-
-  checks_available <- names(attributes(.ptype))
-  checks_in_x <- names(attributes(.x))
-  checks <- c(...)
-
-  checks_unused <- which(! names(checks) %in% checks_available)
-  if (length(checks_unused) > 0) {
-    cli_inform("{.arg ...} contains attributes not present in {.arg .ptype}, \\
-    and will be ignored: ({.val {names(checks_unused)}}).")
+  if (typeof(.x) != typeof(.ptype)) {
+    return(FALSE)
   }
 
-  if (any(c(".x", ".ptype", ".typeof", ".length", ".attrs") %in% names(checks))) {
-    cli_inform("{.arg ...} must not contain {.val .x}, {.val .ptype}, \\
+  checks_dots <- c(...)
+  if (any(c(".x", ".ptype", ".length", ".attrs") %in% names(checks_dots))) {
+    cli_warn("Arguments in {.arg ...} must not be named {.val .x}, {.val .ptype}, \\
     {.val .typeof}, {.val .length}, or {.val .attrs}, which will be ignored.")
   }
 
+  checks_all <- c(
+    ".length", ".attrs",
+    "class", "dim", "names", "row.names", "dimnames", names(checks_dots)
+  )
+  checks_all_ops <- c(
+    .length = .length, .attrs = .attrs,
+    class = class, dim = dim, names = names, row.names = row.names,
+    dimnames = dimnames, checks_dots
+  )
+
   x_attrs <- get_attrs(.x)
   p_attrs <- get_attrs(.ptype)
-
-  checks_available <- c(names(checks_extra), checks_available)
-  checks <- c(checks_extra, checks)
-  for (c in c("class", "dim", "names", "row.names", "dimnames")) {
-    if (! c %in% names(checks)) checks[[c]] <- get(c)
-  }
-  checks_in_x <- c(checks_in_x, ".typeof", ".length", ".attrs")
+  attrs_in_x_or_irrelevant <- c(names(x_attrs), setdiff(checks_all, names(p_attrs)))
 
   is <- TRUE
-  for (attr in intersect(checks_available, names(checks))) {
-    check_op <- CHECK_OPS[[checks[[attr]]]]
+  for (attr in checks_all) {
+    check_op <- CHECK_OPS[[checks_all_ops[[attr]]]]
 
     is <- is &&
-      (attr %in% checks_in_x) &&
+      (attr %in% attrs_in_x_or_irrelevant) &&
       check_op(x_attrs[[attr]], p_attrs[[attr]])
 
     if (!is) break
@@ -127,7 +127,6 @@ is_ptype <- function(
 
   is
 }
-# TODO: "==|0" and "==|null"
 # TODO: consider all headers of the c data (altrep, ...)
 # TODO: check if we need to require that specific signarure for op function in
 # the type hing
@@ -198,8 +197,9 @@ is_ptype_list <- function(.x, .ptype, .named = TRUE, .depth = 1, ...) {
 #' @noRd
 get_attrs <- function(x) {
   c(
-    .typeof = typeof(x), .length = length(x),
-    .attrs = names(attributes(x)), attributes(x)[]
+    .length = list(length(x)),
+    .attrs = list(names(attributes(x)) %||% character()),
+    attributes(x)[]
   )
 }
 
@@ -223,8 +223,8 @@ CHECK_OPS <- list(
   "no" = \(vx, vp) TRUE,
   "id" = \(vx, vp) identical(vx, vp),
   "==" = \(vx, vp) isTRUE(all.equal(vx, vp)),
-  "==_0n" = \(vx, vp) (is_null(vp) || length(vp) == 0 || vp == 0) || isTRUE(all.equal(vx, vp)),
-  "id_0n" = \(vx, vp) (is_null(vp) || length(vp) == 0 || vp == 0) || identical(vx, vp),
+  "0|==" = \(vx, vp) (length(vp) == 0 || vp == 0) || isTRUE(all.equal(vx, vp)),
+  "0|id" = \(vx, vp) (length(vp) == 0 || vp == 0) || identical(vx, vp),
   "id_ord" = \(vx, vp) identical(sort(vx), sort(vp)),
   "==_ord" = \(vx, vp) isTRUE(all.equal(sort(vx), sort(vp))),
   "id_sub" = \(vx, vp) {

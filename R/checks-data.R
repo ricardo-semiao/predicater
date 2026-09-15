@@ -16,6 +16,17 @@
 #' @returns `r ROXY$test_res(na = TRUE)`. If `na.rm = TRUE`, the result is
 #'   always `TRUE` or `FALSE`.
 #'
+#' @examples
+#' # Control the order of the check with `order` argument
+#' is_sorted(1:5) #> TRUE
+#' is_sorted(1:5, order = "desc") #> FALSE
+#'
+#' # Control the handling of NA values with `na.rm` argument:
+#' is_sorted(c(1, 2, NA, 4), na.rm = TRUE) #> TRUE
+#'
+#' # Control the strictness of the order with `strictly` argument:
+#' is_sorted(c(1, 2, 2, 4), strictly = TRUE) #> FALSE
+#'
 #' @export
 is_sorted <- function(x, order = "asc", na.rm = FALSE, strictly = FALSE) {
   # Checks:
@@ -42,6 +53,25 @@ is_sorted <- function(x, order = "asc", na.rm = FALSE, strictly = FALSE) {
 #'   and all values in `yes` must be in `x`.
 #'
 #' @returns `r ROXY$test_res()`
+#'
+#' @examples
+#' x <- c(5, 7, 5, 9, 9)
+#'
+#' # Default mode checks if all values in `x` are in `yes` and not in `no`:
+#' is_matching_set(x, yes = 1:10) #> TRUE
+#' is_matching_set(x, yes = 1:8) #> FALSE
+#' is_matching_set(x, yes = 1:10, no = 5) #> FALSE
+#'
+#' # Mode `any` passes even if there are values in `x` that are not in `yes`:
+#' is_matching_set(x, yes = 1:6, mode = "any") #> TRUE
+#'
+#' # For mode `only`, all values in `x` must be in `yes` and vice versa:
+#' is_matching_set(x, yes = 1:10, mode = "only") #> FALSE
+#' is_matching_set(x, yes = c(5, 7, 9), mode = "only") #> TRUE
+#'
+#' # `yes` can be NULL to test only `no` (independent of mode):
+#' is_matching_set(x, no = 11) #> TRUE
+#' is_matching_set(x) #> TRUE
 #'
 #' @export
 is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
@@ -83,6 +113,15 @@ is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
 #'   size as `x`, describing if each element is duplicated elsewhere.
 #'
 #' @inheritSection vctrs::vec_duplicate_any Missing values
+#'
+#' @examples
+#' any_duplicated(1:10)       #> FALSE
+#' any_duplicated(c(1, 1:10)) #> TRUE
+#'
+#' x <- c(10, 10, 20, 30, 30, 40)
+#' are_duplicated(x) #> c(TRUE, TRUE, FALSE, TRUE, TRUE, FALSE)
+#' duplicated(x) #> c(FALSE, TRUE, FALSE, FALSE, TRUE, FALSE)
+#' # Note that `duplicated()` ignores the first instance of a duplicated value
 #'
 #' @export
 any_duplicated <- vctrs::vec_duplicate_any

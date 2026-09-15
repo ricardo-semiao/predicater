@@ -27,3 +27,15 @@ always \code{TRUE} or \code{FALSE}.
 This function is a wrapper around \code{\link[=is.unsorted]{is.unsorted()}} to check if a vector is
 sorted in ascending or descending order.
 }
+\examples{
+# Control the order of the check with `order` argument
+is_sorted(1:5) #> TRUE
+is_sorted(1:5, order = "desc") #> FALSE
+
+# Control the handling of NA values with `na.rm` argument:
+is_sorted(c(1, 2, NA, 4), na.rm = TRUE) #> TRUE
+
+# Control the strictness of the order with `strictly` argument:
+is_sorted(c(1, 2, 2, 4), strictly = TRUE) #> FALSE
+
+}

@@ -96,11 +96,11 @@ TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
     is_nan(x, na = FALSE)
 
   } else if ("inf" %in% arg) {
-    is_inf(x, 1, na = FALSE)
+    is_inf(x, na = FALSE)
   } else if ("+inf" %in% arg) {
-    is_inf(x, 1, na = FALSE, signs = "+")
+    is_inf(x, na = FALSE, signs = "+")
   } else if ("-inf" %in% arg) {
-    is_inf(x, 1, na = FALSE, signs = "-")
+    is_inf(x, na = FALSE, signs = "-")
 
   } else if (any(c("true", "t") %in% arg)) {
     is_true(x)

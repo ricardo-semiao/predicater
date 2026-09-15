@@ -76,6 +76,30 @@ is_numeric <- function(x, n = NULL) {
 #' - \[`TRUE` | `FALSE` | `NA`] For `is_*`: the scalar result of the test. If
 #'   `na != NA`, the result is always `TRUE` or `FALSE`.
 #'
+#' @examples
+#' x <- c(TRUE, FALSE, NA)
+#'
+#' # Vectorized tests:
+#' are_true(x)           #> c(TRUE, FALSE, FALSE)
+#' are_true(x, na = NA)  #> c(TRUE, FALSE, NA)
+#' are_false(x)          #> c(FALSE, TRUE, FALSE)
+#' are_false(x, na = NA) #> c(FALSE, TRUE, NA)
+#'
+#' are_true(logical(0))  #> logical(0)
+#' try(are_true(1:3)) #> Error (only works for logical vectors)
+#'
+#' # Scalar tests:
+#' is_true2(c(TRUE, TRUE)) #> FALSE
+#' is_true2(TRUE) #> FALSE
+#' is_true2(NA) #> FALSE
+#' is_true2(NA, na = NA) #> NA
+#' # And similar for is_false2()
+#'
+#' is_bool2(TRUE) #> TRUE
+#' is_bool2(FALSE) #> TRUE
+#' is_bool2(NA) #> FALSE
+#' is_bool2(NA, na = NA) #> NA
+#'
 #' @name predicates-true-false
 NULL
 
@@ -177,7 +201,6 @@ is_bool2 <- function(x, na = FALSE) {
 #' @param nan \[`TRUE` | `FALSE`] What to return for `NaN` values.
 #' @param types \[`character()` | `NULL`] A character vector of allowed `NA`
 #'   types (see [`NA`]). Set to `NULL` to allow all types.
-#' @param n \[`integer(1)` | `NULL`] Length of `x`, set to `NULL` to not test.
 #'
 #' @returns
 #' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
@@ -186,17 +209,29 @@ is_bool2 <- function(x, na = FALSE) {
 #' @examples
 #' x <- c(1, Inf, -Inf, NaN, NA)
 #'
+#' # are_na() is vectorized:
 #' are_na2(x)
-#' #> [1] FALSE FALSE FALSE FALSE  TRUE
+#' #> c(FALSE, FALSE, FALSE, FALSE, TRUE)
 #'
 #' are_na2(x, nan = TRUE)
-#' #> [1] FALSE FALSE FALSE  TRUE  TRUE
+#' #> c(FALSE, FALSE, FALSE, TRUE, TRUE)
 #'
 #' are_na2(x, nan = NA)
-#' #> [1] FALSE FALSE FALSE    NA  TRUE
+#' #> c(FALSE, FALSE, FALSE, NA, TRUE)
 #'
-#' is_na2(x) #> FALSE # In all nan modes
-#' is_na2(c(NA, NA)) #> TRUE
+#' # Errors for non-atomic objects:
+#' try(are_na2(list(NA, NA))) #> Error
+#'
+#' # is_na() test for a scalar NA value:
+#' is_na2(c(NA, NA)) #> FALSE
+#' is_na2(NA) #> TRUE
+#' is_na2(NaN, nan = TRUE) #> TRUE
+#'
+#' # Use all(are_na2(x)) to test if all elements are NA:
+#' all(are_na2(c(NA, NA))) #> TRUE
+#'
+#' # Accept only NAs of specific types:
+#' is_na2(NA_integer_, types = c("logical", "character")) #> FALSE 
 #'
 #' # To test for a single NA value, use the n argument:
 #' is_na2(NA, n = 1) #> TRUE

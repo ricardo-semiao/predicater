@@ -36,3 +36,28 @@ an object to test.}
 Check if an object is literally \code{TRUE} or \code{FALSE}, controlling for \code{NA}
 values. \code{\link[rlang:scalar-type-predicates]{rlang::is_bool()}} checks for either \code{TRUE} or \code{FALSE}.
 }
+\examples{
+x <- c(TRUE, FALSE, NA)
+
+# Vectorized tests:
+are_true(x)           #> c(TRUE, FALSE, FALSE)
+are_true(x, na = NA)  #> c(TRUE, FALSE, NA)
+are_false(x)          #> c(FALSE, TRUE, FALSE)
+are_false(x, na = NA) #> c(FALSE, TRUE, NA)
+
+are_true(logical(0))  #> logical(0)
+try(are_true(1:3)) #> Error (only works for logical vectors)
+
+# Scalar tests:
+is_true2(c(TRUE, TRUE)) #> FALSE
+is_true2(TRUE) #> FALSE
+is_true2(NA) #> FALSE
+is_true2(NA, na = NA) #> NA
+# And similar for is_false2()
+
+is_bool2(TRUE) #> TRUE
+is_bool2(FALSE) #> TRUE
+is_bool2(NA) #> FALSE
+is_bool2(NA, na = NA) #> NA
+
+}

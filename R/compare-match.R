@@ -4,8 +4,20 @@
 # From https://github.com/Yunuuuu/standalone/blob/main/R/standalone-tibble.R
 # at 11/09/2026
 
-#' @title Compare - Vectorized if-else
+#' Compare - Vectorized if-else
+#'
 #' @inherit funs::if_else
+#'
+#' @examples
+#' x <- c(NA, 1:4)
+#' if_else2(x > 2, 1, 2) #> c(NA, 2, 1, 1, 1)
+#' if_else2(x > 2, "small", "big") #> c(NA, "big", "big", "small", "small")
+#' if_else2(x > 2, factor("small"), factor("big")) # As above but as a factor
+#'
+#' y <- as.Date("2020-01-01")
+#' if_else2(x > 2, NA, y + x) #> c(NA, "2020-01-02", "2020-01-03", NA, NA)
+#'
+#' @export
 if_else2 <- function(condition, true, false, na = NULL) {
   # output size from `condition`
   size <- vctrs::vec_size(condition)
@@ -34,8 +46,22 @@ if_else2 <- function(condition, true, false, na = NULL) {
   out
 }
 
-#' @title Compare - Vectorized nested if-else
+#' Compare - Vectorized nested if-else
+#'
 #' @inherit dplyr::case_when
+#'
+#' @examples
+#' x <- 1:10
+#' case_when2(
+#'   x %% 3 == 0 ~ "buzz",
+#'   x %% 2 == 0 ~ "fizz",
+#'   .default = as.character(x)
+#' )
+#' #> c("1", "fizz", "buzz", "fizz", "5", "buzz", "7", "fizz", "buzz", "10")
+#'
+#' # See ?dplyr::case_when for more examples
+#'
+#' @export
 case_when2 <- function(.default, ..., .ptype = NULL) {
   if (is.null(.ptype)) {
     .ptype <- vctrs::vec_ptype(.default)
@@ -97,8 +123,8 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 #'   order, and in the caller environment.
 #' @param nomatch \[`any`] Value to return if no cases match. Use `stop()` or
 #'   similar to err.
-#' @param htab,type,size \[`hashtab()` | NULL, `character(1)` | `missing_arg()`,
-#'   `integer(1)` | `missing_arg()`]
+#' @param htab,type,size \[`hashtab()` | NULL, `character(1)` | `NULL`,
+#'   `integer(1)` | `NULL`]
 #'   For `match_hash`: an existing hash table, or the arguments passed to
 #'   [utils::hashtab()] to create a new one.
 #' @param fun,args_id \[`character(1)`, `list()`] For `match_id`: which
@@ -111,6 +137,9 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 #'   cases match.
 #'
 #' @examples
+#' match_hash(1.42, 1.42 ~ base::sum, "oi" ~ -Inf) #> base::sum
+#'
+#' # The htab can be reused to speed up repeated calls to match_hash():
 #' htab <- utils::hashtab(size = 2)
 #' utils::sethash(htab, 1.42, base::sum)
 #' utils::sethash(htab, "oi", -Inf)
@@ -125,7 +154,7 @@ case_when2 <- function(.default, ..., .ptype = NULL) {
 #' @export
 match_hash <- function(
   x, ..., nomatch = NULL,
-  htab = NULL, type = missing_arg(), size = missing_arg()
+  htab = NULL, type = NULL, size = NULL
 ) {
   # Setup:
   cases <- list2(...)

@@ -23,3 +23,19 @@ including \code{NULL} by default.
 Note that objects of type 'S4' and 'object' are not considered collections,
 even if they are 'filled' with slots/attributes.
 }
+\examples{
+is_empty2(list()) #> TRUE
+is_empty2(list(1)) #> FALSE
+is_empty2(list(NULL)) #> FALSE
+
+is_empty2(character(0)) #> TRUE
+is_empty2(letters) #> FALSE
+
+# Only works for collections (see ?is_collection()):
+try(is_empty2(sum))
+#> Error in is_empty2(sum) : `x` is not a collection.
+
+# But can be made to work with NULL:
+is_empty2(NULL, null = TRUE) #> TRUE
+
+}

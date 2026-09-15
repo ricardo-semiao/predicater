@@ -72,3 +72,8 @@ The existing types and their corresponding C SEXP types are:
 \item Internal-only: \emph{"char"/CHARSXP}, \emph{"any"/ANYSXP}.
 }
 }
+\examples{
+is_type(1:10, "integer") #> TRUE
+is_type(NULL, "NULL") #> TRUE
+
+}

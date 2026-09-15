@@ -17,6 +17,21 @@
 #'
 #' @returns `r ROXY$test_res()`
 #'
+#' @examples
+#' is_empty2(list()) #> TRUE
+#' is_empty2(list(1)) #> FALSE
+#' is_empty2(list(NULL)) #> FALSE
+#'
+#' is_empty2(character(0)) #> TRUE
+#' is_empty2(letters) #> FALSE
+#'
+#' # Only works for collections (see ?is_collection()):
+#' try(is_empty2(sum))
+#' #> Error in is_empty2(sum) : `x` is not a collection.
+#'
+#' # But can be made to work with NULL:
+#' is_empty2(NULL, null = TRUE) #> TRUE
+#'
 #' @export
 is_empty2 <- function(x, null = FALSE) {
   if (! is_collection(x, null = null)) {

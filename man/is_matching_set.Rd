@@ -25,3 +25,23 @@ This function checks if an object is in a set of values, and optionally if it
 is not in another set of values. It can check if all, any, or only the values
 are in the set.
 }
+\examples{
+x <- c(5, 7, 5, 9, 9)
+
+# Default mode checks if all values in `x` are in `yes` and not in `no`:
+is_matching_set(x, yes = 1:10) #> TRUE
+is_matching_set(x, yes = 1:8) #> FALSE
+is_matching_set(x, yes = 1:10, no = 5) #> FALSE
+
+# Mode `any` passes even if there are values in `x` that are not in `yes`:
+is_matching_set(x, yes = 1:6, mode = "any") #> TRUE
+
+# For mode `only`, all values in `x` must be in `yes` and vice versa:
+is_matching_set(x, yes = 1:10, mode = "only") #> FALSE
+is_matching_set(x, yes = c(5, 7, 9), mode = "only") #> TRUE
+
+# `yes` can be NULL to test only `no` (independent of mode):
+is_matching_set(x, no = 11) #> TRUE
+is_matching_set(x) #> TRUE
+
+}

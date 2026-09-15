@@ -54,8 +54,9 @@ object_system(1:10) #> "base"
 
 object_system(factor(letters)) #> "S3"
 
-track <- setClass("track", slots = c(x = "numeric", y = "numeric"))
-xs4 <- track(x = 1:10, y = 1:10 + rnorm(10))
+xs4 <- methods::setClass("my_s4_int", contains = "integer")(1:10)
 object_system(xs4) #> "S4"
+
+is_system(xs4, "S4") #> TRUE
 
 }

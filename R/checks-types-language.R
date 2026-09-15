@@ -35,7 +35,31 @@
 #' @param sym,lang,literal \[`TRUE` | `FALSE`] Whether to allow symbols,
 #'   language objects, or syntactic literals.
 #'
-#' @returns `r ROXY$test_res()``
+#' @returns `r ROXY$test_res()`
+#'
+#' @examples
+#' is_syntactic_literal(1) #> TRUE
+#' is_syntactic_literal("a") #> TRUE
+#' is_syntactic_literal(NULL) #> TRUE
+#'
+#' is_symbol2(quote(x)) #> TRUE
+#' is_symbol2(quote(x), name = "y") #> FALSE
+#' is_symbol2(rlang::expr(), empty = FALSE) #> FALSE
+#'
+#' is_language(quote(x + 1)) #> TRUE
+#' is_language(quote(f(x))) #> TRUE
+#' is_language(quote(if (TRUE) 1 else 2)) #> TRUE
+#' # See ?rlang::is_call() for is_call() examples
+#'
+#' is_expression2(expression(1, x, x + 1)) #> TRUE
+#' is_expression2(rlang::exprs(1, x, x + 1)) #> FALSE (exprs generates a list)
+#'
+#' x <- 1
+#' is_code(x) #> TRUE
+#' # Identical to is_syntactic_literal(x) || is_symbol2(x) || is_language(x)
+#'
+#' is_code(x, literal = FALSE) #> FALSE
+#' # Identical to is_symbol2(x) || is_language(x)
 #'
 #' @name predicates-language
 NULL

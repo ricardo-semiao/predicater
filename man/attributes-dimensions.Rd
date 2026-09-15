@@ -9,9 +9,9 @@
 \alias{has_dim}
 \title{Attributes - Dimensions existance and sizes}
 \usage{
-n_dims(x, count_empty = TRUE, how = "dim")
+n_dims(x, empty = TRUE, how = "dim")
 
-n_dimnames(x, count_empty = TRUE, count_invalid = TRUE, how = "dimnames")
+n_dimnames(x, invalid = TRUE, how = "dimnames")
 
 has_dimnames(x, n = NULL, how = "dimnames")
 
@@ -22,7 +22,7 @@ has_dim(x, n = NULL, how = "dim")
 \arguments{
 \item{x}{[\code{any}] An object to test.}
 
-\item{count_empty}{[\code{TRUE} | \code{FALSE}] Whether to count empty dimensions and
+\item{empty}{[\code{TRUE} | \code{FALSE}] Whether to count empty dimensions and
 dimension names.}
 
 \item{how}{[\code{character(1)}]
@@ -35,8 +35,8 @@ How to extract the attribute:
 element of \code{\link[=dimnames]{dimnames()}}, and \code{"attr"} for \code{attr(x, "row.names")}.
 }}
 
-\item{count_invalid}{[\code{TRUE} | \code{FALSE}] Whether to dimension names that have
-only non-NA or non-empty values.}
+\item{invalid}{[\code{TRUE} | \code{FALSE}] Whether to cound dimensions with NA,
+empty, or duplicate names.}
 
 \item{n}{[\code{integer(1)}] Number of dimensions to check for. Set to \code{NULL} to
 not test.}
@@ -57,4 +57,28 @@ names, respectively, controlling for empty dimensions and invalid names.
 \item \code{has_dim()}, \code{has_dimnames()}, and \code{has_rownames()} return whether the
 object has dimensions, dimension names, and rownames, respectively.
 }
+}
+\examples{
+x <- structure(
+  1:6, dim = c(2, 3, 1),
+  dimnames = list(c("a", "a"), c("x", "y", "z"), NULL)
+)
+
+# Counting dimensions and dimension names:
+n_dims(x) #> 3
+n_dims(x, empty = FALSE) #> 2
+
+n_dimnames(x) #> 2
+n_dimnames(x, invalid = FALSE) #> 1 (rownames have duplicates)
+
+# Testing for dimensions and dimension names:
+has_dimnames(x) #> TRUE
+has_rownames(mtcars) #> TRUE
+has_dim(mtcars) #> TRUE
+
+# Data frames often have not actual dimension attribues:
+has_dim(mtcars, how = "attr") #> FALSE
+has_dimnames(mtcars, how = "attr") #> FALSE
+has_rownames(mtcars, how = "row.names") #> TRUE (but have row.names one)
+
 }

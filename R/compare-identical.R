@@ -34,6 +34,7 @@
 #'   [identical()].
 #' @param fun \[`"identical"` | `"identical2"`] For `identical_flag()`: function
 #'   to use for comparison.
+#' @param .is_attrs \[`TRUE` | `FALSE`] For internal use only.
 #'
 #' @returns
 #' - \[`TRUE` | `FALSE`] For `identical2()`: the scalar result of the test.
@@ -47,32 +48,39 @@
 #' identical2(x, y) #> FALSE
 #'
 #' # Pre-sort data and ignore "c" attribute:
-#' identical2(x, y, ord_data = FALSE, ignore_attrs = "c") #> TRUE
+#' identical2(
+#'   x, y, ord_data = FALSE,
+#'   ignore_attrs = list(exact = c("c"))
+#' ) #> TRUE
 #'
 #' # Consider attribute order:
-#' identical2(x, y, ord_data = FALSE, ignore_attrs = "c", ord_attrs = TRUE) #> FALSE
+#' identical2(
+#'   x, y, ord_data = FALSE,
+#'   ignore_attrs = list(exact = c("c")), ord_attrs = TRUE
+#' ) #> FALSE
 #'
 #' # No sorting but accept up to 2.1 numerical absolute tolerance:
-#' identical2(x, y, tol_type = "abs", tol = 2.1, ignore_attrs = "c") #> TRUE
+#' identical2(
+#'   x, y, tol_type = "abs", tol = 2.1,
+#'   ignore_attrs = list(exact = c("c"))
+#' ) #> TRUE
 #'
 #' # Understading where the differences are:
-#' identical_flag(x, y)
 #' #> $.data
-#' #> [1] FALSE  TRUE FALSE  # First (3 & 1) and third (1 & 3) elements are different
+#' #> c(FALSE, TRUE, FALSE) # First (3 & 1) and third (1 & 3) elements are different
 #' #>
 #' #> $.attrs
-#' #> $.attrs$.data
-#' #> $.attrs$.data$a
-#' #> $.attrs$.data$a$.data
-#' #> [1] TRUE
+#' #> $.attrs$a
+#' #> $.attrs$a$.data
+#' #> TRUE
 #' #>
-#' #> $.attrs$.data$b
-#' #> $.attrs$.data$b$.data
-#' #> [1] TRUE
+#' #> $.attrs$b
+#' #> $.attrs$b$.data
+#' #> TRUE
 #' #>
-#' #> $.attrs$.data$c
-#' #> $.attrs$.data$c$.data
-#' #> [1] FALSE  # Attribute "c" ("c" & "d") is different
+#' #> $.attrs$c
+#' #> $.attrs$c$.data
+#' #> FALSE # Attribute "c" ("c" & "d") is different
 #'
 #' @export
 identical2 <- function(
@@ -128,13 +136,12 @@ identical2 <- function(
 # TODO: order data by names, values, or both (currently only by values)
 # TODO: allow ignore_data to accept vector of names or vector of indices. later
 # could even accept mixed, regex, etc.
-# TODO: attrs_rmv or attrs_keep? or attrs_filt?
 # CHECK: Less important but possible: make C header metadata matter
 
 
 #' @rdname identical2
 #' @export
-identical_flag <- function(x, y, ..., fun = "identical2") {
+identical_flag <- function(x, y, ..., fun = "identical2", .is_attrs = FALSE) {
   # Checks:
   # - x and y must be lists
   # - fun must be one of "identical2" or "identical"
@@ -142,7 +149,7 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
 
 
   # Main:
-  fun <- switch(fun,
+  f <- switch(fun,
     identical = identical,
     identical2 = identical2
   )
@@ -153,20 +160,29 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
   if (length(x) != length(y) || typeof(x) != typeof(y)) {
     "do nothing" # * Could early exit with FALSE
     res$.data <- FALSE
+
+  } else if (is_atomic(x)) {
+    res$.data <- mapply(f, x, y, SIMPLIFY = TRUE, USE.NAMES = FALSE)
+    names(res$.data) <- names(x)
+
   } else if (is_list(x)) {
     if (has_names_valid(x)) {
       names_x <- names(x)
-      res$.data <- set_names(vector("list", length(x)), names_x)
+      res_loop <- set_names(vector("list", length(x)), names_x)
     } else {
       names_x <- seq_along(x)
-      res$.data <- vector("list", length(x))
+      res_loop <- vector("list", length(x))
     }
+
     for (i in names_x) {
-      res$.data[[i]] <- identical_flag(x[[i]], y[[i]], ..., fun = fun)
+      res_loop[[i]] <- identical_flag(x[[i]], y[[i]], ..., fun = fun)
     }
-  } else if (is_atomic(x)) {
-    #res$.data <- identical_vec(x, y, ..., fun = fun)
-    res$.data <- fun(x, y, ...)
+
+    if (.is_attrs) {
+      res <- res_loop
+    } else {
+      res$.data <- res_loop
+    }
   }
 
   attrs_x_none <- is_null(attrs_x) || identical(names(attrs_x), "names")
@@ -174,7 +190,7 @@ identical_flag <- function(x, y, ..., fun = "identical2") {
   if (attrs_x_none) {
     res$.attrs <- if (attrs_y_none) NULL else FALSE
   } else {
-    res$.attrs <- identical_flag(attrs_x, attrs_y, ..., fun = fun)
+    res$.attrs <- identical_flag(attrs_x, attrs_y, ..., fun = fun, .is_attrs = TRUE)
   }
 
   res

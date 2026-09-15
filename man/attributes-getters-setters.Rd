@@ -80,3 +80,30 @@ How to get or set the attribute:
 Functions to get and set names, dimnames, and class of an object, while
 requiring a specific 'quality' of the values.
 }
+\examples{
+x <- structure(
+  1:6, dim = c(2, 3, 1), names = paste0("i", 1:6),
+  dimnames = list(c("a", "a"), c("x", "y", "z"), "_bad"),
+  class = c("classA", "", NA, "classB", "classA")
+)
+
+# Getting repaired names and valid classes:
+names3(x) #> c("i1", "i2", "i3", "i4", "i5", "i6") (no repair)
+
+dimnames2(x)
+#> list(c("a...1", "a...2"), c("x", "y", "z"), "_bad")
+dimnames2(x, repair = "universal")
+#> list(c("a...1", "a...2"), c("x", "y", "z"), "._bad")
+
+rownames2(x) #> c("a...1", "a...2")
+
+class2(x) #> c("classA", "classB")
+
+# Setting repaired names and valid classes:
+class2(x) <- c("again", "duplicates", "again")
+class2(x) #> c("again", "duplicates")
+
+rownames2(x) <- NULL # Names are created automatically 
+rownames(x) #> c("...1", "...2")
+
+}

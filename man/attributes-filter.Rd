@@ -19,7 +19,13 @@ attrs_keep(
   perl = FALSE
 )
 
-has_attrs_any(x, abbr = "", exact = character(), disallow = character())
+has_attrs_any(
+  x,
+  abbr = "",
+  exact = character(),
+  match = character(),
+  disallow = character()
+)
 
 has_attrs_all(x, abbr = "", exact = character(), disallow = character())
 
@@ -78,9 +84,21 @@ x <- structure(
   levels = c("aa", "bb", "cc")
 )
 
-attrs_rmv(x) # Removes all attributes
-attrs_rmv(x, abbr = "ncd") # Keeps names, dim, and class
-attrs_rmv(x, abbr = "c", exact = c("levels", "b")) # Keeps class, levels, b
-attrs_rmv(x, match = c("^[a-z]$")) # Keeps a, b, c
+# Default removal:
+attrs_keep(x) # Removes all attributes
+attrs_rmv(x) # Removes no attributes
+
+# Abbreviation, exatc, and regex filtering:
+attrs_keep(x, abbr = "ncd") # Keeps names, dim, and class
+attrs_rmv(x, exact = c("levels", "b")) # Removes levels and b
+attrs_keep(x, match = "^[a-c]$") # Keeps only a, b, and c
+
+# Testing for attributes:
+has_attrs_any(x, "c", exact = "levels") #> TRUE (has class and levels)
+has_attrs_any(x, "c", exact = "levels", disallow = "dim") #> FALSE (has dim)
+has_attrs_all(x, exact = c("a", "b", "c")) #> TRUE
+has_attrs_all(x, exact = c("a", "b", "c", "d")) #> FALSE (missing d)
+
+has_attrs_only(x, exact = c("a", "b", "c")) #> FALSE (has other attributes)
 
 }
