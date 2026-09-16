@@ -7,7 +7,7 @@
 \alias{has_dimnames}
 \alias{has_rownames}
 \alias{has_dim}
-\title{Attributes - Dimensions existance and sizes}
+\title{Attributes - Dimensions existence and sizes}
 \usage{
 n_dims(x, empty = TRUE, how = "dim")
 
@@ -35,7 +35,7 @@ How to extract the attribute:
 element of \code{\link[=dimnames]{dimnames()}}, and \code{"attr"} for \code{attr(x, "row.names")}.
 }}
 
-\item{invalid}{[\code{TRUE} | \code{FALSE}] Whether to cound dimensions with NA,
+\item{invalid}{[\code{TRUE} | \code{FALSE}] Whether to count dimensions with NA,
 empty, or duplicate names.}
 
 \item{n}{[\code{integer(1)}] Number of dimensions to check for. Set to \code{NULL} to
@@ -76,7 +76,7 @@ has_dimnames(x) #> TRUE
 has_rownames(mtcars) #> TRUE
 has_dim(mtcars) #> TRUE
 
-# Data frames often have not actual dimension attribues:
+# Data frames often have no actual dimension attribues:
 has_dim(mtcars, how = "attr") #> FALSE
 has_dimnames(mtcars, how = "attr") #> FALSE
 has_rownames(mtcars, how = "row.names") #> TRUE (but have row.names one)

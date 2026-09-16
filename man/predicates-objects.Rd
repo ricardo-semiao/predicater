@@ -88,7 +88,7 @@ suppressWarnings(class(xs4_s4) <- c("new_class", class(xs4_s4)))
 typeof(xs4_s4) #> "object"
 is_object(xs4_s4) #> TRUE
 
-# is_object_like() is similar to checking the object bit/existance of a class
+# is_object_like() is similar to checking the object bit/existence of a class
 # attribute, while cheking for inconsistencies with the other properties:
 is_object_like(xbase) #> FALSE
 is_object_like(xs4_int) #> TRUE

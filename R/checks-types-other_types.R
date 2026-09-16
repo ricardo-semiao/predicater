@@ -167,7 +167,7 @@ NULL
 #' - `"expression"`: a vector of unevaluated R code objects. Tested by
 #'   [is_expression2()].
 #'
-#' See the 'Details' section for what behaviour you can expect from these types.
+#' See the 'Details' section for what behavior you can expect from these types.
 #'
 #' Additionally:
 #' - [rlang::is_atomic()] tests for any atomic vector type.

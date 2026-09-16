@@ -41,7 +41,6 @@
 #' are_nan(x)
 #' #> c(FALSE, FALSE, FALSE, TRUE, NA)
 #'
-#'
 #' # For all, the NA value's result can be controlled:
 #' are_finite(x, na = FALSE)
 #' #> c(TRUE, FALSE, FALSE, FALSE, FALSE)
@@ -49,15 +48,12 @@
 #' are_nan(x, na = TRUE)
 #' #> c(FALSE, FALSE, FALSE, TRUE, TRUE)
 #'
-#'
 #' # We can consider only +Inf or -Inf:
 #' are_inf(x, signs = "+")
 #' #> c(FALSE, TRUE, FALSE, FALSE, NA)
 #'
-#'
 #' # Errors for non-numeric objects:
 #' try(are_finite(list(1, 2))) #> Error
-#'
 #'
 #' # The is_* predicates test scalars:
 #' is_finite(1) #> TRUE
@@ -170,7 +166,7 @@ is_inf <- function(x, na = NA, signs = "+-") {
 #' Type checks - Integer-like values
 #'
 #' @description
-#' Check if an object can be considerd integer in two different interpretations
+#' Check if an object can be considered integer in two different interpretations
 #' (`mode`s):
 #' - `"unbounded"`: checks if `x` can be represented as a double-precision
 #'   integer, i.e. `x - round(x)` falls within some tolerance value (`tol`).

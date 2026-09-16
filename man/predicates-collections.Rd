@@ -53,7 +53,7 @@ Tested by \code{is_environment2()}.
 \code{\link[=is_expression2]{is_expression2()}}.
 }
 
-See the 'Details' section for what behaviour you can expect from these types.
+See the 'Details' section for what behavior you can expect from these types.
 
 Additionally:
 \itemize{

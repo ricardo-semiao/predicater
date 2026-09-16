@@ -55,7 +55,7 @@ list of range specs (as for \code{n_dims}). Set to \code{NULL} to not test.}
 A list of arguments passed to \code{\link[=test_names]{test_names()}} to test each dimension's
 names. For separate tests for each dimension, use a list of formulas, with
 the LHS being the dimension integer index, and the RHS being the list of
-arguments to \code{test_names()}. An emtpy list() test for the presence of names.}
+arguments to \code{test_names()}. An empty list() test for the presence of names.}
 
 \item{how}{[\code{"dim"} | \code{"x"} | \code{"attr"}] How to extract dimensions from \code{x}:
 \code{"dim"} for \code{\link[=dim]{dim()}}; \code{"x"} ofr \code{x} directly \code{"attr"} for \code{attr(x, "dim")}.}
@@ -106,8 +106,8 @@ across that margin.}
 }
 }
 \description{
-Test if an object has matrix/array-related attributesis that pass some
-conditions. Add
+Test if an object has matrix/array-related attributes that pass some
+conditions.
 
 \code{test_matrix()} is a predicate test, while \code{assert_matrix()} validates their
 input, aborting if it fails the test.

@@ -189,7 +189,7 @@ is_bool2 <- function(x, na = FALSE) {
 #' @description
 #' Checks if an object is `NA`, `NA_integer_`, `NA_real_`, `NA_complex_`, or
 #' `NA_character_`. Differently from [is.na()] and
-#' [rlang::is_na()]/[rlang::are_na()], it allows to control the behaviour for
+#' [rlang::is_na()]/[rlang::are_na()], it allows to control the behavior for
 #' `NaN` objects.
 #'
 #' - `are_na2()` is vectorized, returning a vector of same length as `x`, and

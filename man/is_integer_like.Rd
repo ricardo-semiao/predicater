@@ -33,7 +33,7 @@ the test. If \code{na != NA}, then will always return \code{TRUE} or \code{FALSE
 }
 }
 \description{
-Check if an object can be considerd integer in two different interpretations
+Check if an object can be considered integer in two different interpretations
 (\code{mode}s):
 \itemize{
 \item \code{"unbounded"}: checks if \code{x} can be represented as a double-precision

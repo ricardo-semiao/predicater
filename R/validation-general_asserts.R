@@ -344,10 +344,25 @@ assert_predicate <- function(
 #'
 #' @returns `r ROXY$test_returns("multi")`
 #'
+#' @examples
+#' x <- list(a = 1:2, b = 3:4)
+#'
+#' args <- list(
+#'   types = c("integer", "list"),
+#'   list = list(
+#'     custom_map = \(elt) is_integer(elt, 1)
+#'   )
+#'   # Either a integer vector of a list of integer scalars
+#' )
+#'
+#' do.call(test_multiple, c(list(x), args)) #> FALSE (not all tests passed)
+#'
+#' try(do.call(assert_multiple, c(list(x), args))) #> Error
+#'
 #' @name test_multiple
 NULL
 
-core_multi <- function(x, types, ...) {
+core_multiple <- function(x, types, ..., short_circuit) {
   type <- typeof(x)
   cores_args <- list2(...)
 
@@ -355,17 +370,19 @@ core_multi <- function(x, types, ...) {
     return(c(multi = FALSE) %@@% c(types = types))
   }
 
-  exec(TABLE_TEST_TYPE[[type]], x, !!!cores_args[[type]])
-  # TABLE lives in zzz.R
+  exec(
+    TABLE_TEST_TYPE[[type]],
+    x, !!!cores_args[[type]], short_circuit = short_circuit
+  )
 }
 
 #' @rdname test_multiple
 #' @export
-test_multiple <- fn_core_to_test(core_multi)
+test_multiple <- fn_core_to_test(core_multiple)
 
 #' @rdname test_multiple
 #' @export
-assert_multiple <- fn_core_to_assert(core_multi, list(
+assert_multiple <- fn_core_to_assert(core_multiple, list(
   multi = \(attrs) {
     types <- paste(attrs$types, collapse = ", ")
     glue("not of any of the expected types: {{.val {types}}}.")

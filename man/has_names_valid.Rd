@@ -40,7 +40,7 @@ empty, duplicate, or invalid names.}
 [\code{TRUE} | \code{FALSE}] The scalar result of the test.
 }
 \description{
-Test if \code{x} has names with more flexiblility than \code{\link[rlang:is_named]{rlang::is_named()}},
+Test if \code{x} has names with more flexiblillity than \code{\link[rlang:is_named]{rlang::is_named()}},
 handling NA, empty, duplicate, and invalid names, as well as empty vectors.
 }
 \details{

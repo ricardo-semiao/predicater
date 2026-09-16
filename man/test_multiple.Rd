@@ -65,3 +65,19 @@ For example, if \code{x} is of type \code{"integer"}, then it is tested with
 \code{\link[=test_integer]{test_integer()}}. Pass a list of arguments to the test function via \code{...},
 with the same argument name as the type. E.g. \code{integer = list(len = 2)}.
 }
+\examples{
+x <- list(a = 1:2, b = 3:4)
+
+args <- list(
+  types = c("integer", "list"),
+  list = list(
+    custom_map = \(elt) is_integer(elt, 1)
+  )
+  # Either a integer vector of a list of integer scalars
+)
+
+do.call(test_multiple, c(list(x), args)) #> FALSE (not all tests passed)
+
+try(do.call(assert_multiple, c(list(x), args))) #> Error
+
+}

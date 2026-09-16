@@ -132,8 +132,8 @@ assert_names <- fn_core_to_assert(
 #' Validation - Matrix and array attributes
 #'
 #' @description
-#' Test if an object has matrix/array-related attributesis that pass some
-#' conditions. Add
+#' Test if an object has matrix/array-related attributes that pass some
+#' conditions.
 #'
 #' `test_matrix()` is a predicate test, while `assert_matrix()` validates their
 #' input, aborting if it fails the test.
@@ -147,7 +147,7 @@ assert_names <- fn_core_to_assert(
 #'   A list of arguments passed to [test_names()] to test each dimension's
 #'   names. For separate tests for each dimension, use a list of formulas, with
 #'   the LHS being the dimension integer index, and the RHS being the list of
-#'   arguments to `test_names()`. An emtpy list() test for the presence of names.
+#'   arguments to `test_names()`. An empty list() test for the presence of names.
 #' @param how \[`"dim"` | `"x"` | `"attr"`] How to extract dimensions from `x`:
 #'   `"dim"` for [dim()]; `"x"` ofr `x` directly `"attr"` for `attr(x, "dim")`.
 #' @param sentinels `r ROXY$sentinels()`

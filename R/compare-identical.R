@@ -66,6 +66,7 @@
 #' ) #> TRUE
 #'
 #' # Understading where the differences are:
+#' identical_flag(x, y)
 #' #> $.data
 #' #> c(FALSE, TRUE, FALSE) # First (3 & 1) and third (1 & 3) elements are different
 #' #>

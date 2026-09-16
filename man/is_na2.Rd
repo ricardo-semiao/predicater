@@ -26,7 +26,7 @@ types (see \code{\link{NA}}). Set to \code{NULL} to allow all types.}
 \description{
 Checks if an object is \code{NA}, \code{NA_integer_}, \code{NA_real_}, \code{NA_complex_}, or
 \code{NA_character_}. Differently from \code{\link[=is.na]{is.na()}} and
-\code{\link[rlang:are_na]{rlang::is_na()}}/\code{\link[rlang:are_na]{rlang::are_na()}}, it allows to control the behaviour for
+\code{\link[rlang:are_na]{rlang::is_na()}}/\code{\link[rlang:are_na]{rlang::are_na()}}, it allows to control the behavior for
 \code{NaN} objects.
 \itemize{
 \item \code{are_na2()} is vectorized, returning a vector of same length as \code{x}, and

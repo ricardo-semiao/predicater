@@ -311,7 +311,7 @@ attrs_filter <- function(
 
 #' Attributes - Names
 #'
-#' Test if `x` has names with more flexiblility than [rlang::is_named()],
+#' Test if `x` has names with more flexiblillity than [rlang::is_named()],
 #' handling NA, empty, duplicate, and invalid names, as well as empty vectors.
 #'
 #' @param x \[`collection()`, `any`] For `are_*()`, any collection to test; for
@@ -438,7 +438,7 @@ are_names_valid <- function(
 
 # Dimensions -------------------------------------------------------------------
 
-#' Attributes - Dimensions existance and sizes
+#' Attributes - Dimensions existence and sizes
 #'
 #' @description
 #' Functions for the presence and number of dimensions and dimensions names of
@@ -451,7 +451,7 @@ are_names_valid <- function(
 #' @param x `r ROXY$x()`
 #' @param empty \[`TRUE` | `FALSE`] Whether to count empty dimensions and
 #'   dimension names.
-#' @param invalid \[`TRUE` | `FALSE`] Whether to cound dimensions with NA,
+#' @param invalid \[`TRUE` | `FALSE`] Whether to count dimensions with NA,
 #'   empty, or duplicate names.
 #' @param how \[`character(1)`]
 #'   How to extract the attribute:
@@ -486,7 +486,7 @@ are_names_valid <- function(
 #' has_rownames(mtcars) #> TRUE
 #' has_dim(mtcars) #> TRUE
 #'
-#' # Data frames often have not actual dimension attribues:
+#' # Data frames often have no actual dimension attribues:
 #' has_dim(mtcars, how = "attr") #> FALSE
 #' has_dimnames(mtcars, how = "attr") #> FALSE
 #' has_rownames(mtcars, how = "row.names") #> TRUE (but have row.names one)
@@ -609,12 +609,12 @@ has_dim <- function(x, n = NULL, how = "dim") {
 #' # Getting repaired names and valid classes:
 #' names3(x) #> c("i1", "i2", "i3", "i4", "i5", "i6") (no repair)
 #'
-#' dimnames2(x)
+#' suppressMessages(dimnames2(x))
 #' #> list(c("a...1", "a...2"), c("x", "y", "z"), "_bad")
-#' dimnames2(x, repair = "universal")
+#' suppressMessages(dimnames2(x, repair = "universal"))
 #' #> list(c("a...1", "a...2"), c("x", "y", "z"), "._bad")
 #'
-#' rownames2(x) #> c("a...1", "a...2")
+#' suppressMessages(rownames2(x)) #> c("a...1", "a...2")
 #'
 #' class2(x) #> c("classA", "classB")
 #'
@@ -622,12 +622,11 @@ has_dim <- function(x, n = NULL, how = "dim") {
 #' class2(x) <- c("again", "duplicates", "again")
 #' class2(x) #> c("again", "duplicates")
 #'
-#' rownames2(x) <- NULL # Names are created automatically 
+#' suppressMessages(rownames2(x) <- NULL) # Names are created automatically
 #' rownames(x) #> c("...1", "...2")
 #'
 #' @name attributes-getters-setters
 NULL
-
 
 
 #' @rdname attributes-getters-setters
@@ -832,3 +831,4 @@ class2 <- function(x, how = "class") {
 
   invisible(x)
 }
+# CHECK: add message for cleaning classes as in vctrs::vec_as_names()?

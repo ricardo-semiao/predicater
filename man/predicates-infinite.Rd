@@ -64,7 +64,6 @@ are_inf(x)
 are_nan(x)
 #> c(FALSE, FALSE, FALSE, TRUE, NA)
 
-
 # For all, the NA value's result can be controlled:
 are_finite(x, na = FALSE)
 #> c(TRUE, FALSE, FALSE, FALSE, FALSE)
@@ -72,15 +71,12 @@ are_finite(x, na = FALSE)
 are_nan(x, na = TRUE)
 #> c(FALSE, FALSE, FALSE, TRUE, TRUE)
 
-
 # We can consider only +Inf or -Inf:
 are_inf(x, signs = "+")
 #> c(FALSE, TRUE, FALSE, FALSE, NA)
 
-
 # Errors for non-numeric objects:
 try(are_finite(list(1, 2))) #> Error
-
 
 # The is_* predicates test scalars:
 is_finite(1) #> TRUE

@@ -61,11 +61,14 @@
 #' # For less common attributes, checks need to be specified in `...`:
 #' is_ptype(
 #'   factor(c("a", "b")), factor(levels = c("a", "b", "c"))
-#' ) #> TRUE
+#' )
+#' #> TRUE
+#'
 #' is_ptype(
 #'   factor(c("a", "b")), factor(levels = c("a", "b", "c")),
 #'   levels = "=="
-#' ) #> FALSE
+#' )
+#' #> FALSE
 #'
 #' # Complex objects can be checked with `is_ptype_list()`:
 #' schema <- list(a = integer(1), b = data.frame(), c = double())
