@@ -14,7 +14,7 @@ test_names(
   set = NULL,
   tests_char = NULL,
   how = "names",
-  empty = FALSE,
+  empty = NULL,
   sentinels = NULL,
   custom = NULL
 )
@@ -28,7 +28,7 @@ assert_names(
   set = NULL,
   tests_char = NULL,
   how = "names",
-  empty = FALSE,
+  empty = NULL,
   sentinels = NULL,
   custom = NULL,
   action = "abort",
@@ -66,8 +66,8 @@ How to extract names from \code{x}: \code{"x"} for \code{x} directly; \code{"nam
 \code{colnames(x)}; \code{"row.names"} for \code{attr(x, "row.names")}; or a positive
 integer for \code{dimnames(x)[[how]]}.}
 
-\item{empty}{[\code{TRUE} | \code{FALSE}] Whether to early pass or fail the test if
-the underlying vector \code{x} is empty.}
+\item{empty}{[\code{TRUE} | \code{NULL}] Whether to early pass the test if the
+underlying vector \code{x} is empty.}
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
@@ -130,7 +130,7 @@ args <- list(
   set = list(yes = c("a", "b"), no = c("d", "e")),
   # Names must be only "a" or "b", and not "d" nor "e" (will fail)
   how = "names",         # Use `names(x)` as the names vector to test
-  empty = FALSE,         # Don't allow empty `x` (will pass)
+  empty = NULL,          # Don't allow empty `x` (will pass)
   sentinels = c("null"), # Allow `NULL` names (not the case of x)
   custom = \(x) isTRUE(all(nchar(x) == 1))
   # All names must be a single character (will fail)

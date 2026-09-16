@@ -148,8 +148,7 @@ is_ptype_list <- function(.x, .ptype, .named = TRUE, .depth = 1, ...) {
   # - .named must be a flag
   # - .depth must be >= 0 integerish(1)
   # - .x and .ptype must conform
-  # TODO:
-
+  
   if (! is_list(.x) || ! is_list(.ptype)) {
     cli_abort("is_ptype_list() only works for lists.")
   }

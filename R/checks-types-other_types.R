@@ -52,8 +52,7 @@ is_type <- function(x, type, n = NULL) {
   # Checks:
   # - type must be one of the typeof() values
   # - n can only be supplied for the types in TYPES_LENGTH
-  # TODO:
-
+  
 
   # Main:
   typeof(x) == type && (is.null(n) || length(x) == n)
@@ -257,8 +256,7 @@ is_collection <- function(
   # Checks:
   # - n must pass is_integer_like(n, 1) or be NULL
   # - expr, pairlist, and env must be flags
-  # TODO:
-
+  
   # Main:
   (is_null(n) || length(x) == n) && (
     is_vector(x) ||

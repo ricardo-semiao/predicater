@@ -65,8 +65,7 @@ assert_from_msg <- function(
   # - env must be an environment
   # - x_names must be a character vector or NULL
   # - cnd_fun must be a function
-  # TODO:
-
+  
 
   # Main:
   xs <- list2(...)
@@ -83,10 +82,12 @@ assert_from_msg <- function(
       substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
 
       cnd_args <- c(
-        glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
-        class = "rs_assert_from_error",
+        message = c(
+          glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
+          "i" = "See this condition's {.code rs_assert_from_error} attribute for details."
+        ),
+        class = "rs_assert_from_error", call = env,
         rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
-        call = env,
         args_cnd
       )
       do.call(cli_abort, cnd_args)
@@ -115,8 +116,7 @@ assert_from_error <- function(
   # - env must be an environment
   # - x_names must be a character vector or NULL
   # - cnd_fun must be a function
-  # TODO:
-
+  
 
   # Main:
   xs <- list2(...)
@@ -133,10 +133,12 @@ assert_from_error <- function(
         substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
 
         cnd_args <- c(
-          glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
-          class = "rs_assert_from_error",
+          message = c(
+            glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
+            "i" = "See this condition's {.code rs_assert_from_error} attribute for details."
+          ),
+          class = "rs_assert_from_error", call = env,
           rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
-          call = env,
           args_cnd
         )
         do.call(cli_abort, cnd_args)
@@ -196,8 +198,7 @@ assert_ptype <- function(
   # - env must be an environment
   # - cnd_fun must be a function
   # - cnd_args must be a list
-  # TODO:
-
+  
 
   # Main:
   x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
@@ -206,13 +207,15 @@ assert_ptype <- function(
   for (i in seq_along(xs)) {
     if (! do.call(is_ptype, c(list(.x = xs[[i]], .ptype = ptype), args_ptype))) {
       cnd_args <- c(
-        msg %||% "Argument {.arg {x_name[i]}} is not of prototype \\
-        {.code {deparse(quo_get_expr(ptype_quo))}}.",
-        class = "rs_assert_ptype_error",
+        message = c(
+          msg %||% "Argument {.arg {x_name[i]}} is not of prototype \\
+          {.code {deparse(quo_get_expr(ptype_quo))}}.",
+          "i" = "See this condition's {.code rs_assert_ptype_error} attribute for details."
+        ),
+        class = "rs_assert_ptype_error", call = env,
         rs_assert_ptype_error = list(
           x = xs[[i]], ptype = ptype, ptype_quo = ptype_quo, ptype_args = args_ptype
         ),
-        call = env,
         args_cnd
       )
       do.call(cli_abort, cnd_args)
@@ -268,8 +271,7 @@ assert_predicate <- function(
   # - env must be an environment
   # - cnd_fun must be a function
   # - cnd_args must be a list
-  # TODO:
-
+  
 
   # Main:
   x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
@@ -282,10 +284,10 @@ assert_predicate <- function(
           cli_abort(
             c(
               "{.code fun(.)} must return {.val {TRUE}} or {.val {FALSE}}.",
-              "i" = "Instead, with {.arg {x_name[i]}}, it returned {.val {res}}."
+              "i" = "Instead, with {.arg {x_name[i]}}, it returned {.val {res}}.",
+              "i" = "See this condition's {.code rs_user_fun_error} attribute for details."
             ),
-            class = "rs_user_fun_error",
-            call = env,
+            class = "rs_user_fun_error", call = env,
             rs_user_fun_error = list(bad_result = res)
           )
         }
@@ -295,18 +297,20 @@ assert_predicate <- function(
       error = \(cnd) {
         cli_abort(
           "{.arg fun} run with error at argument {.arg {x_name[i]}}.",
-          .parent = cnd, call = env
+          class = "rs_user_fun_error", parent = cnd, call = env
         )
       }
     )
     if (! pred) {
       cnd_args <- c(
-        msg %||% "Argument {.arg {x_name[i]}} fails {.arg fun}.",
-        class = "rs_assert_predicate_error",
+        message = c(
+          msg %||% "Argument {.arg {x_name[i]}} fails {.arg fun}.",
+          "i" = "See this condition's {.code rs_assert_predicate_error} attribute for details."
+        ),
         rs_assert_predicate_error = list(
           x = xs[[i]], fun = fun, fun_args = args_fun
         ),
-        call = env,
+        class = "rs_assert_predicate_error", call = env,
         args_cnd
       )
       do.call(cli_abort, cnd_args)
@@ -367,7 +371,7 @@ core_multiple <- function(x, types, ..., short_circuit) {
   cores_args <- list2(...)
 
   if (! type %in% update_types(types)) {
-    return(c(multi = FALSE) %@@% c(types = types))
+    return(c(multi = FALSE) %@@% list(types = types))
   }
 
   exec(
@@ -383,9 +387,8 @@ test_multiple <- fn_core_to_test(core_multiple)
 #' @rdname test_multiple
 #' @export
 assert_multiple <- fn_core_to_assert(core_multiple, list(
-  multi = \(attrs) {
-    types <- paste(attrs$types, collapse = ", ")
-    glue("not of any of the expected types: {{.val {types}}}.")
+  multi = \(attrs, test) {
+    glue2("must be one of the 'types': [fmt_vec(attrs$types)]")
   }
 ))
 

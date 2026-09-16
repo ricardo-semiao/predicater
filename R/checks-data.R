@@ -30,8 +30,7 @@
 #' @export
 is_sorted <- function(x, order = "asc", na.rm = FALSE, strictly = FALSE) {
   # Checks:
-  # TODO:
-  switch(order,
+    switch(order,
     asc = !is.unsorted(x, na.rm = na.rm, strictly = strictly),
     desc = !is.unsorted(rev(x), na.rm = na.rm, strictly = strictly)
   )
@@ -93,6 +92,7 @@ is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
   )
 }
 # TODO: deal with NA, cite in ROXY$set
+# TODO: create are_ version
 
 
 #' Data checks - Check for duplicate values

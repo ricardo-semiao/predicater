@@ -65,11 +65,12 @@ core_list <- function(
       type = \(x, arg, pars) {
         mode <- pars$mode
         switch(mode, list = is_list(x), pairlist = is_pairlist(x)) %@@%
-          c(type = typeof(x), mode = mode)
+          list(type = typeof(x), mode = mode)
       },
       n_dup = \(x, arg, pars) {
-        test_in_range(n_dups <- sum(duplicated(as.list(unclass(x)))), arg, pars$l) %@@%
-          c(n = n_dups)
+        test_in_range(
+          n_dups <- sum(duplicated(as.list(unclass(x)))), arg, pars$l
+        ) %@@% list(arg = arg, n = n_dups)
       }
     )
   )
@@ -84,9 +85,17 @@ test_list <- fn_core_to_test(core_list)
 
 #' @rdname test_list
 #' @export
-assert_list <- fn_core_to_assert(core_list, list(
-  type = \(attrs) glue("is not of type {.val {attrs$mode}}.")
-))
+assert_list <- fn_core_to_assert(
+  core_list,
+  list(
+    type = \(attrs, test) {
+      glue2(
+        "must be of type {.val [attrs$mode]}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    }
+  )
+)
 
 
 
@@ -159,9 +168,16 @@ core_environment <- function(
     x, sentinels, len, namespace, parents, env_has, env_sees, custom, custom_map,
     tests_pars = list(l = l), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_environment(x) %@@% c(type = typeof(x)),
-      namespace = \(x, arg, pars) is_namespace(x) == arg,
-      parents = \(x, arg, pars) test_env_parents(x, arg)
+      type = \(x, arg, pars) {
+        is_environment(x) %@@% list(type = typeof(x))
+      },
+      namespace = \(x, arg, pars) {
+        is <- is_namespace(x)
+        is == arg %@@% list(arg = arg, is = is)
+      },
+      parents = \(x, arg, pars) {
+        test_env_parents(x, arg)
+      }
     )
   )
 }
@@ -175,9 +191,24 @@ test_environment <- fn_core_to_test(core_environment)
 assert_environment <- fn_core_to_assert(
   core_environment,
   msgs_add = list(
-    type = \(attrs) "must be an environment.",
-    namespace = \(attrs) "namespace status check failed.",
-    parents = \(attrs) "does not match expected environment parents."
+    type = \(attrs, test) {
+      glue2(
+        "must be of type {.val environment}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    namespace = \(attrs, test) {
+      glue2(
+        "{.code isNamespace(x)} must be {.val [attrs$arg]}.",
+        fmt_postfix("Was {.val [attrs$namespace]}.", test)
+      )
+    },
+    parents = \(attrs, test) {
+      glue2(
+        "must be child of specific parents.",
+        fmt_postfix("Is not.", test)
+      )
+    }
   )
 )
 
@@ -255,14 +286,14 @@ core_vector <- function(
           expression = is_atomic(x) || typeof(x) %in% c("list", "expression"),
           pairlist = is_atomic(x) || typeof(x) %in% c("list", "expression", "pairlist")
         ) %@@%
-          c(type = typeof(x), mode = mode)
+          list(type = typeof(x), mode = mode)
       },
       n_na = \(x, arg, pars) {
         if (pars$mode != "atomic") {
-          return(TRUE %@@% c(n = 0))
+          return(TRUE %@@% list(arg = arg, n = 0))
         }
         test_in_range(n_na <- sum(are_na2(x, nan = FALSE)), arg, pars$l) %@@%
-          c(n = n_na)
+          list(arg = arg, n = n_na)
       }
     )
   )
@@ -278,7 +309,12 @@ test_vector <- fn_core_to_test(core_vector)
 assert_vector <- fn_core_to_assert(
   core_vector,
   msgs_add = list(
-    type = \(attrs) glue("had type `{attrs$type}`, which does not match mode '{attrs$mode}'.")
+    type = \(attrs, test) {
+      glue2(
+        "must be of 'type' {.val [attrs$mode]}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    }
   )
 )
 

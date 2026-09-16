@@ -245,8 +245,7 @@ are_na2 <- function(x, nan = FALSE) {
   # Checks:
   # - x must be atomic
   # - nan must be one of "f", "t", "na"
-  # TODO:
-
+  
 
   # Main:
   if (is.na(nan)) {

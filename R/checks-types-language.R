@@ -91,8 +91,7 @@ is_call <- is_call
 is_expression2 <- function(x, n = NULL, valid = FALSE) {
   # Checks:
   # - n must pass is_integer_like(n, 1) or be NULL
-  # TODO:
-
+  
   (typeof(x) == "expression") &&
     (is.null(n) || length(x) == n) &&
     (!valid || all(vapply_lgl(x, is_parseable)))

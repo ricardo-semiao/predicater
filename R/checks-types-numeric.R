@@ -71,8 +71,7 @@ are_finite <- function(x, na = NA) {
   # Checks:
   # - x must be numeric
   # - na must be one of "f", "t", "na", or "abort"
-  # TODO:
-
+  
 
   # Main:
   if (is.na(na)) {
@@ -102,8 +101,7 @@ are_nan <- function(x, na = NA) {
   # Checks:
   # - x must be numeric
   # - na must be one of "f", "t", "na"
-  # TODO:
-
+  
   # Main:
   if (is.na(na)) {
     if_else2(are_na2(x), NA, is.nan(x))
@@ -133,8 +131,7 @@ are_inf <- function(x, na = NA, signs = "+-") {
   # - x must be numeric
   # - na must be one of "f", "t", "na"
   # - signs must be one of "+-", "+", or "-"
-  # TODO:
-
+  
 
   # Main:
   signs_allowed <- switch(signs, both = c(-1, 1), "+" = 1, "-" = -1)
@@ -282,8 +279,7 @@ are_integer_like <- function(
   # - mode must be one of "type", "trunc", "trunc_tol", "range", or "range_tol"
   # - tol must be a non-NA, finite, non-negative double(1)
   # - na must be one of "t" or "na"
-  # TODO:
-
+  
 
   # Main:
   if (is_integer(x)) {

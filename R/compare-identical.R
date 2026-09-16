@@ -96,8 +96,7 @@ identical2 <- function(
   # - tol_type must be one of "none", "abs", "rel"
   # - tol must be numeric(1) in ]0, Inf[
   # - ignore_data, ignore_attrs must be non-NA character vectors
-  # TODO:
-
+  
 
   # Main:
   if (length(ignore_data) > 0) {
@@ -146,8 +145,7 @@ identical_flag <- function(x, y, ..., fun = "identical2", .is_attrs = FALSE) {
   # Checks:
   # - x and y must be lists
   # - fun must be one of "identical2" or "identical"
-  # TODO:
-
+  
 
   # Main:
   f <- switch(fun,

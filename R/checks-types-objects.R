@@ -117,8 +117,7 @@ has_class <- function(x, invalid = "warn", bad = "warn") {
 is_object_like <- function(x, bad = "warn") {
   # Checks:
   # - bad must be one of "warn", "stop", "f"
-  # TODO:
-
+  
 
   # Main:
   has_class <- ! is_null(attr(x, "class", TRUE))

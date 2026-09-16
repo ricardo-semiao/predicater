@@ -16,11 +16,11 @@ args <- list(
 )
 
 test_that("Examples - test_symbol", {
-  expect_false(rlang::exec(test_symbol, !!!c(list(x), args)))
+  expect_false(rlang::exec(test_symbol, x = quote(my_var), !!!args))
 })
 
 test_that("Examples - assert_symbol snapshot", {
-  expect_snapshot(try(rlang::exec(assert_symbol, !!!c(list(x), args, short_circuit = FALSE))))
+  expect_snapshot(try(rlang::exec(assert_symbol, x = quote(my_var), !!!c(args, short_circuit = FALSE))))
 })
 
 

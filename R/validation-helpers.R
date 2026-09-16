@@ -95,7 +95,10 @@ fn_core_to_assert <- function(core, msgs_add) {
   assert_name <- gsub("^core_", "assert_", as_string(core_sym))
 
   args <- fn_fmls(core)
-  args_core_nms <- setdiff(names(args), c("x", "env", "short_circuit"))
+  args_core_nms <- union(
+    setdiff(names(args), c("x", "env", "short_circuit")),
+    "sentinels"
+  )
   args_core_syms <- syms(names(args))
 
   msgs_fns <- c(msgs_add, TESTS_MSGS[intersect(names(TESTS_MSGS), args_core_nms)])
@@ -131,9 +134,11 @@ fn_core_to_assert <- function(core, msgs_add) {
     msgs <- c(
       glue("{{.arg {x_name}}} failed {{.fn {assert_name}}}:"),
       tests_msgs, "",
-      "i" = "See this condition's {.code rs_assert_error} attribute for details."
+      "i" = "See {.fn predicater::{assert_name}} and this condition's \\
+      {.code rs_assert_error} attribute for details."
     )
 
+    cli::cli_div(theme = CLI_THEME)
     if (action == "abort") {
       do.call(cli_abort, c(
         message = list(msgs), call = env, args_cnd,
@@ -167,19 +172,31 @@ create_tests_msgs <- function(tests, msgs_fns, report_untested) {
   for (i in seq_len(tests_n)) {
     ti <- tests[[i]]
     ni <- tests_names[i]
+    fi <- msgs_fns[[ni]]
 
     if (is.na(ti) && report_untested) {
-      tests_msgs[i] <- paste0(ni, ": ", "not tested due to previous failure.")
+      tests_msgs[i] <- paste0("(skip) ", align_ni(ni), "skiped given failure.")
       msgs_names[i] <- "*"
     } else if (ti) {
-      tests_msgs[i] <- paste0(ni, ": ", "ok.")
+      tests_msgs[i] <- paste0("(pass) ", align_ni(ni), fi(attributes(ti), ti))
       msgs_names[i] <- "v"
     } else {
-      tests_msgs[i] <- paste0(ni, ": ", msgs_fns[[ni]](attributes(ti)))
+      tests_msgs[i] <- paste0("(fail) ", align_ni(ni), fi(attributes(ti), ti))
       msgs_names[i] <- "x"
     }
   }
 
   names(tests_msgs) <- msgs_names
   tests_msgs
+}
+# TODO: pass arg (the test argument) to msg_fun too. Then we dont depend on
+# passing arg to the test attrs via %@@%
+
+align_ni <- function(ni, max_nchar = 6) {
+  n <- nchar(ni)
+  if (n < max_nchar) {
+    paste0(ni, strrep("\u2002", max_nchar - n), ": ")
+  } else {
+    paste0(ni, ": ")
+  }
 }

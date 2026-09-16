@@ -72,7 +72,7 @@ NULL
 #'
 #' do.call(test_integer, c(list(x), args)) #> FALSE (not all tests passed)
 #'
-#' try(do.call(assert_integer_like, c(list(x), args, short_circuit = FALSE))) #> Error
+#' try(do.call(assert_integer, c(list(x), args, short_circuit = FALSE))) #> Error
 #'
 #'
 #' # Example 2: Testing an integer vector under "numeric" mode
@@ -120,7 +120,7 @@ core_integer <- function(
         } else {
           is_integer_like(x, mode = mode, tol = tol)
         } %@@%
-          c(mode = mode, type = typeof(x), tol = tol)
+          list(mode = mode, type = typeof(x), tol = tol)
       }
     )
   )
@@ -145,7 +145,7 @@ core_double <- function(
         } else {
           is_numeric(x)
         } %@@%
-          c(mode = mode, type = typeof(x))
+          list(mode = mode, type = typeof(x))
       }
     )
   )
@@ -162,22 +162,22 @@ core_complex <- function(
     x, sentinels, tests_re, tests_im, tests_mod, tests_arg, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_complex(x) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) is_complex(x) %@@% list(type = typeof(x)),
       tests_re = \(x, arg, pars) {
         exec(test_double, x = Re(x), !!!arg) %@@%
-          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
       tests_im = \(x, arg, pars) {
         exec(test_double, x = Im(x), !!!arg) %@@%
-          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
       tests_mod = \(x, arg, pars) {
         exec(test_double, x = Mod(x), !!!arg) %@@%
-          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
       tests_arg = \(x, arg, pars) {
         exec(test_double, x = Arg(x), !!!arg) %@@%
-          c(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       }
     )
   )
@@ -209,9 +209,18 @@ test_complex <- fn_core_to_test(core_complex)
 assert_integer <- fn_core_to_assert(
   core_integer,
   msgs_add = list(
-    type = \(attrs) {
-      fn <- if (attrs$mode == "strict") "is_integer" else "is_integer_like"
-      glue("had type `{attrs$type}` and did not pass `{fn}`.")
+    type = \(attrs, test) {
+      if (attrs$mode == "strict") {
+        glue2(
+          "must pass {.fn predicater::is_integer}().",
+          fmt_postfix("Had type {.val [attrs$type]}.", test)
+        )
+      } else {
+        glue2(
+          "must pass {.fn predicater::is_integer_like}() in {.val [attrs$mode]} mode.",
+          fmt_postfix("Had type {.val [attrs$type]}.", test)
+        )
+      }
     }
   )
 )
@@ -221,33 +230,45 @@ assert_integer <- fn_core_to_assert(
 assert_double <- fn_core_to_assert(
   core_double,
   msgs_add = list(
-    type = \(attrs) {
-      fn <- if (attrs$mode == "double") "is_double" else "is_numeric"
-      glue("had type `{attrs$type}` and did not pass `{fn}`.")
+    type = \(attrs, test) {
+      fn <- if (attrs$mode == "double") {
+        "predicater::is_double"
+      } else {
+        "predicater::is_numeric"
+      }
+      glue2(
+        "must pass {.fn [fn]}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
     }
   )
 )
+
+msg_tests_complex <- function(x) {
+  \(attrs, test) {
+    ts <- if (length(attrs$tests) == 1) "test" else "tests"
+    glue2(
+      "[x] must pass custom {.fn predicater::test_double} [ts].",
+      fmt_postfix("Failed: [fmt_vec(attrs$tests)].", test),
+      x = x
+    )
+  }
+}
 
 #' @rdname test-numeric
 #' @export
 assert_complex <- fn_core_to_assert(
   core_complex,
   msgs_add = list(
-    type = \(attrs) {
-      glue("had type `{attrs$type}` and did not pass `is_complex`.")
+    type = \(attrs, test) {
+      glue2(
+        "must pass {.fn predicater::is_complex}().",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
     },
-    tests_re = \(attrs) {
-      glue("real component (`Re`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
-    },
-    tests_im = \(attrs) {
-      glue("imaginary component (`Im`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
-    },
-    tests_mod = \(attrs) {
-      glue("modulus component (`Mod`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
-    },
-    tests_arg = \(attrs) {
-      glue("argument component (`Arg`) failed `test_double` for tests: {glue_collapse(attrs$tests, sep = ', ')}.")
-    }
+    tests_re = msg_tests_complex("real component ({.fn Re})"),
+    tests_im = msg_tests_complex("imaginary component ({.fn Im})"),
+    tests_mod = msg_tests_complex("modulus component ({.fn Mod})"),
+    tests_arg = msg_tests_complex("argument component ({.fn Arg})")
   )
 )
-# TODO: pluralize 'tests' (?)

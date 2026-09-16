@@ -36,8 +36,7 @@ is_attrs_allowed <- function(x, cnd_match = NULL, warn = "tw") {
   # Checks:
   # - cnd_match should be no-NA string or NULL
   # - warn should be "f", "t", "tw", or "e"
-  # TODO:
-
+  
 
   # Main:
   cnd_match <- cnd_match %||% "."
@@ -273,8 +272,7 @@ attrs_filter <- function(
   # - abbr should be a no-NA string with only "[ndc0-9]"
   # - exact and match should be a no-NA character()
   # - keep should be a no-NA flag
-  # TODO:
-
+  
 
   # Main:
   if (! is_attrs_allowed(x, warn = "t")) {
@@ -636,8 +634,7 @@ names3 <- function(x, repair = "unique", how = "names") {
   # - x is a collection
   # - repair is left to vec_as_names()
   # - how is "names" or "attr"
-  # TODO:
-
+  
 
   # Main:
   value <- switch(how,
@@ -665,8 +662,7 @@ names3 <- function(x, repair = "unique", how = "names") {
   # - value is character(length(x))
   # - repair is left to vec_as_names()
   # - how is "names" or "attr"
-  # TODO:
-
+  
 
   # Main:
   if (! is_null(value)) {
@@ -720,8 +716,7 @@ dimnames2 <- function(x, repair = "unique", how = "dimnames") {
   #   to dim(x)[i]
   # - repair is left to vec_as_names()
   # - how is "dimnames" or "attr"
-  # TODO:
-
+  
   # Main:
   if (! is_null(value)) {
     value <- lapply(value, \(v) vctrs::vec_as_names(v, repair = repair))
@@ -819,8 +814,7 @@ class2 <- function(x, how = "class") {
   # Checks:
   # - how is "class" or "attr"
   # - value must be character without NAs, "", and dups
-  # TODO:
-
+  
 
   # Main:
   value <- value[value != "" & !duplicated(value) & !is.na(value)]

@@ -2,7 +2,8 @@
 #' @include validation-helpers.R validation-menu.R
 NULL
 
-# CHECK: why do.call with a symbol/language arguments fails
+# CHECK: why do.call with a symbol/language arguments fails (hence the exec())
+# TODO: empty/valid/etc. can be just NULL or TRUE
 
 
 
@@ -45,22 +46,22 @@ core_expression <- function(
     x, sentinels, len, n_null, n_call, n_sym, n_literal, custom, custom_map,
     tests_pars = list(l = length(x), x_list = as.list(x)), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_expression2(x) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) is_expression2(x) %@@% list(type = typeof(x)),
       n_call = \(x, arg, pars) {
         n_call <- sum(vapply_lgl(pars$x_list, is_call))
-        test_in_range(n_call, arg, pars$l) %@@% c(n = n_call)
+        test_in_range(n_call, arg, pars$l) %@@% list(arg = arg, n = n_call)
       },
       n_sym = \(x, arg, pars) {
         n_sym <- sum(vapply_lgl(pars$x_list, is_symbol))
-        test_in_range(n_sym, arg, pars$l) %@@% c(n = n_sym)
+        test_in_range(n_sym, arg, pars$l) %@@% list(arg = arg, n = n_sym)
       },
       n_literal = \(x, arg, pars) {
         n_lit <- sum(vapply_lgl(pars$x_list, is_syntactic_literal))
-        test_in_range(n_lit, arg, pars$l) %@@% c(n = n_lit)
+        test_in_range(n_lit, arg, pars$l) %@@% list(arg = arg, n = n_lit)
       },
       n_invalid = \(x, arg, pars) {
         n_invalid <- sum(vapply_lgl(pars$x_list, \(x) !is_parseable(x)))
-        test_in_range(n_invalid, arg, pars$l) %@@% c(n = n_invalid)
+        test_in_range(n_invalid, arg, pars$l) %@@% list(arg = arg, n = n_invalid)
       }
     )
   )
@@ -75,10 +76,16 @@ test_expression <- fn_core_to_test(core_expression)
 assert_expression <- fn_core_to_assert(
   core_expression,
   msgs_add = list(
-    type = \(attrs) "must be an expression.",
-    n_call = \(attrs) "count of call elements does not fall within the expected range.",
-    n_sym = \(attrs) "count of symbol elements does not fall within the expected range.",
-    n_literal = \(attrs) "count of literal elements does not fall within the expected range."
+    type = \(attrs, test) {
+      glue2(
+        "must be of type {.val expression}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    n_call = msg_n_arg("#of call elements"),
+    n_sym = msg_n_arg("#of symbol elements"),
+    n_literal = msg_n_arg("#of syntatic literals elements"),
+    n_invalid = msg_n_arg("#of syntatically invalid elements")
   )
 )
 
@@ -148,16 +155,17 @@ core_symbol <- function(
     x, sentinels, n_char, valid, env_has, env_seen, custom,
     tests_pars = list(sym_str = sym_str), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_symbol(x) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) is_symbol(x) %@@% list(type = typeof(x)),
       n_char = \(x, arg, pars) {
         n_char <- nchar(pars$sym_str)
-        test_in_range(n_char, arg, n_char) %@@% c(n = n_char)
+        test_in_range(n_char, arg, n_char) %@@% list(arg = arg, n = n_char)
       },
       valid = \(x, arg, pars) {
-        (make.names(pars$sym_str) == pars$sym_str) == arg
+        (make.names(pars$sym_str) == pars$sym_str) == arg %@@%
+          list(arg = arg, name = pars$sym_str)
       },
       empty = \(x, arg, pars) {
-        (pars$sym_str == "") == arg
+        (pars$sym_str == "") == arg %@@% list(arg = arg)
       },
       env_has = \(x, arg, pars) {
         TESTS_MENU$env_has(arg, pars$sym_str) # Oposite order from test_env
@@ -178,9 +186,19 @@ test_symbol <- fn_core_to_test(core_symbol)
 assert_symbol <- fn_core_to_assert(
   core_symbol,
   msgs_add = list(
-    type = \(attrs) "must be a symbol.",
-    n_char = \(attrs) "character count does not fall within the expected range.",
-    valid = \(attrs) "is not a valid syntactic R name."
+    type = \(attrs, test) {
+      glue2(
+        "must be of type {.val symbol}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    n_char = msg_n_arg("#of characters"),
+    valid = \(attrs, test) {
+      glue2(
+        "must be a syntactically valid R name.",
+        fmt_postfix("Was {.val [attrs$name]}.", test)
+      )
+    }
   )
 )
 
@@ -249,18 +267,29 @@ core_language <- function(
     x, sentinels, name, ns, n_args, arg_names, simple, valid, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_language(x) %@@% c(type = typeof(x)),
-      name = \(x, arg, pars) identical(call_name(x), arg),
-      ns = \(x, arg, pars) identical(call_ns(x), arg),
+      type = \(x, arg, pars) is_language(x) %@@% list(type = typeof(x)),
+      name = \(x, arg, pars) {
+        name <- call_name(x)
+        name == arg %@@% list(arg = arg, name = name)
+      },
+      ns = \(x, arg, pars) {
+        ns <- call_ns(x)
+        ns == arg %@@% list(arg = arg, ns = ns)
+      },
       n_args = \(x, arg, pars) {
         n_args <- length(x) - 1L
-        test_in_range(n_args, arg, n_args) %@@% c(n = n_args)
+        test_in_range(n_args, arg, n_args) %@@% list(arg = arg, n = n_args)
       },
       arg_names = \(x, arg, pars) {
-        identical(names(call_args(x)), arg)
+        names <- names(call_args(x))
+        identical(names, arg) %@@% list(arg = arg, names = names)
       },
-      simple = \(x, arg, pars) is_call_simple(x) == arg,
-      valid = \(x, arg, pars) is_parseable(x) == arg
+      simple = \(x, arg, pars) {
+        is_call_simple(x) == arg %@@% list(arg = arg)
+      },
+      valid = \(x, arg, pars) {
+        is_parseable(x) == arg %@@% list(arg = arg)
+      }
     )
   )
 }
@@ -274,13 +303,43 @@ test_language <- fn_core_to_test(core_language)
 assert_language <- fn_core_to_assert(
   core_language,
   msgs_add = list(
-    type = \(attrs) "must be a language object (call).",
-    name = \(attrs) "function name does not match expected value.",
-    ns = \(attrs) "namespace does not match expected value.",
-    n_args = \(attrs) "argument count does not fall within the expected range.",
-    arg_names = \(attrs) "argument names do not match expected values.",
-    simple = \(attrs) "simple call check failed.",
-    valid = \(attrs) "call parseability check failed."
+    type = \(attrs, test) {
+      glue2(
+        "must be of type {.val language}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    name = \(attrs, test) {
+      glue2(
+        "must have call name {.val [attrs$arg]}.",
+        fmt_postfix("Was {.val [attrs$name]}.", test)
+      )
+    },
+    ns = \(attrs, test) {
+      glue2(
+        "must have call namespace {.val [attrs$arg]}.",
+        fmt_postfix("Was {.val [attrs$ns]}.", test)
+      )
+    },
+    n_args = msg_n_arg("#of arguments"),
+    arg_names = \(attrs, test) {
+      glue2(
+        "must have argument names: [fmt_vec(attrs$arg)].",
+        fmt_postfix("Had [fmt_vec(attrs$names)].", test)
+      )
+    },
+    simple = \(attrs, test) {
+      glue2(
+        "must be [if (attrs$arg) 'a' else 'not a'] simple call.",
+        fmt_postfix("Was[if (attrs$arg) ' not' else ''] simple.", test)
+      )
+    },
+    valid = \(attrs, test) {
+      glue2(
+        "must[if (attrs$arg) '' else ' not'] be a valid call.",
+        fmt_postfix("Was[if (attrs$arg) ' not' else ''] parseable.", test)
+      )
+    }
   )
 )
 
@@ -346,13 +405,14 @@ core_code <- function(
     x, sentinels, valid, empty, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_code(x, sym, lang, literal) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) is_code(x, sym, lang, literal) %@@% list(type = typeof(x)),
       valid = \(x, arg, pars) {
-        is_code(x, sym, lang, literal, valid = TRUE) == arg
+        is_code(x, sym, lang, literal, valid = TRUE) == arg %@@%
+          list(sym = sym, lang = lang, literal = literal)
       },
       empty = \(x, arg, pars) {
         if (is_symbol(x)) {
-          identical(x, expr()) == arg
+          identical(x, expr()) == arg %@@% list(arg = arg)
         } else {
           TRUE
         }
@@ -370,8 +430,28 @@ test_code <- fn_core_to_test(core_code)
 assert_code <- fn_core_to_assert(
   core_code,
   msgs_add = list(
-    type = \(attrs) glue("had type `{attrs$type}`, which is not valid language code."),
-    valid = \(attrs) "code validity check failed.",
-    empty = \(attrs) "empty symbol status does not match expected setting."
+    type = \(attrs, test) {
+      opts <- c(
+        if (attrs$sym) "symbol",
+        if (attrs$lang) "language",
+        if (attrs$literal) "syntactic literal"
+      )
+      glue2(
+        "must be of 'type' [fmt_vec(opts)].",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    valid = \(attrs, test) {
+      glue2(
+        "must be [if (attrs$arg) 'valid' else 'invalid'] code.",
+        fmt_postfix("Was {.val [!attrs$arg]}.", test)
+      )
+    },
+    empty = \(attrs, test) {
+      glue2(
+        "empty symbol status must be {.val [attrs$arg]}.",
+        fmt_postfix("Was not.", test)
+      )
+    }
   )
 )

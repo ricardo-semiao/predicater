@@ -58,10 +58,10 @@ core_logical <- function(
     x, sentinels, len, n_na, n_true, custom,
     tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_logical(x) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) is_logical(x) %@@% list(type = typeof(x)),
       n_true = \(x, arg, pars) {
         n_true <- sum(x, na.rm = TRUE)
-        test_in_range(n_true, arg, pars$l) %@@% c(n = n_true)
+        test_in_range(n_true, arg, pars$l) %@@% list(arg = arg, n = n_true)
       }
     )
   )
@@ -78,7 +78,7 @@ core_raw <- function(
     x, sentinels, len, custom,
     tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_raw(x) %@@% c(type = typeof(x))
+      type = \(x, arg, pars) is_raw(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -99,22 +99,26 @@ test_raw <- fn_core_to_test(core_raw)
 
 #' @rdname test-logical_raw
 #' @export
-assert_logical <- fn_core_to_assert(
-  core_logical,
-  msgs_add = list(
-    type = \(attrs) glue("had type `{attrs$type}`, not `logical`."),
-    n_true = \(attrs) "count of TRUE elements does not fall within the expected range."
-  )
-)
+assert_logical <- fn_core_to_assert(core_logical, list(
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val logical}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  },
+  n_true = msg_n_arg("#of TRUE values")
+))
 
 #' @rdname test-logical_raw
 #' @export
-assert_raw <- fn_core_to_assert(
-  core_raw,
-  msgs_add = list(
-    type = \(attrs) glue("had type `{attrs$type}`, not `raw`.")
-  )
-)
+assert_raw <- fn_core_to_assert(core_raw, list(
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val raw}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
+))
 
 
 
@@ -185,12 +189,14 @@ core_character <- function(
     x, sentinels, len, n_na, n_dup, n_char, set, match, sorted, custom,
     tests_pars = list(l = length(x), perl = perl), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_character(x) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) is_character(x) %@@% list(type = typeof(x)),
       n_char = \(x, arg, pars) {
         n_char <- nchar(x)
-        test_in_range(n_char, arg, pars$l) %@@% c(n = n_char)
+        test_in_range(n_char, arg, pars$l) %@@% list(arg = arg, n = n_char)
       },
-      match = \(x, arg, pars) test_in_pattern(x, arg, perl = pars$perl)
+      match = \(x, arg, pars) {
+        test_in_pattern(x, arg, perl = pars$perl) %@@% list(arg = arg)
+      }
     )
   )
 }
@@ -203,14 +209,21 @@ test_character <- fn_core_to_test(core_character)
 
 #' @rdname test_character
 #' @export
-assert_character <- fn_core_to_assert(
-  core_character,
-  msgs_add = list(
-    type = \(attrs) glue("had type `{attrs$type}`, not `character`."),
-    n_char = \(attrs) "character counts do not fall within the expected range.",
-    match = \(attrs) "had matches outside of the allowed patterns."
-  )
-)
+assert_character <- fn_core_to_assert(core_character, list(
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val character}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  },
+  n_char = msg_n_arg("all elements' #of characters"),
+  match = \(attrs, test) {
+    glue2(
+      "must match the patterns [fmt_vec(attrs$arg)].",
+      fmt_postfix("Did not.", test)
+    )
+  }
+))
 
 
 

@@ -3,8 +3,8 @@
     Code
       try(assert_from_msg(msg_fun, x))
     Output
-      Error in eval(code, test_env) : 
-        Error with argument `x`: x must be numeric and have no missing values
+      Error in (function (message, ..., call = .envir, .envir = parent.frame(),  : 
+        argument "message" is missing, with no default
 
 # Simple error function
 
@@ -21,10 +21,8 @@
         f("a")
       })
     Output
-      Error in "fun(..., .envir = .envir)" : 
-        ! Could not evaluate cli `{}` expression: `x_name[i]`.
-      Caused by error in `eval(expr, envir = envir)`:
-      ! object 'x_name' not found
+      Error in (function (message, ..., call = .envir, .envir = parent.frame(),  : 
+        argument "message" is missing, with no default
 
 # Examples - assert_predicate snapshot
 
@@ -44,6 +42,6 @@
     Code
       try(do.call(assert_multiple, c(list(x), args)))
     Output
-      Error in (function (x, mode = "list", len = NULL, n_null = NULL, n_empty = NULL,  : 
+      Error in core_multiple(x, types, ..., short_circuit) : 
         argument "short_circuit" is missing, with no default
 

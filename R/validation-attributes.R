@@ -2,6 +2,9 @@
 #' @include validation-helpers.R validation-menu.R
 NULL
 
+# NOTE: the type test could be !is_null(), but this would allow how = x to pass
+# a weird object
+
 
 
 # Names ------------------------------------------------------------------------
@@ -30,8 +33,8 @@ NULL
 #'   `names(x)`; `"attr"` for `attr(x, "names")`; `"colnames"` for
 #'   `colnames(x)`; `"row.names"` for `attr(x, "row.names")`; or a positive
 #'   integer for `dimnames(x)[[how]]`.
-#' @param empty \[`TRUE` | `FALSE`] Whether to early pass or fail the test if
-#'   the underlying vector `x` is empty.
+#' @param empty \[`TRUE` | `NULL`] Whether to early pass the test if the
+#'   underlying vector `x` is empty.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param action `r ROXY$action()`
@@ -54,7 +57,7 @@ NULL
 #'   set = list(yes = c("a", "b"), no = c("d", "e")),
 #'   # Names must be only "a" or "b", and not "d" nor "e" (will fail)
 #'   how = "names",         # Use `names(x)` as the names vector to test
-#'   empty = FALSE,         # Don't allow empty `x` (will pass)
+#'   empty = NULL,          # Don't allow empty `x` (will pass)
 #'   sentinels = c("null"), # Allow `NULL` names (not the case of x)
 #'   custom = \(x) isTRUE(all(nchar(x) == 1))
 #'   # All names must be a single character (will fail)
@@ -71,7 +74,7 @@ core_names <- function(
   x,
   n_na = NULL, n_empty = NULL, n_dup = NULL, n_invalid = NULL,
   set = NULL, tests_char = NULL, how = "names",
-  empty = FALSE, sentinels = NULL, custom = NULL,
+  empty = NULL, sentinels = NULL, custom = NULL,
   short_circuit = TRUE
 ) {
   x <- switch(how,
@@ -84,20 +87,25 @@ core_names <- function(
   )
 
   run_tests(
-    x, sentinels, n_na, n_empty, n_dup, n_invalid, set, tests_char, empty, custom,
-    tests_pars = list(), short = short_circuit,
+    x, sentinels, empty, n_na, n_empty, n_dup, n_invalid, set, tests_char, custom,
+    tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_character(x) %@@% c(type = typeof(x)),
+      type = \(x, arg, pars) {
+        is_character(x) %@@% list(type = typeof(x))
+      },
       n_empty = \(x, arg, pars) {
         n_empty <- sum(x == "", na.rm = TRUE)
-        test_in_range(n_empty, arg, pars$l) %@@% c(n = n_empty)
+        test_in_range(n_empty, arg, pars$l) %@@%
+          list(arg = arg, n = n_empty)
       },
       n_invalid = \(x, arg, pars) {
         n_invalid <- sum(make.names(x) != x, na.rm = TRUE)
-        test_in_range(n_invalid, arg, pars$l) %@@% c(n = n_invalid)
+        test_in_range(n_invalid, arg, pars$l) %@@%
+          list(arg = arg, n = n_invalid)
       },
       tests_char = \(x, arg, pars) {
-        exec(test_character, x, !!!arg)
+        exec(test_character, x, !!!arg) %@@%
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       },
       empty = \(x, arg, pars) {
         is_empty2(x)
@@ -105,8 +113,13 @@ core_names <- function(
     )
   )
 }
-# cite sentinels NULL and empty
+# TODO: cite sentinels NULL and empty
 # TODO: order would be nice. set doesnt support it
+# WARN: if x is empty and short_circuit = FALSE, we might get errors. Maybe
+# create a menu_short arg to run_tests that always short_circuits (type and
+# sentinels there, instead of manually). Then, lets generalize the idea of a non
+# failable test, maybe one that returns NA. Ideas are good, but: if x is empty,
+# names are null, and we short-circuit in type test
 
 #' @rdname test_names
 #' @export
@@ -117,13 +130,27 @@ test_names <- fn_core_to_test(core_names)
 assert_names <- fn_core_to_assert(
   core_names,
   msgs_add = list(
-    type = \(attrs) "is not a character vector.",
-    empty = \(attrs) "is an empty vector.",
-    n_empty = \(attrs) "count of empty string names does not fall within the expected range.",
-    n_invalid = \(attrs) "count of syntactically invalid R names does not fall within the expected range.",
-    tests_char = \(attrs) "failed additional character tests specified in `tests_char`."
+    type = \(attrs, test) {
+      glue2(
+        "names must be of type {.val character}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    empty = \(attrs, test) {
+      glue2("vector can be empty.") # Non-failable test
+    },
+    n_empty = msg_n_arg("#of empty string names"),
+    n_invalid = msg_n_arg("#of syntactically invalid names"),
+    tests_char = \(attrs, test) {
+      ts <- if (length(attrs$tests) == 1) "test" else "tests"
+      glue2(
+        "names must pass custom {.fn predicater::test_names} [ts].",
+        fmt_postfix("Failed [fmt_vec(attrs$tests)].", test)
+      )
+    }
   )
 )
+# CHECK: pass how via %@@% to be used in messages? Doesn't seem easy to inform
 
 
 
@@ -201,28 +228,30 @@ core_matrix <- function(
   sentinels = NULL, custom = NULL, custom_apply = NULL,
   short_circuit
 ) {
-  dims <- switch(
-    how,
+  dims <- switch(how,
     dim = dim(x),
     x = x,
     attr = attr(x, "dim", exact = TRUE)
   )
 
   run_tests(
-    x, sentinels, n_dims, dims_shape, custom, custom_apply,
+    x, sentinels, n_dims, dims_shape, names_apply, custom, custom_apply,
     tests_pars = list(dims = dims, l = length(x)), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) !is_null(pars$dims),
+      type = \(x, arg, pars) {
+        is_integer(pars$dims) %@@% list(type = typeof(pars$dims))
+        # TODO: maybe use is_integer_like for more leeway
+      },
       n_dims = \(x, arg, pars) {
         n_dims <- length(pars$dims)
-        test_in_range(n_dims, arg, pars$l) %@@% c(n = n_dims)
+        test_in_range(n_dims, arg, pars$l) %@@% list(arg = arg, n = n_dims)
       },
       dims_shape = \(x, arg, pars) {
         res <- logical(length(arg))
         for (i in seq_along(arg)) {
           res[i] <- test_in_range(pars$dims[i], arg[[i]], pars$l)
         }
-        all(res)
+        all(res) %@@% list(dims = which(! res))
       },
       names_apply = \(x, arg, pars) {
         dimnames <- dimnames(x)
@@ -236,18 +265,21 @@ core_matrix <- function(
           res <- logical(length(arg))
           for (i in seq_along(arg)) {
             margin <- eval(f_lhs(arg[[i]]))
-            res[i] <- exec(test_names, x = dimnames[[margin]], !!!arg[[i]])
+            args <- eval(f_rhs(arg[[i]]))
+            res[i] <- exec(test_names, x = dimnames[[margin]], !!!args)
           }
         }
+        all(res) %@@% list(dims = which(! res))
       },
       custom_apply = \(x, arg, pars) {
         res <- logical(length(arg))
+        margins <- integer(length(arg))
         for (i in seq_along(arg)) {
-          margin <- eval(f_lhs(arg[[i]]))
+          margins[i] <- eval(f_lhs(arg[[i]]))
           fun <- eval(f_rhs(arg[[i]]))
-          res[i] <- all(apply(x, margin, \(x) test_custom(x, fun)))
+          res[i] <- all(apply(x, margins[i], \(x) test_custom(x, fun)))
         }
-        all(res)
+        all(res) %@@% list(margin = margins[which(! res)])
       }
     )
   )
@@ -264,11 +296,34 @@ test_matrix <- fn_core_to_test(core_matrix)
 assert_matrix <- fn_core_to_assert(
   core_matrix,
   msgs_add = list(
-    type = \(attrs) glue("no dimensions."),
-    n_dims = \(attrs) "number of matrix dimensions does not fall within the expected range.",
-    dims_shape = \(attrs) glue("dimension size for dimension {attrs$dim} failed expected shape check."),
-    names_apply = \(attrs) glue("names for dimension failed expected check."),
-    custom_apply = \(attrs) glue("custom applied assertion failed along margin '{attrs$margin}'.")
+    type = \(attrs, test) {
+      glue2(
+        "dim must be of type {.val integer}.",
+        fmt_postfix("Had type {.val [attrs$type]}.", test)
+      )
+    },
+    n_dims = msg_n_arg("#of dimensions"),
+    dims_shape = \(attrs, test) {
+      ds <- if (length(attrs$dims) == 1) "dimension" else "dimensions"
+      glue2(
+        "each dimension size must be in custom range.",
+        fmt_postfix("Failed for [ds] [fmt_vec(attrs$dims)].", test)
+      )
+    },
+    names_apply = \(attrs, test) {
+      ds <- if (length(attrs$dims) == 1) "dimension" else "dimensions"
+      glue2(
+        "each dimension names must pass custom {.fn predicater::test_names} test.",
+        fmt_postfix("Failed for [ds] [fmt_vec(attrs$dims)].", test)
+      )
+    },
+    custom_apply = \(attrs, test) {
+      ms <- if (length(attrs$margin) == 1) "margin" else "margins"
+      glue2(
+        "must pass custom tests along some margins.",
+        fmt_postfix("Failed for [ms] {.val {[attrs$margin]}}.", test)
+      )
+    }
   )
 )
 
@@ -344,8 +399,7 @@ core_class <- function(
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
-  x <- switch(
-    how,
+  x <- switch(how,
     class = class(x),
     x = x,
     attr = attr(x, "class", exact = TRUE)
@@ -355,10 +409,12 @@ core_class <- function(
     x, sentinels, classes, tests_char, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) test_character(x, len = c(1, Inf), n_na = 0),
+      type = \(x, arg, pars) {
+        test_character(x, len = c(1, Inf), n_na = 0) %@@% list(c = x)
+      },
       classes = \(x, arg, pars) {
         if (is_character(arg)) {
-          return(inherits_any(x, arg))
+          return(inherits_any(x, arg) %@@% list(arg = arg))
         }
 
         res <- logical(length(arg))
@@ -371,10 +427,11 @@ core_class <- function(
             none = !inherits_any(x, arg[[i]])
           )
         }
-        any(res)
+        any(res) %@@% list(c = x)
       },
       tests_char = \(x, arg, pars) {
-        exec(test_character, x, !!!arg)
+        exec(test_character, x, !!!arg) %@@%
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
       }
     )
   )
@@ -389,9 +446,25 @@ test_class <- fn_core_to_test(core_class)
 assert_class <- fn_core_to_assert(
   core_class,
   msgs_add = list(
-    type = \(attrs) "object does not have a valid class attribute.",
-    classes = \(attrs) "object failed class inheritance constraints.",
-    tests_char = \(attrs) "failed additional character tests on class names."
+    type = \(attrs, test) {
+      glue2(
+        "class must be a non-empty no-na character vector.",
+        fmt_postfix("Had class [fmt_vec(attrs$c)].", test)
+      )
+    },
+    classes = \(attrs, test) {
+      glue2(
+        "class must satisfy class inheritance constraints.",
+        fmt_postfix("Had class [fmt_vec(attrs$c)].", test)
+      )
+    },
+    tests_char = \(attrs, test) {
+      ts <- if (length(attrs$tests) == 1) "test" else "tests"
+      glue2(
+        "class must pass the specified character [ts].",
+        fmt_postfix("Failed [fmt_vec(attrs$tests)].", test)
+      )
+    }
   )
 )
 
@@ -460,10 +533,21 @@ core_object <- function(
     x, sentinels, oo_system, s4_bit, tests_class, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_object_like(x, bad = "false"),
-      oo_system = \(x, arg, pars) is_system(x, arg),
-      s4_bit = \(x, arg, pars) has_s4_bit(x) == arg,
-      tests_class = \(x, arg, pars) exec(test_class, x = x, !!!arg)
+      type = \(x, arg, pars) {
+        is_object_like(x, bad = "false")
+      },
+      oo_system = \(x, arg, pars) {
+        sys <- object_system(x)
+        arg == sys %@@% list(arg = arg, system = sys)
+      },
+      s4_bit = \(x, arg, pars) {
+        bit <- has_s4_bit(x)
+        bit == arg %@@% list(arg = arg, bit = bit)
+      },
+      tests_class = \(x, arg, pars) {
+        exec(test_class, x = x, !!!arg) %@@%
+          list(tests = names(arg)[vapply_lgl(arg, \(p) !is_null(p))])
+      }
     )
   )
 }
@@ -479,9 +563,30 @@ test_object <- fn_core_to_test(core_object)
 assert_object <- fn_core_to_assert(
   core_object,
   msgs_add = list(
-    type = \(attrs) "is not an object.",
-    oo_system = \(attrs) "failed object-oriented system constraint.",
-    s4_bit = \(attrs) "S4 bit status does not match expected setting.",
-    tests_class = \(attrs) "failed object class tests."
+    type = \(attrs, test) {
+      glue2(
+        "must have a consistent class (see {.fn predicater::is_object_like}).",
+        fmt_postfix("Did not.", test)
+      )
+    },
+    oo_system = \(attrs, test) {
+      glue2(
+        "must belong to the {.val [attrs$arg]} object system.",
+        fmt_postfix("Was from {.val [attrs$system]}.", test)
+      )
+    },
+    s4_bit = \(attrs, test) {
+      glue2(
+        "S4 bit must be {.val [attrs$arg]}.",
+        fmt_postfix("Was {.val [attrs$bit]}.", test)
+      )
+    },
+    tests_class = \(attrs, test) {
+      ts <- if (length(attrs$tests) == 1) "test" else "tests"
+      glue2(
+        "must pass the custom {.fn predicater::test_class} [ts].",
+        fmt_postfix("Failed [fmt_vec(attrs$tests)].", test)
+      )
+    }
   )
 )

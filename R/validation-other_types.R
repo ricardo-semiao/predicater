@@ -41,7 +41,7 @@ core_null <- function(
     x, sentinels,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, test_arg, params) is_null(x) %@@% c(type = typeof(x))
+      type = \(x, test_arg, params) is_null(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -54,7 +54,7 @@ core_promise <- function(
     x, sentinels, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, test_arg, params) is_promise(x) %@@% c(type = typeof(x))
+      type = \(x, test_arg, params) is_promise(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -67,7 +67,7 @@ core_dots <- function(
     x, sentinels, custom,
     tests_pars = list(l = length(x)), short = short_circuit,
     menu_add = list(
-      type = \(x, test_arg, params) is_dots(x) %@@% c(type = typeof(x))
+      type = \(x, test_arg, params) is_dots(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -82,7 +82,7 @@ core_weakref <- function(
     x, sentinels, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, test_arg, params) is_weakref(x) %@@% c(type = typeof(x))
+      type = \(x, test_arg, params) is_weakref(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -95,7 +95,7 @@ core_bytecode <- function(
     x, sentinels, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, test_arg, params) is_bytecode(x) %@@% c(type = typeof(x))
+      type = \(x, test_arg, params) is_bytecode(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -108,7 +108,7 @@ core_externalptr <- function(
     x, sentinels, custom,
     tests_pars = list(), short = short_circuit,
     menu_add = list(
-      type = \(x, test_arg, params) is_externalptr(x) %@@% c(type = typeof(x))
+      type = \(x, test_arg, params) is_externalptr(x) %@@% list(type = typeof(x))
     )
   )
 }
@@ -142,37 +142,67 @@ test_externalptr <- fn_core_to_test(core_externalptr)
 #' @rdname tests-other_types
 #' @export
 assert_null <- fn_core_to_assert(core_null, list(
-  type = \(x, test_arg, params) glue("`{x}` is not `NULL`")
+  type = \(attrs, test) {
+    glue2(
+      "must be {.val NULL}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
 ))
 
 #' @rdname tests-other_types
 #' @export
 assert_promise <- fn_core_to_assert(core_promise, list(
-  type = \(x, test_arg, params) glue("`{x}` is not of type {.val promise}.")
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val promise}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
 ))
 
 #' @rdname tests-other_types
 #' @export
 assert_dots <- fn_core_to_assert(core_dots, list(
-  type = \(x, test_arg, params) glue("`{x}` is not of type {.val ...}.")
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val ...}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
 ))
 
 #' @rdname tests-other_types
 #' @export
 assert_weakref <- fn_core_to_assert(core_weakref, list(
-  type = \(x, test_arg, params) glue("`{x}` is not of type weak reference.")
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val weakref}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
 ))
 
 #' @rdname tests-other_types
 #' @export
 assert_bytecode <- fn_core_to_assert(core_bytecode, list(
-  type = \(x, test_arg, params) glue("`{x}` is not bytecode.")
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val bytecode}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
 ))
 
 #' @rdname tests-other_types
 #' @export
 assert_externalptr <- fn_core_to_assert(core_externalptr, list(
-  type = \(x, test_arg, params) glue("`{x}` is not an external pointer.")
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val externalptr}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
+  }
 ))
 
 
@@ -198,10 +228,6 @@ assert_externalptr <- fn_core_to_assert(core_externalptr, list(
 #'   [rlang::env_inherits()]. Set to `NULL` to not test.
 #' @param dots \[`TRUE` | `FALSE` | `NULL`] Test if the function has `...` in
 #'   its arguments. Set to `NULL` to not test.
-#' @param generic,method \[`TRUE` | `FALSE` | `NULL` each] Test if the function
-#'   is an S3 generic or method via
-#'   [sloop::is_s3_generic()]/[sloop::is_s3_method()]. Set to `NULL` to not
-#'   test.
 #' @param sentinels `r ROXY$sentinels()`
 #' @param custom `r ROXY$custom()`
 #' @param action `r ROXY$action()`
@@ -224,8 +250,6 @@ assert_externalptr <- fn_core_to_assert(core_externalptr, list(
 #'   fn_env = rlang::global_env(),
 #'   # Function environment must equal or inherit from global env (will pass)
 #'   dots = TRUE,                 # Function must accept `...` in arguments (will pass)
-#'   generic = FALSE,             # Must not be an S3 generic (will pass)
-#'   method = FALSE,              # Must not be an S3 method (will pass)
 #'   sentinels = c("null"),       # Allow NULL function (not the case of x)
 #'   custom = NULL                # No custom predicate
 #' )
@@ -240,31 +264,24 @@ NULL
 core_function <- function(
   x,
   mode = "function", args_names = NULL, fn_env = NULL, dots = NULL,
-  generic = NULL, method = NULL,
   sentinels = NULL, custom = NULL,
   short_circuit
 ) {
   run_tests(
-    x, sentinels, args_names, env, dots, generic, method, custom,
+    x, sentinels, args_names, fn_env, dots, custom,
     tests_pars = list(mode = mode), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) test_fn_type(x, pars$mode),
-      args_names = \(x, arg, pars) identical(fn_fmls_names(x), arg),
-      fn_env = \(x, arg, pars) test_fn_env(x, arg),
-      dots = \(x, arg, pars) ("..." %in% fn_fmls_names(x)) == arg,
-      generic = \(x, arg, pars) {
-        if (check_installed2("sloop")) {
-          sloop::is_s3_generic(x) == arg
-        } else {
-          cli_abort("Package {.pkg sloop} is required to run test {.arg generic}.")
-        }
+      type = \(x, arg, pars) {
+        test_fn_type(x, pars$mode) %@@% list(mode = pars$mode)
       },
-      method <- \(x, arg, pars) {
-        if (check_installed2("sloop")) {
-          sloop::is_s3_method(x) == arg
-        } else {
-          cli_abort("Package {.pkg sloop} is required to run test {.arg method}.")
-        }
+      args_names = \(x, arg, pars) {
+        args <- fn_fmls_names(x)
+        identical(args, arg) %@@% list(arg = arg, args = args)
+      },
+      fn_env = \(x, arg, pars) test_fn_env(x, arg),
+      dots = \(x, arg, pars) {
+        has_dots <- "..." %in% fn_fmls_names(x)
+        (has_dots == arg) %@@% list(arg = arg, dots = has_dots)
       }
     )
   )
@@ -277,21 +294,26 @@ test_function <- fn_core_to_test(core_function)
 #' @rdname test_function
 #' @export
 assert_function <- fn_core_to_assert(core_function, list(
-  type = \(attrs) glue("`{x}` is not a function."),
-  args_names = \(attrs) {
-    glue("does not have the expected argument names.")
+  type = \(attrs, test) {
+    glue2(
+      "must be of type {.val [attrs$mode]}.",
+      fmt_postfix("Had type {.val [attrs$type]}.", test)
+    )
   },
-  fn_env = \(attrs) {
-    glue("does not have the expected environment.")
+  args_names = \(attrs, test) {
+    glue2(
+      "must have argument names [fmt_vec(attrs$arg)].",
+      fmt_postfix("Had [fmt_vec(attrs$args)].", test)
+    )
   },
-  dots = \(attrs) {
-    glue("does not have the expected `...` argument.")
+  fn_env = \(attrs, test) {
+    glue2("must have the expected environment.")
   },
-  generic = \(attrs) {
-    glue("is not an S3 generic function.")
-  },
-  method = \(attrs) {
-    glue("is not an S3 method function.")
+  dots = \(attrs, test) {
+    glue2(
+      "must [if (attrs$arg) 'accept' else 'not accept'] {.code ...}.",
+      fmt_postfix("Did [if (attrs$dots) 'accept' else 'not accept'].", test)
+    )
   }
 ))
 
@@ -302,12 +324,13 @@ assert_function <- fn_core_to_assert(core_function, list(
 test_fn_type <- function(x, type) {
   type_x <- typeof(x)
   switch(type,
+    "function" = type_x %in% c("closure", "builtin", "special"),
     primitive = type_x %in% c("builtin", "special"),
     builtin = type_x == "builtin",
     special = type_x == "special",
     closure = type_x == "closure"
   ) %@@%
-    c(type = type_x)
+    list(type = type_x)
 }
 
 test_fn_env <- function(x, target_env) {

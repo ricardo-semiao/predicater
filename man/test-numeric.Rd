@@ -224,7 +224,7 @@ args <- list(
 
 do.call(test_integer, c(list(x), args)) #> FALSE (not all tests passed)
 
-try(do.call(assert_integer_like, c(list(x), args, short_circuit = FALSE))) #> Error
+try(do.call(assert_integer, c(list(x), args, short_circuit = FALSE))) #> Error
 
 
 # Example 2: Testing an integer vector under "numeric" mode

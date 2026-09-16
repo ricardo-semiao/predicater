@@ -10,49 +10,49 @@ TESTS_MENU <- list()
 
 TESTS_MENU$len <- function(x, arg, pars) {
   l <- pars$l
-  test_in_range(l, arg, l) %@@% c(n = l)
+  test_in_range(l, arg, l) %@@% list(arg = arg, n = l)
 }
 
 TESTS_MENU$range <- function(x, arg, pars) {
-  res <- if (length(arg) == 2) {
-    all(x >= arg[1] & x <= arg[2])
+  inside <- if (length(arg) == 2) {
+    x >= arg[1] & x <= arg[2]
 
   } else {
-    all(x %in% arg)
+    x %in% arg
   }
 
-  res %@@% c(range = arg)
+  all(inside) %@@% list(arg = arg, bad = x[which(! inside)])
 }
 
 TESTS_MENU$n_na <- function(x, arg, pars) {
   test_in_range(n_na <- sum(are_na2(x, nan = FALSE)), arg, pars$l) %@@%
-    c(n = n_na)
+    list(arg = arg, n = n_na)
 }
 
 TESTS_MENU$n_dup <- function(x, arg, pars) {
   test_in_range(n_dups <- sum(duplicated(unclass(x))), arg, pars$l) %@@%
-    c(n = n_dups)
+    list(arg = arg, n = n_dups)
 }
 # TODO: deal with NA (incomparables)?
 
 TESTS_MENU$n_nan <- function(x, arg, pars) {
   test_in_range(n_nan <- sum(are_nan(x, na = FALSE)), arg, pars$l) %@@%
-    c(n = n_nan)
+    list(arg = arg, n = n_nan)
 }
 
 TESTS_MENU$n_inf <- function(x, arg, pars) {
   test_in_range(n_inf <- sum(are_inf(x, na = FALSE)), arg, pars$l) %@@%
-    c(n = n_inf)
+    list(arg = arg, n = n_inf)
 }
 
 TESTS_MENU$n_null <- function(x, arg, pars) {
   test_in_range(n_null <- sum(vapply_lgl(x, is_null)), arg, pars$l) %@@%
-    c(n = n_null)
+    list(arg = arg, n = n_null)
 }
 
 TESTS_MENU$n_empty <- function(x, arg, pars) {
   test_in_range(n_empty <- sum(vapply_lgl(x, is_empty)), arg, pars$l) %@@%
-    c(n = n_empty)
+    list(arg = arg, n = n_empty)
 }
 
 
@@ -60,14 +60,14 @@ TESTS_MENU$n_empty <- function(x, arg, pars) {
 # Others -----------------------------------------------------------------------
 
 TESTS_MENU$sorted <- function(x, arg, pars) {
-  is_sorted(x, arg, na.rm = TRUE) %@@% c(sorted = arg)
+  is_sorted(x, arg, na.rm = TRUE) %@@% list(arg = arg)
 }
 
 TESTS_MENU$set <- function(x, arg, pars) {
   if (! is_list(arg)) {
-    all(x %in% arg)
+    all(x %in% arg) %@@% list(arg = arg)
   } else {
-    is_matching_set(x, arg$yes, arg$no, arg$mode %||% "all")
+    is_matching_set(x, arg$yes, arg$no, arg$mode %||% "all") %@@% list(arg = arg)
   }
 }
 # CHECK: would be nice to be able to enforce order too
@@ -78,19 +78,24 @@ TESTS_MENU$custom <- function(x, arg, pars) {
 }
 
 TESTS_MENU$custom_map <- function(x, arg, pars) {
-  all(vapply(x, test_custom, logical(1), custom = arg))
+  all(vapply(
+    names(x) %||% seq_along(x), # Envs must be subsetted by name, not by index
+    \(i) test_custom(x[[i]], arg, i), logical(1)
+  ))
 }
 
 TESTS_MENU$env_has <- function(x, arg, pars) {
-  all(env_has(x, nms = arg, inherit = FALSE))
+  found <- env_has(x, nms = arg, inherit = FALSE)
+  all(found) %@@% list(arg = arg, missing = arg[! found])
 }
 
 TESTS_MENU$env_sees <- function(x, arg, pars) {
-  all(env_has(x, nms = arg, inherit = TRUE))
+  found <- env_has(x, nms = arg, inherit = TRUE)
+  all(found) %@@% list(arg = arg, missing = arg[! found])
 }
 
 TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
-  if ("null" %in% arg) {
+  res <- if ("null" %in% arg) {
     is_null(x)
 
   } else if ("na" %in% arg) {
@@ -131,6 +136,8 @@ TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
   } else {
     FALSE
   }
+
+  res %@@% list(arg = arg)
 }
 
 
@@ -138,7 +145,15 @@ TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
 # Sub-test helpers internals ---------------------------------------------------
 
 #' @noRd
-test_custom <- function(x, custom) {
+test_custom <- function(x, custom, i = NULL) {
+  i_lab <- if (is_integer(i)) {
+    " in the {.val {i}}-th element,"
+  } else if (is_character(i)) {
+    " in the {.val {i}} element,"
+  } else {
+    ""
+  }
+
   tryCatch(
     {
       res <- custom(x)
@@ -146,7 +161,8 @@ test_custom <- function(x, custom) {
         cli_abort(
           c(
             "{.code custom(x)} must return {.val {TRUE}} or {.val {FALSE}}.",
-            "i" = "Instead, with {.arg {x_name[i]}}, it returned {.val {res}}."
+            "i" = glue2("Instead,[i_lab] it returned {.val {res}}."),
+            "i" = "See this condition's {.code rs_user_fun_error} attribute for details."
           ),
           class = "rs_user_fun_error",
           rs_user_fun_error = list(bad_result = res)
@@ -158,8 +174,7 @@ test_custom <- function(x, custom) {
     error = \(cnd) {
       cli_abort(
         "Evaluating {.code custom(x)} raised an error.",
-        class = "rs_test_custom_error",
-        parent = cnd
+        class = "rs_user_fun_error", parent = cnd
       )
     }
   )
@@ -195,22 +210,113 @@ test_in_range <- function(n, range, l) {
 
 # Messages ---------------------------------------------------------------------
 
+msg_n_arg <- function(x) {
+  \(attrs, test) {
+    base <- if (is_function(attrs$arg)) {
+      "[x] must satisfy a custom function."
+    } else if (length(attrs$arg) == 1) {
+      "[x] must be {.val {[attrs$arg]}}."
+    } else if (length(attrs$arg) == 2) {
+      "[x] must be in range {.val {[attrs$arg[1]]}} to {.val {[attrs$arg[2]]}}."
+    } else if (length(attrs$arg) > 2) {
+      "[x] must be in set [fmt_vec(attrs$arg)]."
+    }
+    glue2(
+      base,
+      fmt_postfix("Was {.val {[attrs$n]}}.", test)
+    )
+  }
+}
+# TODO: deal with negative values in length = 2
+
+
 TESTS_MSGS <- list(
-  len = \(attrs) glue("had length {{.val {{{attrs$n}}}}}."),
-  range = \(attrs) glue("had values outside of {{.val {{{attrs$range}}}}}."),
-  n_na = \(attrs) glue("had {{.val {{{attrs$n}}}}} NA values."),
-  n_dup = \(attrs) glue("had {{.val {{{attrs$n}}}}} duplicated values."),
-  n_nan = \(attrs) glue("had {{.val {{{attrs$n}}}}} NaN values."),
-  n_inf = \(attrs) glue("had {{.val {{{attrs$n}}}}} Inf values."),
-  n_null = \(attrs) glue("had {{.val {{{attrs$n}}}}} NULL values."),
-  n_empty = \(attrs) glue("had {{.val {{{attrs$n}}}}} empty values."),
-  sorted = \(attrs) {
-    order <- switch(attrs$sorted, asc = "ascending", desc = "descending")
-    glue("was not sorted in {order} order.")
+  sentinels = \(attrs, test) {
+    if (is_null(attrs$arg)) {
+      "no sentinel values allowed."
+    } else {
+      glue2("can be sentinels: [fmt_vec(attrs$arg, Inf)].")
+    }
   },
-  set = \(attrs) glue("had values outside of the allowed set."),
-  custom = \(attrs) glue("did not pass the custom test."),
-  custom_map = \(attrs) glue("not all elements passed the custom map test."),
-  env_has = \(attrs) glue("supplied symbols were not found in the supplied environment."),
-  env_sees = \(attrs) glue("supplied symbols were not found in the supplied environment or its parents.")
+
+  range = \(attrs, test) {
+    base <- if (length(attrs$arg) == 2) {
+      "must be in range {.val {[attrs$arg[1]]}} to {.val {[attrs$arg[2]]}}."
+    } else {
+      "must be in set [fmt_vec(attrs$arg)]."
+    }
+    glue2(base, fmt_postfix("Found [fmt_vec(attrs$bad, 2)]. ", test))
+  },
+
+  len = msg_n_arg("length"),
+  n_na = msg_n_arg("#of NA values"),
+  n_dup = msg_n_arg("#of duplicate values"),
+  n_nan = msg_n_arg("#of NaN values"),
+  n_inf = msg_n_arg("#of Inf values"),
+  n_null = msg_n_arg("#of NULL values"),
+  n_empty = msg_n_arg("#of empty values"),
+
+  sorted = \(attrs, test) {
+    order <- switch(attrs$arg, asc = "ascending", desc = "descending")
+    glue2(
+      "must be in [order] order.",
+      fmt_postfix("Did not.", test)
+    )
+  },
+
+  set = \(attrs, test)  {
+    glue2(
+      "must be in a custom set.",
+      fmt_postfix("Was not.", test)
+    )
+  },
+
+  custom = \(attrs, test) {
+    glue2(
+      "must pass a custom test.",
+      fmt_postfix("Did not.", test)
+    )
+  },
+
+  custom_map = \(attrs, test) {
+    glue2(
+      "all elements must pass a custom test.",
+      fmt_postfix("Did not.", test)
+    )
+  },
+
+  env_has = \(attrs, test) {
+    glue2(
+      "must contain [fmt_vec(attrs$arg, 2)].",
+      fmt_postfix("Is missing [fmt_vec(attrs$missing, 2)].", test)
+    )
+  },
+
+  env_sees = \(attrs, test) {
+    glue2(
+      "must contain or inherit [fmt_vec(attrs$arg, 2)].",
+      fmt_postfix("Is missing [fmt_vec(attrs$missing, 2)].", test)
+    )
+  }
 )
+
+
+
+# Helpers ----------------------------------------------------------------------
+
+glue2 <- function(...) {
+  glue(..., .open = "[", .close = "]", .envir = caller_env())
+}
+
+fmt_postfix <- function(msg, test) {
+  if (! test) {
+    paste0(" {.fail ", msg, "}")
+  } else {
+    ""
+  }
+}
+
+fmt_vec <- function(x, trunc = 3, ...) {
+  x <- cli::cli_vec(x, list("vec-trunc" = trunc, ...))
+  cli::cli_fmt(cli::cli_text("{.val {x}}"))
+}

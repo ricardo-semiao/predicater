@@ -14,8 +14,9 @@ vapply_lgl <- function(.x, .f = as.logical, ..., .n = 1L) {
 
 
 `%@@%` <- function(x, attrs) {
-  if (!is_null(x)) {
-    attributes(x) <- c(attributes(x), as.list(attrs))
+  if (! is_null(x)) {
+    attributes(x) <- attrs # Could be c(attributes(x), attrs) but we only call
+    # it with no attributes x
   }
   x
 }
@@ -47,7 +48,8 @@ collapse_patterns <- function(p) {
 CLI_THEME <- list(
   ".bold" = list("font-weight" = "bold"),
   ".italic" = list("font-style" = "italic"),
-  ".blue" = list("color" = "blue"),
+  #".blue" = list("color" = "blue"),
+  ".fail" = list("color" = "red"),
   h1 = list(
     "font-weight" = "bold",
     "margin-top" = 1,

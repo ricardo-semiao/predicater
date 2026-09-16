@@ -167,8 +167,7 @@ match_hash <- function(
   # - if ... is empty, htab must be provided
   # - if htab is providade and ... is not empty, warn
   # - type and size are left to hashtab
-  # TODO:
-
+  
 
   # Main:
   if (is_null(htab)) {
@@ -199,8 +198,7 @@ match_id <- function(
   # - ... must be formulas with non-empty LHS, at least one
   # - fun must be one of "identical" or "identical2"
   # - args_id must be a list
-  # TODO:
-
+  
 
   # Main:
   fun <- switch(fun,
@@ -233,8 +231,7 @@ match_ptype <- function(x, ..., nomatch = NULL, args_ptype = list()) {
   # Checks:
   # - ... must be formulas with non-empty LHS, at least one
   # - args_ptype must be a list
-  # TODO:
-
+  
 
   # Main:
   for (case in cases) {
@@ -259,8 +256,7 @@ match_when <- function(x, ..., nomatch = NULL) {
 
   # Checks:
   # - ... must be formulas with non-empty LHS, at least one
-  # TODO:
-
+  
 
   # Main:
   for (case in cases) {

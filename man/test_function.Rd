@@ -11,8 +11,6 @@ test_function(
   args_names = NULL,
   fn_env = NULL,
   dots = NULL,
-  generic = NULL,
-  method = NULL,
   sentinels = NULL,
   custom = NULL
 )
@@ -23,8 +21,6 @@ assert_function(
   args_names = NULL,
   fn_env = NULL,
   dots = NULL,
-  generic = NULL,
-  method = NULL,
   sentinels = NULL,
   custom = NULL,
   action = "abort",
@@ -53,11 +49,6 @@ Checks if \code{fn_env(x)} is identical to \code{env} or inherits from it via
 
 \item{dots}{[\code{TRUE} | \code{FALSE} | \code{NULL}] Test if the function has \code{...} in
 its arguments. Set to \code{NULL} to not test.}
-
-\item{generic, method}{[\code{TRUE} | \code{FALSE} | \code{NULL} each] Test if the function
-is an S3 generic or method via
-\code{\link[sloop:is_s3_generic]{sloop::is_s3_generic()}}/\code{\link[sloop:is_s3_generic]{sloop::is_s3_method()}}. Set to \code{NULL} to not
-test.}
 
 \item{sentinels}{[\code{character()} | \code{NULL}] Each entry in this character vector allows \code{x} to   also be some scalar sentinel below. Set to \code{NULL} to disconsider sentinels.
 \itemize{
@@ -115,8 +106,6 @@ args <- list(
   fn_env = rlang::global_env(),
   # Function environment must equal or inherit from global env (will pass)
   dots = TRUE,                 # Function must accept `...` in arguments (will pass)
-  generic = FALSE,             # Must not be an S3 generic (will pass)
-  method = FALSE,              # Must not be an S3 method (will pass)
   sentinels = c("null"),       # Allow NULL function (not the case of x)
   custom = NULL                # No custom predicate
 )
