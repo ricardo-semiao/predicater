@@ -53,8 +53,8 @@
       Error in eval(code, test_env) : `x` failed `assert_object()`:
       v (pass) sentinels: no sentinel values allowed.
       v (pass) type  : must have a consistent class (see `predicater::is_object_like()`).
-      v (pass) oo_system:
-      v (pass) s4_bit:
+      v (pass) oo_system: must belong to the "S3" object system.
+      v (pass) s4_bit: S4 bit must be "FALSE".
       x (fail) tests_class: must pass the custom `predicater::test_class()` test. Failed "classes".
       v (pass) custom: must pass a custom test.
       

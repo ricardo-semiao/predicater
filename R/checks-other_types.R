@@ -262,7 +262,7 @@ is_collection <- function(
     is_vector(x) ||
       (null && is.null(x)) ||
       (expr && is.expression(x)) ||
-      (pairlist && is.pairlist(x)) ||
+      (pairlist && is_pairlist(x)) || # is.pairlist accepts null
       (env && is.environment(x)) ||
       (dots && is_dots(x))
   )

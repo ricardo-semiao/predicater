@@ -7,7 +7,7 @@
 assert_predicate(
   fun,
   ...,
-  args_fun,
+  args_fun = list(),
   msg = NULL,
   x_names = NULL,
   env = caller_env(),
@@ -25,8 +25,7 @@ to test as its first argument.}
 \item{msg}{[\code{character(1)} | \code{NULL}] The message to use if the check fails.
 If \code{NULL}, a default message is generated.}
 
-\item{x_names}{[\code{character(1)} | \code{NULL}] The name of \code{x} to print in
-messages. In \code{NULL}, the name is inferred from \code{x}'s symbol, if possible.}
+\item{x_names}{[\code{character()} | \code{NULL}] The names of \code{...} to print in messages. If \code{NULL}, the name is inferred from \code{...}'s expressions.}
 
 \item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as   the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
 \itemize{

@@ -351,7 +351,7 @@ attrs_filter <- function(
 #' has_names_valid(integer(0)) #> TRUE
 #'
 #' # Use `how` to control how names are extracted:
-#' has_names_valid(rlang::global_env(), how = "attr") #> FALSE
+#' has_names_valid(rlang::base_env(), how = "attr") #> FALSE
 #' # (envs have no names attribute)
 #' has_names_valid(c("a", "b", "c"), how = "x") #> TRUE (x itself was tested)
 #'
@@ -422,9 +422,9 @@ are_names_valid <- function(
   res <- rep_len(TRUE, length(nms))
 
   if (!na) res <- res & !is.na(nms)
-  if (!empty) res <- res & nms != ""
+  if (!empty) res[!is.na(nms) & nms == ""] <- FALSE
   if (!dups) res <- res & !are_duplicated(x)
-  if (!invalid) res <- res & make.names(nms) == nms
+  if (!invalid) res[!is.na(nms) & make.names(nms) != nms] <- FALSE
 
   res
 }
@@ -523,7 +523,7 @@ n_dimnames <- function(
   n <- n - sum(vapply(dimnames, length, integer(1)) == 0)
   if (! invalid) {
     n <- n - sum(vapply_lgl(dimnames, \(x) {
-      all(is.na(x) | x == "" | are_duplicated(x))
+      length(x) > 0 && all(if_else2(is.na(x), TRUE, x == "" | are_duplicated(x)))
     }))
   }
 

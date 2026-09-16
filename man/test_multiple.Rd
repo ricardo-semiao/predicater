@@ -2,22 +2,9 @@
 % Please edit documentation in R/validation-general_asserts.R
 \name{test_multiple}
 \alias{test_multiple}
-\alias{assert_multiple}
 \title{Validation - Test for one of multiple types}
 \usage{
 test_multiple(x, types, ...)
-
-assert_multiple(
-  x,
-  types,
-  ...,
-  action = "abort",
-  env = caller_env(),
-  x_name = NULL,
-  short_circuit = TRUE,
-  report_untested = TRUE,
-  args_cnd = list()
-)
 }
 \arguments{
 \item{x}{[\code{any}] An object to test.}
@@ -26,29 +13,6 @@ assert_multiple(
 
 \item{...}{[\code{list()} each] Lists of arguments to pass to the test function
 for each type. The list names}
-
-\item{action}{[\code{"abort"} | \code{"warn"} | \code{"inform"}] Action to take when the test fails:
-\itemize{
-\item \code{"abort"} to stop execution and throw an error.
-\item \code{"warning"} to issue a warning and return \code{invisible(x)}.
-\item \code{"message"} to issue a message and return \code{invisible(x)}.
-}}
-
-\item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as   the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
-\itemize{
-\item An environment in the call stack or a hard-coded defused call.
-\item \code{NULL} for no information.
-\item \code{missing_arg()} to use the assert function itself.
-\item The default is \code{caller_env()}, to display the function where the assertion     was called.
-}}
-
-\item{x_name}{[\code{character(1)} | \code{NULL}] The name of the object to use in the error message.   If \code{NULL}, the name is inferred from the expression passed to \code{x}.}
-
-\item{short_circuit}{[\code{TRUE} | \code{FALSE}] If \code{TRUE}, the tests results will be reported up to the   first failure. Else, all tests results are reported. The former is more   efficient, while the latter is more informative.}
-
-\item{report_untested}{[\code{TRUE} | \code{FALSE}] If \code{TRUE}, the tests that were not run due to short-  circuiting will be reported as untested, else, ignored.}
-
-\item{args_cnd}{[\code{list()}] Additional arguments passed to \code{\link[cli:cli_abort]{cli::cli_abort()}}, \code{\link[cli:cli_abort]{cli::cli_warn()}},   or \code{\link[cli:cli_abort]{cli::cli_inform()}}, based on the chosen \code{action}.}
 }
 \value{
 \itemize{
@@ -77,7 +41,5 @@ args <- list(
 )
 
 do.call(test_multiple, c(list(x), args)) #> FALSE (not all tests passed)
-
-try(do.call(assert_multiple, c(list(x), args))) #> Error
 
 }

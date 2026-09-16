@@ -101,7 +101,7 @@ test_that("Examples - Invalid names and zero-length x's return TRUE by default",
 })
 
 test_that("Examples - Use `how` to control how names are extracted", {
-  expect_false(has_names_valid(rlang::global_env(), how = "attr"))
+  expect_false(has_names_valid(rlang::base_env(), how = "attr"))
   expect_true(has_names_valid(c("a", "b", "c"), how = "x"))
 })
 

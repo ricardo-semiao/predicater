@@ -4,6 +4,8 @@ NULL
 
 # TODO: instead of x_names, add names to ... . Then, maybe, add . prefix to arg
 # names
+# TODO: review what to show for arg names when not simple symbols, and also for
+# fun, ptype, ...
 
 
 
@@ -24,8 +26,7 @@ NULL
 #'   error if the check fails.
 #' @param ... \[`any` each] Objects to check.
 #' @param args_fun \[`list()`] Additional arguments to pass to `fun`.
-#' @param x_names \[`character()` | `NULL`] The names of `...` to print in
-#'   messages. In `NULL`, the name is inferred from `x`'s expression.
+#' @param x_names `r ROXY$x_names()`
 #' @param env `r ROXY$env()`
 #' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
@@ -82,10 +83,10 @@ assert_from_msg <- function(
       substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
 
       cnd_args <- c(
-        message = c(
+        message = list(c(
           glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
           "i" = "See this condition's {.code rs_assert_from_error} attribute for details."
-        ),
+        )),
         class = "rs_assert_from_error", call = env,
         rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
         args_cnd
@@ -123,27 +124,24 @@ assert_from_error <- function(
   x_names <- x_names %||% vapply(x_exprs, expr_name, character(1))
 
   for (i in seq_along(xs)) {
-    res <- tryCatch(
-      do.call(fun, c(x = list(xs[[i]]), args_fun)),
-      error = \(cnd) {
-        msg <- gsub(
-          "([^{])\\{([^{])", "\\1{{\\2",
-          gsub("([^}])\\}([^}])", "\\1}}\\2", res$message)
-        ) # Escape braces for glue
-        substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
+    res <- tryCatch(do.call(fun, c(x = list(xs[[i]]), args_fun)), error = identity)
+    if (!inherits(res, "error")) next # CHECK: use withCallingHandlers instead?
 
-        cnd_args <- c(
-          message = c(
-            glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
-            "i" = "See this condition's {.code rs_assert_from_error} attribute for details."
-          ),
-          class = "rs_assert_from_error", call = env,
-          rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
-          args_cnd
-        )
-        do.call(cli_abort, cnd_args)
-      }
+    msg <- gsub(
+      "([^{])\\{([^{])", "\\1{{\\2",
+      gsub("([^}])\\}([^}])", "\\1}}\\2", res$message)
+    ) # Escape braces for glue
+    substr(msg, 1, 1) <- tolower(substr(msg, 1, 1))
+    cnd_args <- c(
+      message = list(c(
+        glue("Error with argument {{.arg {x_names[[i]]}}}: {msg}"),
+        "i" = "See this condition's {.code rs_assert_from_error} attribute for details."
+      )),
+      class = "rs_assert_from_error", call = env,
+      rs_assert_from_error = list(x = xs[[i]], fun = fun, args = args_fun),
+      args_cnd
     )
+    do.call(cli_abort, cnd_args)
   }
 
   invisible(xs)
@@ -165,8 +163,7 @@ assert_from_error <- function(
 #' @param args_ptype \[`list()`] Additional arguments to pass to [is_ptype()].
 #' @param msg \[`character(1)` | `NULL`] The message to use if the check fails.
 #'   If `NULL`, a default message is generated.
-#' @param x_names \[`character(1)` | `NULL`] The name of `x` to print in
-#'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
+#' @param x_names `r ROXY$x_names()`
 #' @param env `r ROXY$env()`
 #' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
@@ -193,8 +190,8 @@ assert_ptype <- function(
 
 
   # Checks:
-  # - x must be a symbol or x_name must be supplied
-  # - msg and x_name must be strings or NULL
+  # - x must be a symbol or x_names must be supplied
+  # - msg and x_names must be strings or NULL
   # - env must be an environment
   # - cnd_fun must be a function
   # - cnd_args must be a list
@@ -207,11 +204,11 @@ assert_ptype <- function(
   for (i in seq_along(xs)) {
     if (! do.call(is_ptype, c(list(.x = xs[[i]], .ptype = ptype), args_ptype))) {
       cnd_args <- c(
-        message = c(
-          msg %||% "Argument {.arg {x_name[i]}} is not of prototype \\
+        message = list(c(
+          msg %||% "Argument {.arg {x_names[i]}} is not of prototype \\
           {.code {deparse(quo_get_expr(ptype_quo))}}.",
           "i" = "See this condition's {.code rs_assert_ptype_error} attribute for details."
-        ),
+        )),
         class = "rs_assert_ptype_error", call = env,
         rs_assert_ptype_error = list(
           x = xs[[i]], ptype = ptype, ptype_quo = ptype_quo, ptype_args = args_ptype
@@ -238,8 +235,7 @@ assert_ptype <- function(
 #' @param args_fun \[`list()`] Additional arguments to pass to `fun`.
 #' @param msg \[`character(1)` | `NULL`] The message to use if the check fails.
 #'   If `NULL`, a default message is generated.
-#' @param x_names \[`character(1)` | `NULL`] The name of `x` to print in
-#'   messages. In `NULL`, the name is inferred from `x`'s symbol, if possible.
+#' @param x_names `r ROXY$x_names()`
 #' @param env `r ROXY$env()`
 #' @param args_cnd `r ROXY$args_cnd(FALSE)`
 #'
@@ -255,7 +251,7 @@ assert_ptype <- function(
 #'
 #' @export
 assert_predicate <- function(
-  fun, ..., args_fun,
+  fun, ..., args_fun = list(),
   msg = NULL, x_names = NULL,
   env = caller_env(), args_cnd = list()
 ) {
@@ -266,8 +262,8 @@ assert_predicate <- function(
 
 
   # Checks:
-  # - x must be a symbol or x_name must be supplied
-  # - msg and x_name must be strings or NULL
+  # - x must be a symbol or x_names must be supplied
+  # - msg and x_names must be strings or NULL
   # - env must be an environment
   # - cnd_fun must be a function
   # - cnd_args must be a list
@@ -284,7 +280,7 @@ assert_predicate <- function(
           cli_abort(
             c(
               "{.code fun(.)} must return {.val {TRUE}} or {.val {FALSE}}.",
-              "i" = "Instead, with {.arg {x_name[i]}}, it returned {.val {res}}.",
+              "i" = "Instead, with {.arg {x_names[i]}}, it returned {.val {res}}.",
               "i" = "See this condition's {.code rs_user_fun_error} attribute for details."
             ),
             class = "rs_user_fun_error", call = env,
@@ -296,17 +292,17 @@ assert_predicate <- function(
       rs_user_fun_error = cnd_signal,
       error = \(cnd) {
         cli_abort(
-          "{.arg fun} run with error at argument {.arg {x_name[i]}}.",
+          "{.arg fun} run with error at argument {.arg {x_names[i]}}.",
           class = "rs_user_fun_error", parent = cnd, call = env
         )
       }
     )
     if (! pred) {
       cnd_args <- c(
-        message = c(
-          msg %||% "Argument {.arg {x_name[i]}} fails {.arg fun}.",
+        message = list(c(
+          msg %||% "Argument {.arg {x_names[i]}} fails {.arg fun}.",
           "i" = "See this condition's {.code rs_assert_predicate_error} attribute for details."
-        ),
+        )),
         rs_assert_predicate_error = list(
           x = xs[[i]], fun = fun, fun_args = args_fun
         ),
@@ -339,12 +335,6 @@ assert_predicate <- function(
 #' @param types \[`character()`] A character vector of types to check against.
 #' @param ... \[`list()` each] Lists of arguments to pass to the test function
 #'   for each type. The list names
-#' @param action `r ROXY$action()`
-#' @param env `r ROXY$env()`
-#' @param x_name `r ROXY$x_name()`
-#' @param short_circuit `r ROXY$short_circuit()`
-#' @param report_untested `r ROXY$report_untested()`
-#' @param args_cnd `r ROXY$args_cnd()`
 #'
 #' @returns `r ROXY$test_returns("multi")`
 #'
@@ -360,8 +350,6 @@ assert_predicate <- function(
 #' )
 #'
 #' do.call(test_multiple, c(list(x), args)) #> FALSE (not all tests passed)
-#'
-#' try(do.call(assert_multiple, c(list(x), args))) #> Error
 #'
 #' @name test_multiple
 NULL
@@ -384,13 +372,15 @@ core_multiple <- function(x, types, ..., short_circuit) {
 #' @export
 test_multiple <- fn_core_to_test(core_multiple)
 
-#' @rdname test_multiple
-#' @export
-assert_multiple <- fn_core_to_assert(core_multiple, list(
-  multi = \(attrs, test) {
-    glue2("must be one of the 'types': [fmt_vec(attrs$types)]")
-  }
-))
+# assert_multiple <- fn_core_to_assert(core_multiple, list(
+#   multi = \(attrs, test) {
+#     glue2("must be one of the 'types': [fmt_vec(attrs$types)]")
+#   }
+# ))
+# try(do.call(assert_multiple, c(list(x), args))) #> Error
+# Currently does not work because it does not have acess to all the msgs_fns. We
+# would need to save all into TESTS_MSGS, and not filter it when creating this
+# function
 
 
 

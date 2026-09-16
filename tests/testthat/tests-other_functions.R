@@ -6,7 +6,9 @@
 
 test_that("Examples - c2", {
   expect_identical(c2(FALSE, 1L, 1.5), c(0, 1.0, 1.5))
-  expect_identical(c2(Sys.Date(), Sys.time()), c(as.POSIXct(Sys.Date()), as.POSIXct(Sys.time())))
+  date <- as.Date("2026-09-16")
+  time <- as.POSIXct("2026-09-16 12:00:00", tz = "UTC")
+  expect_identical(c2(date, time), c(as.POSIXct(date), time))
   expect_identical(c2(factor("a"), factor("b")), factor(c("a", "b")))
   expect_identical(c2(name = 1), c(name = 1))
 })
@@ -14,7 +16,7 @@ test_that("Examples - c2", {
 test_that("Examples - c2 with name specification", {
   expect_identical(
     c2(name = 1:3, .name_spec = "{outer}_{inner}"),
-    c(name_1 = 1, name_2 = 2, name_3 = 3)
+    c(name_1 = 1L, name_2 = 2L, name_3 = 3L)
   )
 })
 

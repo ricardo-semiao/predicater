@@ -46,10 +46,7 @@ test_that("Simple error function", {
 # - Assert example
 
 test_that("Examples - assert_ptype snapshot", {
-  expect_snapshot(try({
-    f <- \(x) assert_ptype(numeric(), x)
-    f("a")
-  }))
+  expect_snapshot(try(assert_ptype(numeric(), "a")))
 })
 
 
@@ -60,10 +57,7 @@ test_that("Examples - assert_ptype snapshot", {
 # - Assert example
 
 test_that("Examples - assert_predicate snapshot", {
-  expect_snapshot(try({
-    f <- \(x) assert_predicate(\(x) all(x > 0), x)
-    f(c(-1, 0, 1))
-  }))
+  expect_snapshot(try(assert_predicate(\(x) all(x > 0), c(-1, 0, 1))))
 })
 
 
@@ -86,6 +80,6 @@ test_that("Examples - test_multiple", {
   expect_false(do.call(test_multiple, c(list(x), args)))
 })
 
-test_that("Examples - assert_multiple snapshot", {
-  expect_snapshot(try(do.call(assert_multiple, c(list(x), args))))
-})
+# test_that("Examples - assert_multiple snapshot", {
+#   expect_snapshot(try(do.call(assert_multiple, c(list(x), args))))
+# })

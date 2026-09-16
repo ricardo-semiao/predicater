@@ -538,11 +538,11 @@ core_object <- function(
       },
       oo_system = \(x, arg, pars) {
         sys <- object_system(x)
-        arg == sys %@@% list(arg = arg, system = sys)
+        (arg == sys) %@@% list(arg = arg, system = sys)
       },
       s4_bit = \(x, arg, pars) {
         bit <- has_s4_bit(x)
-        bit == arg %@@% list(arg = arg, bit = bit)
+        (bit == arg) %@@% list(arg = arg, bit = bit)
       },
       tests_class = \(x, arg, pars) {
         exec(test_class, x = x, !!!arg) %@@%

@@ -73,7 +73,7 @@ is_syntactic_literal <- is_syntactic_literal
 is_symbol2 <- function(x, name = NULL, valid = FALSE, empty = TRUE) {
   is_symbol(x, name) &&
     (!valid || x == sym(make.names(x))) &&
-    (!empty || identical(x, expr()))
+    (empty || !identical(x, expr()))
 }
 
 #' @rdname predicates-language

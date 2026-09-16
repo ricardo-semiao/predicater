@@ -23,7 +23,7 @@ test_that("Examples - Vectorized tests", {
 
 test_that("Examples - Scalar tests", {
   expect_false(is_true2(c(TRUE, TRUE)))
-  expect_false(is_true2(TRUE))
+  expect_true(is_true2(TRUE))
   expect_false(is_true2(NA))
   expect_identical(is_true2(NA, na = NA), NA)
   expect_true(is_bool2(TRUE))

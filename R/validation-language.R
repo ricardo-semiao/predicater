@@ -161,11 +161,11 @@ core_symbol <- function(
         test_in_range(n_char, arg, n_char) %@@% list(arg = arg, n = n_char)
       },
       valid = \(x, arg, pars) {
-        (make.names(pars$sym_str) == pars$sym_str) == arg %@@%
+        ((make.names(pars$sym_str) == pars$sym_str) == arg) %@@%
           list(arg = arg, name = pars$sym_str)
       },
       empty = \(x, arg, pars) {
-        (pars$sym_str == "") == arg %@@% list(arg = arg)
+        ((pars$sym_str == "") == arg) %@@% list(arg = arg)
       },
       env_has = \(x, arg, pars) {
         TESTS_MENU$env_has(arg, pars$sym_str) # Oposite order from test_env
@@ -270,11 +270,11 @@ core_language <- function(
       type = \(x, arg, pars) is_language(x) %@@% list(type = typeof(x)),
       name = \(x, arg, pars) {
         name <- call_name(x)
-        name == arg %@@% list(arg = arg, name = name)
+        (name == arg) %@@% list(arg = arg, name = name)
       },
       ns = \(x, arg, pars) {
         ns <- call_ns(x)
-        ns == arg %@@% list(arg = arg, ns = ns)
+        (ns == arg) %@@% list(arg = arg, ns = ns)
       },
       n_args = \(x, arg, pars) {
         n_args <- length(x) - 1L
@@ -282,13 +282,13 @@ core_language <- function(
       },
       arg_names = \(x, arg, pars) {
         names <- names(call_args(x))
-        identical(names, arg) %@@% list(arg = arg, names = names)
+        identical(names, arg) %@@% list(arg = arg, name = name)
       },
       simple = \(x, arg, pars) {
-        is_call_simple(x) == arg %@@% list(arg = arg)
+        (is_call_simple(x) == arg) %@@% list(arg = arg)
       },
       valid = \(x, arg, pars) {
-        is_parseable(x) == arg %@@% list(arg = arg)
+        (is_parseable(x) == arg) %@@% list(arg = arg)
       }
     )
   )
@@ -325,7 +325,7 @@ assert_language <- fn_core_to_assert(
     arg_names = \(attrs, test) {
       glue2(
         "must have argument names: [fmt_vec(attrs$arg)].",
-        fmt_postfix("Had [fmt_vec(attrs$names)].", test)
+        fmt_postfix("Had [fmt_vec(attrs$name)].", test)
       )
     },
     simple = \(attrs, test) {
@@ -403,16 +403,19 @@ core_code <- function(
 ) {
   run_tests(
     x, sentinels, valid, empty, custom,
-    tests_pars = list(), short = short_circuit,
+    tests_pars = list(sym = sym, lang = lang, literal = literal), short = short_circuit,
     menu_add = list(
-      type = \(x, arg, pars) is_code(x, sym, lang, literal) %@@% list(type = typeof(x)),
+      type = \(x, arg, pars) {
+        is_code(x, pars$sym, pars$lang, pars$literal) %@@%
+          list(type = typeof(x), sym = pars$sym, lang = pars$lang, literal = pars$literal)
+      },
       valid = \(x, arg, pars) {
-        is_code(x, sym, lang, literal, valid = TRUE) == arg %@@%
-          list(sym = sym, lang = lang, literal = literal)
+        (is_code(x, pars$sym, pars$lang, pars$literal, valid = TRUE) == arg) %@@%
+          list(arg = arg, sym = pars$sym, lang = pars$lang, literal = pars$literal)
       },
       empty = \(x, arg, pars) {
         if (is_symbol(x)) {
-          identical(x, expr()) == arg %@@% list(arg = arg)
+          (identical(x, expr()) == arg) %@@% list(arg = arg)
         } else {
           TRUE
         }

@@ -12,8 +12,8 @@ args <- list(
   n_empty = c(0, 1),
   n_dup = 0,
   sentinels = c("null"),
-  custom = \(x) is.list(x),
-  custom_map = \(elt) !is.na(elt)
+  custom = NULL,
+  custom_map = \(elt) !is_na2(elt)
 )
 
 test_that("Examples - test_list", {

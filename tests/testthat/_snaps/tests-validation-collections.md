@@ -3,12 +3,16 @@
     Code
       try(do.call(assert_list, c(list(x), args, short_circuit = FALSE)))
     Output
-      Error in test_custom(x[[i]], arg, i) : 
-        Evaluating `custom(x)` raised an error.
-      Caused by error in `test_custom()`:
-      ! `custom(x)` must return TRUE or FALSE.
-      i Instead, in the "b" element, it returned .
-      i See this condition's `rs_user_fun_error` attribute for details.
+      Error in eval(code, test_env) : `x` failed `assert_list()`:
+      v (pass) sentinels: no sentinel values allowed.
+      v (pass) type  : must be of type "list".
+      v (pass) len   : length must be in range 1 to 10.
+      x (fail) n_null: #of NULL values must be 0. Was 1.
+      x (fail) n_empty: #of empty values must be in range 0 to 1. Was 2.
+      x (fail) n_dup : #of duplicate values must be 0. Was 1.
+      v (pass) custom_map: all elements must pass a custom test.
+      
+      i See `predicater::assert_list()` and this condition's `rs_assert_error` attribute for details.
 
 # Examples - assert_environment snapshot
 

@@ -24,3 +24,18 @@
       
       i See `predicater::assert_double()` and this condition's `rs_assert_error` attribute for details.
 
+# Examples - assert_complex snapshot
+
+    Code
+      try(do.call(assert_complex, c(list(x), args, short_circuit = FALSE)))
+    Output
+      Error in eval(code, test_env) : `x` failed `assert_complex()`:
+      v (pass) sentinels: no sentinel values allowed.
+      v (pass) type  : must pass `predicater::is_complex()`().
+      x (fail) tests_re: real component (`Re()`) must pass custom `predicater::test_double()` tests. Failed: "len", "n_na", "n_dup", ..., "set", and "custom".
+      x (fail) tests_im: imaginary component (`Im()`) must pass custom `predicater::test_double()` tests. Failed: "len", "n_na", "n_dup", ..., "set", and "custom".
+      x (fail) tests_mod: modulus component (`Mod()`) must pass custom `predicater::test_double()` tests. Failed: "len", "n_na", "n_dup", ..., "set", and "custom".
+      x (fail) tests_arg: argument component (`Arg()`) must pass custom `predicater::test_double()` tests. Failed: "len", "n_na", "n_dup", ..., "set", and "custom".
+      
+      i See `predicater::assert_complex()` and this condition's `rs_assert_error` attribute for details.
+

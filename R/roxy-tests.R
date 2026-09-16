@@ -49,6 +49,13 @@ ROXY$x_name <- function() {
   )")
 }
 
+ROXY$x_names <- function() {
+  glue(r"(
+  \[`character()` | `NULL`] The names of `...` to print in messages. If `NULL`, \
+  the name is inferred from `...`'s expressions.
+  )")
+}
+
 ROXY$report_untested <- function() {
   glue(r"(
   \[`TRUE` | `FALSE`] If `TRUE`, the tests that were not run due to short-\

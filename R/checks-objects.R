@@ -100,7 +100,7 @@ has_class <- function(x, invalid = "warn", bad = "warn") {
     return(FALSE)
   }
 
-  if (anyNA(class) || any(class == "")) {
+  if (anyNA(class) || any(class == "") || any_duplicated(class)) {
     switch(invalid,
       warn = cli_warn("Class of {.arg x} has {.val NA} or empty values."),
       false = return(FALSE)
@@ -110,6 +110,8 @@ has_class <- function(x, invalid = "warn", bad = "warn") {
   TRUE
 }
 # NOTE: i believe it is impossible to set a non-character class
+# CHECK: maybe we should allow granular control over NA, "", and dups, or remove
+# dups from invalid
 
 
 #' @rdname predicates-objects

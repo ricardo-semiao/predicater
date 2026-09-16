@@ -38,28 +38,46 @@ test_that("Examples - The is_* predicates test scalars", {
 # Tests:
 # - Assert examples
 
-x <- c(1.0, NA, 1.0 + 1e-6, 1.0 + .Machine$double.eps, NaN, -Inf, 1e200)
+x <- c(1.0, NA, 1.0 + 1e-15, 1.0 + 1e-6, NaN, -Inf, 1e200)
 
 test_that("Examples - Default test", {
-  expect_identical(are_integer_like(x), c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE))
+  expect_identical(
+    are_integer_like(x),
+    c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)
+  )
   expect_false(is_integer_like(x))
 })
 
 test_that("Examples - Changing NA interpretation", {
-  expect_identical(are_integer_like(x, na = NA), c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE))
+  expect_identical(
+    are_integer_like(x, na = NA),
+    c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
+  )
 })
 
 test_that("Examples - Adding tolerance", {
-  expect_identical(are_integer_like(x, tol = sqrt(.Machine$double.eps)), c(TRUE, NA, TRUE, TRUE, FALSE, FALSE, FALSE))
-  expect_identical(are_integer_like(x, tol = 1e-5), c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE))
+  expect_identical(
+    are_integer_like(x, tol = sqrt(.Machine$double.eps)),
+    c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
+  )
+  expect_identical(
+    are_integer_like(x, tol = 1e-5),
+    c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE)
+  )
 })
 
 test_that("Examples - unbounded mode allows Inf, NaN, and out-of-integer-range values", {
-  expect_identical(are_integer_like(x, mode = "unbounded"), c(TRUE, NA, FALSE, FALSE, TRUE, TRUE, TRUE))
+  expect_identical(
+    are_integer_like(x, mode = "unbounded"),
+    c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE)
+  )
 })
 
 test_that("Examples - Adding tolerance, all pass, and finally is_integer_like() returns TRUE", {
-  expect_identical(are_integer_like(x, mode = "unbounded", tol = 1e-5), c(TRUE, NA, TRUE, TRUE, TRUE, TRUE, TRUE))
+  expect_identical(
+    are_integer_like(x, mode = "unbounded", tol = 1e-5),
+    c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
+  )
   expect_true(is_integer_like(x, mode = "unbounded", tol = 1e-5))
 })
 

@@ -1,6 +1,8 @@
 
 # TODO: add user input checks, here and inside core_ functions that have
 # specific subtests
+# NOTE: all tests should have a 'na.rm = TRUE' behaviour. If the user dislikes
+# NAs, use n_na
 
 TESTS_MENU <- list()
 
@@ -21,7 +23,7 @@ TESTS_MENU$range <- function(x, arg, pars) {
     x %in% arg
   }
 
-  all(inside) %@@% list(arg = arg, bad = x[which(! inside)])
+  all(inside, na.rm = TRUE) %@@% list(arg = arg, bad = x[which(! inside)])
 }
 
 TESTS_MENU$n_na <- function(x, arg, pars) {
@@ -65,7 +67,7 @@ TESTS_MENU$sorted <- function(x, arg, pars) {
 
 TESTS_MENU$set <- function(x, arg, pars) {
   if (! is_list(arg)) {
-    all(x %in% arg) %@@% list(arg = arg)
+    all(x %in% arg, na.rm = TRUE) %@@% list(arg = arg)
   } else {
     is_matching_set(x, arg$yes, arg$no, arg$mode %||% "all") %@@% list(arg = arg)
   }
@@ -86,13 +88,14 @@ TESTS_MENU$custom_map <- function(x, arg, pars) {
 
 TESTS_MENU$env_has <- function(x, arg, pars) {
   found <- env_has(x, nms = arg, inherit = FALSE)
-  all(found) %@@% list(arg = arg, missing = arg[! found])
+  all(found, na.rm = TRUE) %@@% list(arg = arg, missing = arg[! found])
 }
 
 TESTS_MENU$env_sees <- function(x, arg, pars) {
   found <- env_has(x, nms = arg, inherit = TRUE)
-  all(found) %@@% list(arg = arg, missing = arg[! found])
+  all(found, na.rm = TRUE) %@@% list(arg = arg, missing = arg[! found])
 }
+# Shouldnt need na.rm = TRUE but just in case
 
 TESTS_MENU$sentinels <- function(x, arg, pars = list()) {
   res <- if ("null" %in% arg) {
@@ -196,13 +199,13 @@ test_in_range <- function(n, range, l) {
   }
 
   if (length(range) == 1) {
-    all(n == range)
+    all(n == range, na.rm = TRUE)
 
   } else if (length(range) == 2) {
-    all(n >= range[1] & n <= range[2])
+    all(n >= range[1] & n <= range[2], na.rm = TRUE)
 
   } else {
-    all(n %in% range)
+    all(n %in% range, na.rm = TRUE)
   }
 }
 

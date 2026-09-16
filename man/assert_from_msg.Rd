@@ -36,8 +36,7 @@ error if the check fails.
 
 \item{args_fun}{[\code{list()}] Additional arguments to pass to \code{fun}.}
 
-\item{x_names}{[\code{character()} | \code{NULL}] The names of \code{...} to print in
-messages. In \code{NULL}, the name is inferred from \code{x}'s expression.}
+\item{x_names}{[\code{character()} | \code{NULL}] The names of \code{...} to print in messages. If \code{NULL}, the name is inferred from \code{...}'s expressions.}
 
 \item{env}{[\code{environment()} | \code{call()} | \code{NULL} | \code{missing_arg()}] The call to inform as   the origin of the error, passed to \code{\link[rlang:abort]{rlang::abort()}}:
 \itemize{

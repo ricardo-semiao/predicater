@@ -37,11 +37,11 @@ NULL
 #'   mode = "list",               # Must be a standard list (will pass)
 #'   len = c(1, 10),              # Length must be between 1 and 10 (will pass)
 #'   n_null = 0,                  # No NULL elements allowed (will fail)
-#'   n_empty = c(0, 1),           # At most 1 empty element allowed (will pass)
+#'   n_empty = c(0, 1),           # At most 1 empty element allowed (will fail)
 #'   n_dup = 0,                   # No duplicate elements allowed (will fail)
 #'   sentinels = c("null"),       # Allow NULL list (not the case of x)
-#'   custom = \(x) is.list(x),    # Must be a list (will pass)
-#'   custom_map = \(elt) !is.na(elt)
+#'   custom = NULL,
+#'   custom_map = \(elt) !is_na2(elt)
 #'   # All list elements must be non-NA (will pass)
 #' )
 #'
@@ -173,7 +173,7 @@ core_environment <- function(
       },
       namespace = \(x, arg, pars) {
         is <- is_namespace(x)
-        is == arg %@@% list(arg = arg, is = is)
+        (is == arg) %@@% list(arg = arg, is = is)
       },
       parents = \(x, arg, pars) {
         test_env_parents(x, arg)

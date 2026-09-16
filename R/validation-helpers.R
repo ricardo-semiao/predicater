@@ -95,13 +95,16 @@ fn_core_to_assert <- function(core, msgs_add) {
   assert_name <- gsub("^core_", "assert_", as_string(core_sym))
 
   args <- fn_fmls(core)
-  args_core_nms <- union(
-    setdiff(names(args), c("x", "env", "short_circuit")),
-    "sentinels"
-  )
-  args_core_syms <- syms(names(args))
+  args_core_nms <- setdiff(names(args), c("x", "env", "short_circuit"))
 
-  msgs_fns <- c(msgs_add, TESTS_MSGS[intersect(names(TESTS_MSGS), args_core_nms)])
+  args_core_syms <- syms(names(args))
+  names(args_core_syms) <- names(args)
+  names(args_core_syms)[names(args) == "..."] <- ""
+
+  msgs_fns <- c(
+    msgs_add,
+    TESTS_MSGS[intersect(names(TESTS_MSGS), union(args_core_nms, "sentinels"))]
+  )
 
   args <- c(
     x = expr(), args[args_core_nms],

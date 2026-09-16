@@ -10,3 +10,4 @@
 ^pkgdown$
 ^personal$
 ^predicater\.code-workspace$
+^\.github$

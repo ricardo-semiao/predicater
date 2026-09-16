@@ -90,7 +90,7 @@ is_numeric <- function(x, n = NULL) {
 #'
 #' # Scalar tests:
 #' is_true2(c(TRUE, TRUE)) #> FALSE
-#' is_true2(TRUE) #> FALSE
+#' is_true2(TRUE) #> TRUE
 #' is_true2(NA) #> FALSE
 #' is_true2(NA, na = NA) #> NA
 #' # And similar for is_false2()
@@ -113,6 +113,10 @@ are_true <- function(x, na = FALSE) {
 
 
   # Main:
+  if (! is_logical(x)) {
+    cli_abort("{.arg x} must be a logical vector.")
+  }
+
   if (is.na(na)) {
     if_else2(is.na(x), NA, x)
   } else {
@@ -146,8 +150,12 @@ are_false <- function(x, na = FALSE) {
 
 
   # Main:
+  if (! is_logical(x)) {
+    cli_abort("{.arg x} must be a logical vector.")
+  }
+
   if (is.na(na)) {
-    if_else2(is.na(x), NA, x)
+    if_else2(is.na(x), NA, !x)
   } else {
     !(is.na(x) | x)
   }
@@ -163,7 +171,7 @@ is_false2 <- function(x, na = FALSE) {
 
   # Main:
   if (is_logical(x, 1)) {
-    if (is.na(x)) na else x
+    if (is.na(x)) na else !x
   } else {
     FALSE
   }

@@ -34,5 +34,5 @@ test_that("Examples - test_function", {
 })
 
 test_that("Examples - assert_function snapshot", {
-  expect_snapshot(try(assert_function(x, !!!args, short_circuit = FALSE)))
+  expect_snapshot(try(do.call(assert_function, c(list(x), args, short_circuit = FALSE))))
 })

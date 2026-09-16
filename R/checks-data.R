@@ -91,7 +91,7 @@ is_matching_set <- function(x, yes = NULL, no = NULL, mode = "all") {
     only = all(x_in_yes) && all(yes %in% x)
   )
 }
-# TODO: deal with NA, cite in ROXY$set
+# TODO: deal with NA, cite in ROXY$set, and use na-safe version in TESTS_MENU$set
 # TODO: create are_ version
 
 

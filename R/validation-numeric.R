@@ -182,6 +182,7 @@ core_complex <- function(
     )
   )
 }
+# TODO: move len and na tests to first-level tests
 
 
 

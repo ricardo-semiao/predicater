@@ -17,7 +17,7 @@
 #' @param na \[`TRUE` | `FALSE` | `NA`] What to return for `NA` values.
 #' @param signs \[`character(1)`] For `are_inf()` and `is_inf()` -- which signs
 #'   of infinity to allow: `"+"` for positive infinity, `"-"` for negative
-#'   infinity, or `"+-"` for both.
+#'   infinity, or `"+-"`/`"-+"` for both.
 #'
 #' @returns
 #' - \[`logical(length(x))`] For `are_*`: the vectorized or result of the test.
@@ -106,9 +106,9 @@ are_nan <- function(x, na = NA) {
   if (is.na(na)) {
     if_else2(are_na2(x), NA, is.nan(x))
   } else if (na) {
-    is.nan(x)
+    is.na(x)
   } else {
-    is.nan(x) & !are_na2(x)
+    is.nan(x)
   }
 }
 
@@ -134,7 +134,7 @@ are_inf <- function(x, na = NA, signs = "+-") {
   
 
   # Main:
-  signs_allowed <- switch(signs, both = c(-1, 1), "+" = 1, "-" = -1)
+  signs_allowed <- switch(signs, "+-" = c(-1, 1), "-+" = c(-1, 1), "+" = 1, "-" = -1)
   if (is.na(na)) {
     if_else2(are_na2(x), NA, is.infinite(x) & sign(x) %in% signs_allowed)
   } else if (na) {
@@ -148,7 +148,7 @@ are_inf <- function(x, na = NA, signs = "+-") {
 #' @rdname predicates-infinite
 #' @export
 is_inf <- function(x, na = NA, signs = "+-") {
-  signs_allowed <- switch(signs, both = c(-1, 1), "+" = 1, "-" = -1)
+  signs_allowed <- switch(signs, "+-" = c(-1, 1), "-+" = c(-1, 1), "+" = 1, "-" = -1)
   if (is_numeric(x, n = 1)) {
     if (is.na(x)) na else is.infinite(x) & sign(x) %in% signs_allowed
   } else {
@@ -216,11 +216,13 @@ is_inf <- function(x, na = NA, signs = "+-") {
 #' return `TRUE`.
 #'
 #' @examples
-#' x <- c(1.0, NA, 1.0 + 1e-6, 1.0 + .Machine$double.eps, NaN, -Inf, 1e200)
+#' x <- c(1.0, NA, 1.0 + 1e-15, 1.0 + 1e-6, NaN, -Inf, 1e200)
 #'
 #' # Default test:
 #' are_integer_like(x)
-#' #> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
+#' #> c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)
+#' # By default, NA_real_ values are considered integer-like, since can be
+#' # coerced to NA_integer_
 #'
 #' # is_integer_like only returns TRUE if are_integer_like() is all TRUE:
 #' is_integer_like(x) #> FALSE
@@ -235,19 +237,19 @@ is_inf <- function(x, na = NA, signs = "+-") {
 #'
 #' # Adding tolerance:
 #' are_integer_like(x, tol = sqrt(.Machine$double.eps))
-#' #> c(TRUE, NA, TRUE, TRUE, FALSE, FALSE, FALSE)
+#' #> c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE)
 #'
 #' # Decreasing tolerance:
 #' are_integer_like(x, tol = 1e-5)
-#' #> c(TRUE, NA, FALSE, FALSE, FALSE, FALSE, FALSE)
+#' #> c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE)
 #'
 #' # unbounded mode allows Inf, NaN, and out-of-integer-range values:
 #' are_integer_like(x, mode = "unbounded")
-#' #> c(TRUE, NA, FALSE, FALSE, TRUE, TRUE, TRUE)
+#' #> c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE)
 #'
 #' # Adding tolerance, all pass, and finally is_integer_like() retursn TRUE:
 #' are_integer_like(x, mode = "unbounded", tol = 1e-5)
-#' #> c(TRUE, NA, TRUE, TRUE, TRUE, TRUE, TRUE)
+#' #> c(TRUE, TRUE, TRUE, TRUE, TRUE, TRUE, TRUE)
 #'
 #' is_integer_like(x, mode = "unbounded", tol = 1e-5) #> TRUE
 #'
@@ -289,14 +291,14 @@ are_integer_like <- function(
   delta <- abs(x - round(x)) # Testing on delta propagates Inf as NaN values
   if (mode == "unbounded") {
     case_when2(
-      .default = delta < tol,
+      .default = delta <= tol,
       are_na2(delta) ~ na,
       are_nan(delta, na = FALSE) ~ TRUE,
       are_inf(delta, na = FALSE) ~ TRUE
     )
   } else {
     case_when2(
-      abs(x) <= .Machine$integer.max & delta < tol,
+      abs(x) <= .Machine$integer.max & delta <= tol,
       are_na2(delta) ~ na,
       are_nan(delta, na = FALSE) ~ FALSE,
       are_inf(delta, na = FALSE) ~ FALSE
