@@ -11,3 +11,4 @@
 ^personal$
 ^predicater\.code-workspace$
 ^\.github$
+^codecov\.yml$

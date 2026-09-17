@@ -1,7 +1,7 @@
 
 # General attributes functions -------------------------------------------------
 
-#' Attributes - Check if object allows attributes
+#' Attribute checks - Check if object allows attributes
 #'
 #' @description
 #' In R, some objects do not allow attributes to be set on them. This function
@@ -67,7 +67,7 @@ is_attrs_allowed <- function(x, cnd_match = NULL, warn = "tw") {
 }
 
 
-#' Attributes - Get attribute of object
+#' Attribute utilities - Get attribute of object
 #'
 #' Identical to [attr()] but with `exact = TRUE` by default.
 #'
@@ -96,7 +96,7 @@ attr2 <- function(x, which, exact = TRUE) {
 
 # Filter -----------------------------------------------------------------------
 
-#' Attributes - Check for and filter attributes from object
+#' Attribute checks - Check for and filter attributes from object
 #'
 #' @description
 #' Functions to test for and filter attributes from an object. Attributes can be
@@ -307,7 +307,7 @@ attrs_filter <- function(
 
 # Names ------------------------------------------------------------------------
 
-#' Attributes - Names
+#' Attribute checks - Names
 #'
 #' Test if `x` has names with more flexiblillity than [rlang::is_named()],
 #' handling NA, empty, duplicate, and invalid names, as well as empty vectors.
@@ -436,7 +436,7 @@ are_names_valid <- function(
 
 # Dimensions -------------------------------------------------------------------
 
-#' Attributes - Dimensions existence and sizes
+#' Attribute checks - Dimensions existence and sizes
 #'
 #' @description
 #' Functions for the presence and number of dimensions and dimensions names of
@@ -571,7 +571,7 @@ has_dim <- function(x, n = NULL, how = "dim") {
 
 # Attribute setters and getters ------------------------------------------------
 
-#' Attributes - Getters and setters
+#' Attribute utilities - Getters and setters
 #'
 #' Functions to get and set names, dimnames, and class of an object, while
 #' requiring a specific 'quality' of the values.

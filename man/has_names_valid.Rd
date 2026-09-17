@@ -71,7 +71,7 @@ has_names_valid(rlang::set_names(1:3, c("_bad", "b", "c"))) #> TRUE
 has_names_valid(integer(0)) #> TRUE
 
 # Use `how` to control how names are extracted:
-has_names_valid(rlang::global_env(), how = "attr") #> FALSE
+has_names_valid(rlang::base_env(), how = "attr") #> FALSE
 # (envs have no names attribute)
 has_names_valid(c("a", "b", "c"), how = "x") #> TRUE (x itself was tested)
 

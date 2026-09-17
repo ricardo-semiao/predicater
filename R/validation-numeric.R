@@ -96,7 +96,7 @@ NULL
 #'
 #' try(do.call(assert_double, c(list(x), args, short_circuit = FALSE))) #> Error
 #'
-#' @name test-numeric
+#' @name tests-numeric
 NULL
 
 
@@ -190,22 +190,22 @@ core_complex <- function(
 
 # Test functions:
 
-#' @rdname test-numeric
+#' @rdname tests-numeric
 #' @export
 test_integer <- fn_core_to_test(core_integer)
 
-#' @rdname test-numeric
+#' @rdname tests-numeric
 #' @export
 test_double <- fn_core_to_test(core_double)
 
-#' @rdname test-numeric
+#' @rdname tests-numeric
 #' @export
 test_complex <- fn_core_to_test(core_complex)
 
 
 # Assert functions:
 
-#' @rdname test-numeric
+#' @rdname tests-numeric
 #' @export
 assert_integer <- fn_core_to_assert(
   core_integer,
@@ -226,7 +226,7 @@ assert_integer <- fn_core_to_assert(
   )
 )
 
-#' @rdname test-numeric
+#' @rdname tests-numeric
 #' @export
 assert_double <- fn_core_to_assert(
   core_double,
@@ -256,7 +256,7 @@ msg_tests_complex <- function(x) {
   }
 }
 
-#' @rdname test-numeric
+#' @rdname tests-numeric
 #' @export
 assert_complex <- fn_core_to_assert(
   core_complex,

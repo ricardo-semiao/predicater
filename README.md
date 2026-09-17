@@ -8,7 +8,37 @@
 [![Lifecycle:
 experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://lifecycle.r-lib.org/articles/stages.html#experimental)
 [![R-CMD-check](https://github.com/ricardo-semiao/predicater/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/ricardo-semiao/predicater/actions/workflows/R-CMD-check.yaml)
+[![Codecov test
+coverage](https://codecov.io/gh/ricardo-semiao/predicater/graph/badge.svg)](https://app.codecov.io/gh/ricardo-semiao/predicater)
 <!-- badges: end -->
+
+Validation of R objects with more consistency and flexibility than base
+‘is’ functions, having predictable and well documented behavior.
+Provides simple ‘is’/‘are’/‘has’ predicates, and complex assertions for
+common input validation needs. Includes improved object comparison,
+prototypes, if-else chains, and pattern matching.
+
+predicater has three main parts:
+
+- **Simple predicates:** functions to test the type/data (`is_*()`) or
+  attributes (`has_*()`) of an object. Always returning a logical
+  scalar, but with vectorized versions (`are_*()`). They are better
+  named and more consistent than base R `is.*()` functions, while at the
+  same time allowing the user more flexibility.
+- **Complex predicates and assertions:** functions to test multiple
+  properties of an object (`test_*()`) and raise informative errors when
+  any of the tests fails (`assert_*()`). They are useful for input
+  validation, and allow lots of control, meeting most of the needs a
+  developer can have.
+- **Objects comparison:** a more flexible `base::identical()`; a notion
+  of *prototype* (see [vctrs
+  prototypes](https://vctrs.r-lib.org/articles/type-size.html)) expanded
+  for any metadata/attributes; pattern matching, similar to
+  `base::switch()` but for any object, not just strings; and
+  self-contained re-exports of `funs::if_else()` and
+  `dplyr::case_when()`.
+
+<!-- TODO: point to documentation for the user to see, but maybe add an example here too -->
 
 ## Installation
 

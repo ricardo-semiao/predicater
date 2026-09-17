@@ -1,9 +1,13 @@
 Package: predicater
-Title: Simplified predicate and testing functions for R
+Title: Modern and consistent validation for R
 Version: 0.0.0.9000
 Authors@R: 
     person("Ricardo", "Semião", , "ricardo.semiao@outlook.com", role = c("aut", "cre"))
-Description: Simplified predicate and testing functions for R.
+Description: Validation of R objects with more consistency and flexibility
+    than base 'is' functions, having predictable and well documented
+    behavior. Provides simple 'is'/'are'/'has' predicates, and complex
+    assertions for common input validation needs. Includes improved object
+    comparison, prototypes, if-else chains, and pattern matching.
 License: MIT + file LICENSE
 Depends: 
     R (>= 4.3)

@@ -299,6 +299,7 @@ core_vector <- function(
   )
 }
 # CHECK: we can create a atomic = T/F, list = T/F, ... scheme, for more control
+# CHECK: change to test_collection and allow envs?
 
 #' @rdname test_vector
 #' @export

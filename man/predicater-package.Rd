@@ -4,9 +4,9 @@
 \name{predicater-package}
 \alias{predicater}
 \alias{predicater-package}
-\title{predicater: Simplified predicate and testing functions for R}
+\title{predicater: Modern and consistent validation for R}
 \description{
-Simplified predicate and testing functions for R.
+Validation of R objects with more consistency and flexibility than base 'is' functions, having predictable and well documented behavior. Provides simple 'is'/'are'/'has' predicates, and complex assertions for common input validation needs. Includes improved object comparison, prototypes, if-else chains, and pattern matching.
 }
 \author{
 \strong{Maintainer}: Ricardo Semião \email{ricardo.semiao@outlook.com}

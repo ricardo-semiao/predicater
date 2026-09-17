@@ -1,4 +1,100 @@
 url: ~
+
+
 template:
   bootstrap: 5
+  package: rspkgdown
 
+reference:
+- title: Simple predicates
+  desc: ""
+- subtitle: Atomic vectors
+  contents:
+  - predicates-atomic
+  - is_integer_like
+  - predicates-true-false
+  - is_na2
+  - predicates-infinite
+- subtitle: Other types
+  contents:
+  - predicates-collections
+  - predicates-language
+  - is_function
+  - predicates-other-types
+- subtitle: attributes
+  contents:
+  - is_attrs_allowed
+  - has_names_valid
+  - attributes-dimensions
+  - attributes-filter
+- subtitle: Object systems
+  contents:
+  - predicates-objects
+  - object_system
+- subtitle: Data
+  contents:
+  - is_sorted
+  - is_matching_set
+  - any_duplicated
+  - is_empty2
+
+- title: Object comparison
+  desc: ""
+- subtitle: Comparison and prototypes
+  contents:
+  - identical2
+  - is_ptype
+- subtitle: If-else and pattern matching
+  contents:
+  - match_hash
+  - if_else2
+  - case_when2
+
+- title: Complex predicates and validation
+  desc: ""
+- subtitle: Atomic vectors
+  contents:
+  - tests-numeric
+  - test-logical_raw
+  - test_character
+- subtitle: Language objects
+  contents:
+  - test_expression
+  - test_symbol
+  - test_language
+  - test_code
+- subtitle: Other types
+  contents:
+  - test_list
+  - test_vector
+  - test_environment
+  - test_function
+  - tests-other_types
+- subtitle: Attributes
+  contents:
+  - test_names
+  - test_matrix
+  - test_class
+  - test_object
+- subtitle: Validation via external functions
+  contents:
+  - assert_from_msg
+  - assert_ptype
+  - assert_predicate
+  - test_multiple
+
+- title: Utilities
+  desc: ""
+- subtitle: Logical utilities
+  contents:
+  - pany
+  - reduce_predicate
+- subtitle: Attributes utilities
+  contents:
+  - attributes-filter
+  - attributes-getters-setters
+  - attr2
+- subtitle: Others
+  contents:
+  - check_installed2
+  - c2
